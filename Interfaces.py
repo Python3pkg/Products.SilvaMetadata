@@ -18,6 +18,20 @@ class IMetadataTool(IPortalMetadata):
 class IMetadataCollection(Interface):
     pass
 
+class IOrderedContainer(Interface):
+
+    def moveObject(self, id, position):
+        pass
+
+    def moveObjectUp(self, id, steps=1):
+        pass
+
+    def moveObjectDown(self, id, steps=1):
+        pass
+
+    def getObjectPosition(self, id):
+        pass
+    
 class IMetadataSet(Interface):
     pass
 

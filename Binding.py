@@ -262,7 +262,7 @@ class MetadataBindAdapter(Implicit):
         the nearest container which has this flag
         set on the element. IE this method is called
         on containers when you want contained content
-        to acquire metadata.
+        to acquire metadata from the container
         """
 
         set = self._getSet(set_id)

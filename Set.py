@@ -11,12 +11,65 @@ from Exceptions import NamespaceConflict, ConfigurationError
 from Export import MetadataSetExporter
 from FormulatorField import listFields
 from Index import createIndexes
-from Interfaces import IMetadataSet
+from Interfaces import IMetadataSet, IOrderedContainer
 from Namespace import MetadataNamespace, DefaultNamespace, DefaultPrefix
 
 from Products.ProxyIndex.ProxyIndex import getIndexTypes
 
-class MetadataSet(Folder):
+class OrderedContainer(Folder):
+
+    __implements__ = IOrderedContainer
+
+    security = ClassSecurityInfo()
+
+    #security.declareProtected('moveObject')
+    def moveObject(self, id, position):
+        obj_idx  = self.getObjectPosition(id)
+        if obj_idx == position:
+            return None
+        elif position < 0:
+            position = 0
+
+        metadata = list(self._objects)
+        obj_meta = metadata.pop(obj_idx)
+        metadata.insert(position, obj_meta)
+        self._objects = tuple(metadata)
+
+    #security.declareProtected('getObjectPosition')
+    def getObjectPosition(self, id):
+        # range was faster last i checked.. (v. xrange)
+        objs = list(self._objects)
+        om = [objs.index(om) for om in objs if om['id']==id ]
+
+        if om: # only 1 in list if any
+            return om[0]
+
+        raise NotFound('Object %s was not found'%str(id))
+
+    #security.declareProtected('moveObjectUp')
+    def moveObjectUp(self, id, steps=1):
+        self.moveObject(
+            self.getObjectPosition(id) - int(steps)
+            )
+
+    #security.declareProtected('moveObjectDown')
+    def moveObjectDown(self, id, steps=1):
+        self.moveObject(
+            self.getObjectPosition(id) + int(steps)
+            )
+
+    def manage_renameObject(self, id, new_id, REQUEST=None):
+        " "
+        objidx = self.getObjectPosition(id)
+        method = OrderedContainer.inheritedAttribute('manage_renameObject')
+        result = method(self, id, new_id, REQUEST)
+        self.moveObject(new_id, objidx)
+
+        return result
+        
+InitializeClass(OrderedContainer)  
+
+class MetadataSet(OrderedContainer):
     """
     Set of Elements constituting a metadata dialect
     """
@@ -32,10 +85,10 @@ class MetadataSet(Folder):
         )
 
     manage_options = (
+        {'label':'Elements',
+         'action':'manage_main'},        
         {'label':'Settings',
          'action':'setSettingsForm'},        
-        {'label':'Elements',
-         'action':'manage_main'},
         {'label':'Action',
          'action':'setActionForm'},
         )

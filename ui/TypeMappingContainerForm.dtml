@@ -12,6 +12,7 @@
     <input name="default_chain" type="text" value="<dtml-var getDefaultChain>">
    </td></tr>
 
+
 <dtml-in getContentTypes prefix="type">
   <tr><td><dtml-let ctm="getTypeMappingFor(type_item)">
             <dtml-if ctm>
