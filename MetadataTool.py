@@ -193,21 +193,38 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
                 set.initialize()
             
     def addTypesMapping(self, types, setids, default=''):
-        mapping = self.getTypeMapping()
         for type in types:
-            chain = mapping.getChainFor(type)
-            if chain == 'Default':
-                chain = ''
-            chain = [c.strip() for c in chain.split(',') if c]
-            for setid in setids:
-                if setid in chain:
-                    continue
-                chain.append(setid)
-            tm = {'type': type, 'chain': ','.join(chain)}
-            mapping.editMappings(default, (tm, ))
+            self.addTypeMapping(type, setids, default)
             
+    def addTypeMapping(self, type, setids, default=''):
+        mapping = self.getTypeMapping()
+        chain = mapping.getChainFor(type)
+        if chain == 'Default':
+            chain = ''
+        chain = [c.strip() for c in chain.split(',') if c]
+        for setid in setids:
+            if setid in chain:
+                continue
+            chain.append(setid)
+        tm = {'type': type, 'chain': ','.join(chain)}
+        mapping.editMappings(default, (tm, ))
+
+    def removeTypesMapping(self, types, setids):
+        for type in types:
+            self.removeTypeMapping(type, setids)
+        
     def removeTypeMapping(self, type, setids):
-        pass
+        mapping = self.getTypeMapping()
+        chain = mapping.getChainFor(type)
+        if chain == 'Default' or chain == '':
+            return
+        chain = [c.strip() for c in chain.split(',') if c]
+        for setid in setids:
+            if setid in chain:
+                chain.remove(setid)
+        tm = {'type': type, 'chain': ','.join(chain)}
+        default = mapping.getDefaultChain()
+        mapping.editMappings(default, (tm, ))
     
     #################################
     # misc
