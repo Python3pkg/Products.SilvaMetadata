@@ -309,16 +309,19 @@ def import_metadata(content, content_node):
             if not binding.isEditable(set_name, element_name):
                 del v[element_name]
         
+        # Set data
         errors = binding._setData(namespace_key=k,
                                   data=v,
                                   reindex=1)
-        errors = None        
+
+        errors = None # discard errors for now
         if errors:
-            raise ValidationError( "%s %s"%(
-                str(content.getPhysicalPath()),
-                str(errors)
+            raise ValidationError(
+                "%s %s"%(
+                    str(content.getPhysicalPath()),
+                    str(errors)
+                    )
                 )
-                                   )
 
 def metadata_node_search( content_node ):
 
