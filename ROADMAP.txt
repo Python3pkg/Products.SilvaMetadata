@@ -6,7 +6,7 @@ Meta:
   Valid for:  SilvaMetadata 0.7.x
   Author:     Martijn Faassen
   Email:      <faassen@infrae.com>
-  CVS:        $Revision: 1.3 $
+  CVS:        $Revision: 1.4 $
 
 ================
 Metadata roadmap
@@ -22,6 +22,8 @@ Short term
   * Installation/registration API cleanups.
 
   * Support CMF and Silva at the same time.
+
+  * Normal way of product registration.
 
 Medium term
 
@@ -72,6 +74,18 @@ CMF and Silva cannot currently use the metadata system at the same
 time, as this is hardcoded in Configuration.py in SilvaMetadata. Since
 people may want to install CMF and Silva in the same Zope instance, it
 is important that the code is adjusted so that this is possible.
+
+Normal way of product registration
+----------------------------------
+
+Both SilvaMetadata and Annotations don't register their addables
+through the Zope registerClass mechanism, but instead use a custom
+strategy through Extensions (is this a CMF or Plone way to do
+it?). The consequence is that if someone installs the products by
+themselves, there is nothing to add in the ZMI and thus not much of a
+clue on what to do with it. Icon registration also becomes a lot
+harder. We should investigate whether we can switch to the normal
+registration mechanism instead.
 
 Medium term
 ===========
