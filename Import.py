@@ -5,6 +5,7 @@ author: kapil thangavelu <k_vertigo@objectrealms.net>
 from xml.sax import make_parser, ContentHandler
 from xml.dom import XMLNS_NAMESPACE
 from UserDict import UserDict
+from XMLType import deserialize
 
 _marker = []
 
@@ -247,7 +248,7 @@ def import_metadata( content, content_node):
 
     """
     
-    from Compatiblity import getToolByName, getContentType
+    from Compatibility import getToolByName, getContentType
     
     metadata_node = metadata_node_search(content_node)
     metadata_tool = getToolByName(content, 'portal_metadata')
@@ -268,8 +269,7 @@ def import_metadata( content, content_node):
     for node in metadata_node.childNodes:
         if not node.namespaceURI:
             continue
-        
-        metadata[node.namespaceURI][node.localName]=node.firstChild.nodeValue
+        metadata[node.namespaceURI][node.localName]= deserialize( node.firstChild )
         
     for k, v in metadata.items():
         errors = binding.setValues(namespace_key=k, data=v)
@@ -279,6 +279,15 @@ def import_metadata( content, content_node):
                 str(errors)
                 )
                                    )
+
+def metadata_node_search( content_node ):
+
+    for child_node in content_node.childNodes:
+        if child_node.nodeName == 'metadata':
+            return child_node
+
+    return None
+        
 if __name__ == '__main__':
     # visual check
     import sys, pprint

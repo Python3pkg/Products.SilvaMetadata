@@ -7,6 +7,7 @@ from types import IntType, FloatType, ListType
 from Interfaces import IMetadataSetExporter
 
 from Element import MetadataElement
+from XMLType import serialize
 from utils import StringBuffer, make_lookup
 
 
@@ -144,7 +145,8 @@ class ObjectMetadataExporter:
                 # is no longer part of the metadata set, so we filter it out.
                 if not check(k):
                     continue
-                print >> out, '      <%s:%s>%s</%s:%s>'%(prefix, k, escape(unicode(v)), sid, k)
+                
+                print >> out, '      <%s:%s>%s</%s:%s>'%(prefix, k, serialize(v), sid, k)
 
         print >> out, '</metadata>'
 
