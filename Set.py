@@ -133,6 +133,10 @@ class MetadataSet(OrderedContainer):
     action = None
     title = ''
     description = ''
+    
+    # for backwards compatibility...
+    _category = ''
+    _minimal_role = ''
 
     def __init__(self, id, title='', description='',
                  metadata_prefix=DefaultPrefix, metadata_uri=DefaultNamespace):
@@ -143,6 +147,7 @@ class MetadataSet(OrderedContainer):
         self.title = ''
         self.description = ''
         self._minimal_role = ''
+        self._category = ''
         
         # we can't do any verification till after we have a ctx
         self.metadata_uri = metadata_uri
@@ -160,6 +165,12 @@ class MetadataSet(OrderedContainer):
 
     def setMinimalRole(self, role):
         self._minimal_role = role
+
+    def getCategory(self):
+        return self._category
+
+    def setCategory(self, cat):
+        self._category = cat
         
     def addMetadataElement(self,
                            id,
@@ -207,21 +218,24 @@ class MetadataSet(OrderedContainer):
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
 
-    def editSettings(self, title, description, ns_uri, ns_prefix, minimal_role, RESPONSE):
+    def editSettings(
+        self, title, description, ns_uri, ns_prefix, 
+        minimal_role='', category=''):
         """ Edit Set Settings """
 
         if self.isInitialized():
             raise ConfigurationError (" Set Already Initialized ")
 
-        self.setNamespace(ns_uri, ns_prefix)
         self.title = title
         self.description = description
-
-        if minimal_role:
-            self.setMinimalRole(minimal_role)
-        
-        if RESPONSE is not None:
-            RESPONSE.redirect('manage_workspace')
+            
+        self.setNamespace(ns_uri, ns_prefix)
+        self.setMinimalRole(minimal_role)
+        self.setCategory(category)
+            
+        request = getattr(self, 'REQUEST', None)
+        if request is not None:
+            request.RESPONSE.redirect('manage_workspace')
 
     def exportXML(self, RESPONSE=None):
         """ export an xml serialized version of the policy """

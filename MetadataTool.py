@@ -107,8 +107,15 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
     #################################
     ## new interface
 
+    def getCollectionForCategory(self, category=''):
+        """return a container containing all known metadata sets
+        """
+        collections = self._getOb(Configuration.MetadataCollection)
+        return [coll for coll in collections if coll.getCategory() == category]
+    
     def getCollection(self):
-        """ return a container containing all known metadata sets """
+        """return a container containing all known metadata sets
+        """
         return self._getOb(Configuration.MetadataCollection)
 
     def getTypeMapping(self):

@@ -51,6 +51,14 @@
    </td>
 </tr>
 
+<tr>
+   <td valign="top"> Category:</td>
+   <td valign="top"> 
+      <small>change to:</small><br />
+      <input type="text" name="category" value="<dtml-var getCategory>" size="20" /> 
+   </td>
+</tr>
+
 <tr><td align="center" colspan="2">
      <input type="submit" value="edit settings" />
      </td></tr>
