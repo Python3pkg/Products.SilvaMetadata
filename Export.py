@@ -34,13 +34,8 @@ class MetadataSetExporter:
             self.set.metadata_prefix
             )
 
-        print >> out, '<title>%s</title>'%(
-            escape(self.set.getTitle(), 1)
-            )
-
-        print >> out, '<description>%s</description>'%(
-            escape(self.set.getDescription(), 1)
-            )
+        out.write('<title>%s</title>\n'%( escape(self.set.getTitle(), 1) ) )
+        out.write('<description>%s</description>\n'%( escape(self.set.getDescription(), 1) ) )
 
         for e in self.set.getElements():
             
@@ -74,17 +69,17 @@ class MetadataSetExporter:
                 if v is None:
                     continue
                 if isinstance(v, IntType):
-                    print >> out,    '        <value key="%s" type="%s" value="%d" />'%(
-                        k, 'int', v )
+                    out.write('        <value key="%s" type="%s" value="%d" />\n'%(
+                        k, 'int', v ))
                 elif isinstance(v, FloatType):
-                    print >> out,    '        <value key="%s" type="%s" value="%d" />'%(
-                        k, 'float', v )
+                    out.write('        <value key="%s" type="%s" value="%d" />\n'%(
+                        k, 'float', v ))
                 elif isinstance(v, ListType):
-                    print >> out,    '        <value key="%s" type="%s" value="%s" />'%(
-                        k, 'list', escape(str(v), 1) )
+                    out.write( '        <value key="%s" type="%s" value="%s" />\n'%(
+                        k, 'list', escape(str(v), 1) ))
                 else:
-                    print >> out,    '        <value key="%s" type="str" value="%s" />'%(
-                        k, escape(str(v), 1) )
+                    out.write('        <value key="%s" type="str" value="%s" />\n'%(
+                        k, escape(str(v), 1) ))
 
             print >> out, '   </field_values>'            
 
@@ -92,20 +87,22 @@ class MetadataSetExporter:
             for k,v in f.tales.items():
                 if v is None:
                     continue
-                print >> out, '     <value key="%s">%s</value>'%(k, escape(str(v), 1))
+                print >> out.write('     <value key="%s">%s</value>\n'%(k, escape(str(v), 1)))
             print >> out, '   </field_tales>'
 
             print >> out, '   <field_messages>'
             for message_key in f.get_error_names():
-                print >> out, '     <message name="%s">%s</message>'%(
+                out.write('     <message name="%s">%s</message>\n'%(
                     escape(message_key, 1),
                     escape(f.get_error_message(message_key), 1)
                     )
+                )
+                
             print >> out, '   </field_messages>'
 
             print >> out, '   <index_args>'
             for k,v in e.index_constructor_args.items():
-                print >> out, '     <value key="%s">%s</value>'%(k, escape(str(v), 1))
+                out.write( '     <value key="%s">%s</value>\n'%(k, escape(str(v), 1)) )
             print >> out, '   </index_args>'
             
             print >> out, '  </metadata_element>'
@@ -139,11 +136,11 @@ class ObjectMetadataExporter:
         if out is None:
             out = StringBuffer()
 
-        print >> out, '<metadata '
+        out.write('<metadata \n')
         
         for set in self.sets:
-            print >> out, '    xmlns:%s="%s"'%(set.metadata_prefix, set.metadata_uri)
-        print >> out, '      >'
+            out.write('    xmlns:%s="%s"\n'%(set.metadata_prefix, set.metadata_uri))
+        out.write('      >')
 
         for set in self.sets:
             sid = set.getId()
@@ -157,15 +154,9 @@ class ObjectMetadataExporter:
                 if not check(k):
                     continue
                 
-                print >> out, u'      <%s:%s>%s</%s:%s>'%(
-                    unicode(prefix),
-                    unicode(k),
-                    serialize(v),
-                    unicode(prefix),
-                    unicode(k)
-                    )
+                out.write(u'      <%s:%s>%s</%s:%s>\n'%( prefix, k, serialize(v), prefix, k) )
 
-        print >> out, '</metadata>'
+        out.write('</metadata>\n')
 
         if external_out:
             return None

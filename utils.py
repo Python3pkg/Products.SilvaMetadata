@@ -10,6 +10,9 @@ class StringBuffer:
         self.buf =[]
     def write(self, data):
         self.buf.append(data)
+    def writeln(self, data):
+        self.buf.append(data)
+        self.buf.append('\n')
     def getvalue(self):
         return ''.join(self.buf)
 
