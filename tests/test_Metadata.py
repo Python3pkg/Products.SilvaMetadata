@@ -1,5 +1,8 @@
+from __future__ import nested_scopes
+
 from unittest import TestCase, TestSuite, makeSuite, main
 import Zope
+Zope.startup()
 
 from DateTime import DateTime
 
@@ -17,21 +20,21 @@ from Products.SilvaMetadata.MetadataTool import MetadataTool
 
 from Products.CMFCore.TypesTool import FactoryTypeInformation as FTI
 from Products.CMFCore.PortalFolder import PortalFolder
+from Products.CMFCore.utils import getToolByName
 
-class PortalMetadataTests( SecurityTest ):
+SET_ID = 'ut_md'
 
-    def setUp( self ):
-        SecurityTest.setUp(self)
+def setupTools(root):
+    root._setObject('portal_types', TypesTool())
+    root._setObject('portal_annotations', AnnotationTool())
+    root._setObject('portal_metadata', MetadataTool())
+    root._setObject('portal_catalog', CatalogTool())    
 
-        self.root._setObject('portal_types', TypesTool())
-        self.root._setObject('portal_annotations', AnnotationTool())
-        self.root._setObject('portal_metadata', MetadataTool())
-        self.root._setObject('portal_catalog', CatalogTool())
-        
-        types_tool = self.root.portal_types
-        
-        types_tool._setObject( 'Folder'
-                             , FTI( id='Folder'
+def setupContentTypes(context):
+    types_tool = getToolByName(context, 'portal_types')
+
+    types_tool._setObject( 'Folder'
+                           , FTI( id='Folder'
                                   , title='Folder or Directory'
                                   , meta_type=PortalFolder.meta_type
                                   , product='CMFCore'
@@ -39,21 +42,219 @@ class PortalMetadataTests( SecurityTest ):
                                   , filter_content_types=0
                                   )
                              )
-        types_tool._setObject( 'Dummy Content', DummyFTI )
+    #types_tool._setObject( 'Dummy Content', DummyFTI )    
+
+def setupContentTree(container):
+    ttool = getToolByName(container, 'portal_types')
+    ttool.constructContent('Folder', container, 'zoo')
+
+    zoo = container._getOb('zoo')
+
+    ttool.constructContent('Folder', zoo, 'mammals')
+    ttool.constructContent('Folder', zoo, 'reptiles')
+
+    mammals = zoo._getOb('mammals')
+    reptiles = zoo._getOb('reptiles')
+
+    #ttool.constructContent('Dummy Content', mammals,  'elephant')
+    #ttool.constructContent('Dummy Content', reptiles, 'snake')
+
+    return zoo
+
+def setupCatalog(context):
+    catalog = getToolByName(context, 'portal_catalog')
+    pass
+    
+def setupMetadataSet(context):
+    from Products.Formulator import StandardFields
+    
+    mtool = getToolByName(context, 'portal_metadata')
+    collection = mtool.getCollection()
+    collection.addMetadataSet(SET_ID,
+                              'tmd',
+                              'http://www.example.com/xml/test_md')
+
+    set = collection.getMetadataSet(SET_ID)
 
 
-    def testAddEditMetadataSet(self):
-        # collection test
-        pm = self.root.portal_metadata
-        pm.collection.addMetadataSet('test_md',
-                                     'tmd',
-                                     'http://www.example.com/xml/test_md')
+    set.addMetadataElement('Title',
+                           StandardFields.StringField.meta_type,
+                           'KeywordIndex',
+                           1
+                           )
 
-        ms = pm.getMetadataSet('test_md')
-        assert ms.namespace_prefix == 'tmd'
-        assert ms.namespace_uri == 'http://www.example.com/xml/test_md'
+    set.addMetadataElement('Description',
+                           StandardFields.StringField.meta_type,
+                           'KeywordIndex',
+                           1
+                           )                           
+    return set
+
+def setupMetadataMapping(context):
+
+    mtool = getToolByName(context, 'portal_metadata')
+    mapping = mtool.getTypeMapping()
+    mapping.setDefaultChain('ut_md')
+
+class MetadataTests( SecurityTest ): 
+
+    def setUp( self ):
+        SecurityTest.setUp(self)
+        
+        setupTools(self.root)
+        setupCatalog(self.root)        
+        setupContentTypes(self.root)
+        setupMetadataSet(self.root)
+        setupMetadataMapping(self.root)
+        setupContentTree(self.root)
+                           
+class TestSetImportExport( MetadataTests ):
+
+    def testImportExport(self):
+
+        from cStringIO import StringIO
+        
+        pm = getToolByName(self.root, 'portal_metadata')
+        collection = pm.getCollection()
+        set = collection.getMetadataSet(SET_ID)
+        xml = set.exportXML()
+        xmlio = StringIO(xml)
+        
+        collection.manage_delObjects([SET_ID])
+        collection.importSet(xmlio)
+
+        set = collection.getMetadataSet(SET_ID)
+        xml2 = set.exportXML()
+
+        assert xml == xml2, "Import/Export disjoint"
+        
+class TestAdvancedMetadata( MetadataTests ):
+    """ tests for runtime binding methods """
+    
+    def setupAcquiredMetadata(self):
+        zoo = self.root.zoo
+        binding = getToolByName(zoo, 'portal_metadata').getMetadata(zoo)
+        set_id = SET_ID
+        binding.setValues(
+            set_id,
+            {'Title':'hello world',
+             'Description':'cruel place'}
+            )
+
+        binding.setAcquire(set_id, 'Description', 1)
+        
+    def testContainmentAcquisitionValue(self):
+        self.setupAcquiredMetadata()
+        zoo = self.root.zoo
+        mammals = zoo.mammals
+        
+
+        z_binding = getToolByName(zoo, 'portal_metadata').getMetadata(zoo)
+        m_binding = getToolByName(mammals, 'portal_metadata').getMetadata(mammals)
+        
+        set_id = SET_ID
+
+        assert m_binding[set_id]['Description'] == z_binding[set_id]['Description']
+        assert m_binding.get(set_id, 'Description', acquire=0) != \
+               z_binding[set_id]['Description']
 
         
-    def testEditMetadataSet(self):
-        pass
+    def testContainmentAcquisitionList(self):
+        self.setupAcquiredMetadata()
+
+        zoo = self.root.zoo
+        mammals = zoo.mammals
+
+        m_binding = getToolByName(mammals, 'portal_metadata').getMetadata(mammals)
         
+        set_id = SET_ID
+
+        acquired = m_binding.listAcquired()
+
+        assert len(acquired) == 1
+        assert acquired[0][1] == 'Description'
+        
+    def XXtestObjectDelegation(self):
+
+        from Acquisition import Implicit
+        
+        class Delegator(Implicit):
+
+            def __init__(self, name):
+                self.name = name
+
+            def __call__(self):
+                ob = self.aq_inner.aq_parent
+                return getattr(ob, self.name)
+
+        zoo = self.root.zoo
+        delegate = Delegator('reptiles')
+        zoo.delegate = delegate
+
+        mammals = zoo.mammals
+        reptiles = zoo.reptiles
+
+        r_binding = getToolByName(reptiles, 'portal_metadata').getMetadata(reptiles)
+        m_binding = getToolByName(mammals, 'portal_metadata').getMetadata(mammals)
+
+        r_binding.setValues(SET_ID,
+                            {'Title':'snake food', 'Description':'yummy n the tummy'}
+                            )
+        
+        m_binding.setObjectDelegator('delegate')
+        
+        self.assertEqual(
+            m_binding[SET_ID]['Title'],
+            r_binding[SET_ID]['Title']
+            )
+
+        m_binding.clearObjectDelegator()
+        assert m_binding[SET_ID]['Title'] != r_binding[SET_ID]['Title']
+
+        
+    def XXtestMutationTriggerDelegation(self):
+
+        class MutationTrigger:
+
+            def __init__(self):
+                self.called = 0
+
+            def __call__(self):
+                self.called += 1
+
+        zoo = self.root.zoo
+        mammals = zoo.mammals
+
+        m_binding = getToolByName(mammals, 'portal_metadata').getMetadata(mammals)
+
+        trigger = MutationTrigger()
+        zoo.trigger = trigger
+
+        m_binding.setMutationTrigger(SET_ID, 'Title', 'trigger')
+        
+        m_binding.setValues(SET_ID, {'Title':'surfin betty'} )
+        self.assertEqual(trigger.called, 1)
+
+        m_binding.setValues(SET_ID, {'Description':'midnight raid'} )
+        self.assertEqual(trigger.called, 1)
+
+        m_binding.clearMutationTrigger(SET_ID)
+
+        # props to tennyson
+        m_binding.setValues(SET_ID,
+                            {'Title':'To strive, to seek, to find, and not to yield'}
+                            )
+        self.assertEqual(trigger.called, 1)
+        
+
+def test_suite():
+    suite = unittest.TestSuite()
+    suite.addTest( unittest.makeSuite( TestAdvancedMetadata ) )
+    suite.addTest( unittest.makeSuite( TestSetImportExport ) )    
+    
+
+
+
+if __name__ == '__main__':
+    main()
+    
