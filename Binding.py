@@ -428,13 +428,12 @@ class MetadataBindAdapter(Implicit):
         # filter based on write guard and whether field is readonly
         eids = [e.getId() for e in set.getElementsFor(ob, mode='edit')]
         
-        #todo, convert this to a hash lookup maybe..
-        #valid_key = make_lookup(eids)
         keys = data.keys()
         for k in keys:
             if k not in eids:
                 raise Unauthorized('Not Allowed to Edit %s in this context'%k)
-        
+
+        # fire mutation triggers
         triggers = self._getMutationTriggers(set.getId())
         for k in keys:
             if triggers.has_key(k):
@@ -443,14 +442,15 @@ class MetadataBindAdapter(Implicit):
                 except: # gulp
                     pass
 
-        # update acquired
+        # update acquireable metadata
         bind_data = self._getBindData()
         set_id = set.getId()
         update_list = [eid for sid, eid in  bind_data.get(AcquireRuntime, []) if sid==set_id and eid in keys]
         for eid in update_list:
-            encodeElement(
-        
-                
+            aqelname = encodeElement(sid, eid)
+            setattr(self.content, aqelname, data[eid])
+
+        # save in annotations
         annotations = getToolByName(ob, 'portal_annotations')
         metadata = annotations.getAnnotations(ob, MetadataNamespace)
         metadata[set.metadata_uri].update(data)
