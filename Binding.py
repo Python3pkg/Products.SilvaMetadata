@@ -51,7 +51,7 @@ class MetadataBindAdapter(Implicit):
             d = {}
             for s in collection:
                 d[s.getId()]=s
-                self.set_order.append(s.getId())
+                self.ordered_set_names.append(s.getId())
             collection = d
         elif isinstance(collection, types.DictType):
             # no explicit order defined
@@ -311,12 +311,20 @@ class MetadataBindAdapter(Implicit):
 
     security.declarePrivate('getObjectDelegator')
     def getObjectDelegator(self):
-        return self._getBindData()[ObjectDelegate]
+        return self._getBindData().get(ObjectDelegate)
+
+    def clearObjectDelegator(self):
+        bind_data = self._getBindData()
+        try:
+            del bind_data[ObjectDelegate]
+        except KeyError:
+            pass
+        return None
 
     security.declarePublic('setMutationTrigger')
     def setMutationTrigger(self, set_id, element_id, method_name):
         """
-        support for simple events, based on path expression
+        support for simple events, based on acquired method
         invocation. major use case.. cache invalidation on
         metadata setting.
         """
@@ -325,6 +333,30 @@ class MetadataBindAdapter(Implicit):
         bind_data = self._getBindData()
         bind_data[MutationTrigger].set_default(set_id, {})[element_id]=method_name
 
+    security.declarePublic('clearMutationTrigger')
+    def clearMutationTrigger(self, set_id, element_id=None):
+        """
+        clear mutation triggers for a particular set or element.
+
+        if element_id is not specified, clear triggers for
+        the entire set.
+        """
+
+        bind_data = self._getBindData()
+        triggers = bind_data[MutationTrigger]
+
+        if element_id is None:
+            try:
+                del triggers[set_id]
+            except KeyError:
+                pass
+        else:
+            try:
+                del triggers[set_id][element_id]
+            except KeyError:
+                pass
+        return None
+        
     #################################
     ### Private
 
