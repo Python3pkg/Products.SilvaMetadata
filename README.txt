@@ -1,4 +1,14 @@
-Advanced Metadata System
+Copyright (c) 2003 Infrae. All rights reserved.
+See also LICENSE.txt
+
+Meta::
+
+  Valid for:  SilvaMetadata 0.7.x
+  Author:     Kapil Thangavelu
+  Email:      <k_vertigo@objectrealms.net>
+  CVS:        $Revision: 1.6 $
+
+Silva Metadata
 
   Implemented Use Cases
 
@@ -112,47 +122,4 @@ Advanced Metadata System
 	invoked to construct the binding's runtime data. initializers
 	can be defined on a per content type basis or as a default 
 	initializer.
-
-  Installation
-
-    Dependencies
-
-      - Formulator 1.4+ 
-
-      - Annotations 0.4.0
-
-      - ProxyIndex-1.0.0
-
-    CMF Installation
-
-      requires CMF 1.3+ (compatible with CMF1.4)
-
-      add an external method install_metadata::
-   
-       Module: CMFMetadata.Install
-       Function: install_all
-   
-      the install all, also installs the annotation
-      product. if its already installed, you can use 
-      function install instead.
-
-    Silva Installation
-
-      the metadata system comes bundled silva 0.9.2 and is
-      installed as part of a silva installation.
-
-  Author
-
-    kapil thangavelu <k_vertigo@objectrealms.net>
-
-  Credits
-    
-    Many thanks to "Infrae":http://www.infrae.com for sponsoring
-    development.
-
-    Martijn Faassen for additional Feature Requirements and assistance
-    with Formulator.
- 
-    Jan-Wijbrand Kolman for feedback on the binding apis, and doing
-    the Silva UI for the Metadata System.
 
