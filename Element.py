@@ -158,6 +158,9 @@ class MetadataElement(SimpleItem):
         return self.field.render(value)
 
     def isRequired(self):
+        """
+        is the element required to have a value
+        """
         return self.field.is_required()
 
     def getDefault(self):
@@ -165,7 +168,13 @@ class MetadataElement(SimpleItem):
         return the default value for this element
         """
         return self.field.get_value('default')
-           
+
+    def getVocabulary(self):
+        """
+        return the set of allowed of words
+        """
+        raise NotImplemented
+    
     ## little hack to get formulator fields to do unicode
     def get_form_encoding(self):
         return encoding

@@ -6,6 +6,7 @@ from ZopeImports import *
 from Interfaces import IMetadataCollection
 from Import import read_set, make_set
 from Set import MetadataSet
+from Configuration import pMetadataManage
 
 class MetadataCollection(Folder):
 
@@ -13,15 +14,26 @@ class MetadataCollection(Folder):
 
     __implements__ = IMetadataCollection
 
+    security = ClassSecurityInfo()
+
     all_meta_types = (
         {'name':MetadataSet.meta_type,
          'action':'addMetadataSetForm'},
         )
 
+    manage_options = (
+        
+        {'label':'Metadata Sets',
+         'action':'manage_main'},
+        
+        {'label':'Metadata Tool',
+         'action':'../manage_workspace'},
+        )
+
+    security.declareProtected( pMetadataManage, 'addMetadataSetForm')    
     addMetadataSetForm = DTMLFile('ui/MetadataSetAddForm', globals())
 
-    security = ClassSecurityInfo()
-
+    security.declareProtected( pMetadataManage, 'addMetadataSet')    
     def addMetadataSet(self,
                        id,
                        namespace_prefix,
@@ -38,6 +50,7 @@ class MetadataCollection(Folder):
     def getMetadataSets(self):
         return self.objectValues('Metadata Set')
 
+    security.declareProtected( pMetadataManage, 'importSet')
     def importSet(self, xml_file, RESPONSE=None):
         """ import an xml definition of a metadata set"""
             

@@ -4,7 +4,7 @@ not really meant for public api exposure (certainly not ttw)
 
 Handler Signature is as follows
 
-def metadata_initialization()
+def metadata_initialization(content, bind_data)
 
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """

@@ -3,9 +3,12 @@ author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 from __future__ import nested_scopes
 
-from ZopeImports import *
-from AccessControl import getSecurityManager
+import sys
+
+from AccessControl import getSecurityManager, Permissions
+
 from Compatibility import actionFactory
+import Configuration
 from Element import MetadataElement, ElementFactory
 from Exceptions import NamespaceConflict, ConfigurationError
 from Export import MetadataSetExporter
@@ -13,6 +16,7 @@ from FormulatorField import listFields
 from Index import createIndexes
 from Interfaces import IMetadataSet, IOrderedContainer
 from Namespace import MetadataNamespace, DefaultNamespace, DefaultPrefix
+from ZopeImports import *
 
 from Products.ProxyIndex.ProxyIndex import getIndexTypes
 
@@ -22,7 +26,7 @@ class OrderedContainer(Folder):
 
     security = ClassSecurityInfo()
 
-    #security.declareProtected('moveObject')
+    security.declareProtected(Permissions.copy_or_move, 'moveObject')
     def moveObject(self, id, position):
         obj_idx  = self.getObjectPosition(id)
         if obj_idx == position:
@@ -35,9 +39,9 @@ class OrderedContainer(Folder):
         metadata.insert(position, obj_meta)
         self._objects = tuple(metadata)
 
-    #security.declareProtected('getObjectPosition')
+    security.declareProtected(Permissions.copy_or_move, 'getObjectPosition')
     def getObjectPosition(self, id):
-        # range was faster last i checked.. (v. xrange)
+
         objs = list(self._objects)
         om = [objs.index(om) for om in objs if om['id']==id ]
 
@@ -46,17 +50,39 @@ class OrderedContainer(Folder):
 
         raise NotFound('Object %s was not found'%str(id))
 
-    #security.declareProtected('moveObjectUp')
-    def moveObjectUp(self, id, steps=1):
+    security.declareProtected(Permissions.copy_or_move, 'moveObjectUp')
+    def moveObjectUp(self, id, steps=1, RESPONSE=None):
+        """ Move an object up """
         self.moveObject(
+            id,
             self.getObjectPosition(id) - int(steps)
             )
+        if RESPONSE is not None:
+            RESPONSE.redirect('manage_workspace')
 
-    #security.declareProtected('moveObjectDown')
-    def moveObjectDown(self, id, steps=1):
+    security.declareProtected(Permissions.copy_or_move, 'moveObjectDown')
+    def moveObjectDown(self, id, steps=1, RESPONSE=None):
+        """ move an object down """
         self.moveObject(
+            id,
             self.getObjectPosition(id) + int(steps)
             )
+        if RESPONSE is not None:
+            RESPONSE.redirect('manage_workspace')        
+        
+    security.declareProtected(Permissions.copy_or_move, 'moveObjectTop')
+    def moveObjectTop(self, id, RESPONSE=None):
+        """ move an object to the top """
+        self.moveObject(id, 0)
+        if RESPONSE is not None:
+            RESPONSE.redirect('manage_workspace')        
+
+    security.declareProtected(Permissions.copy_or_move, 'moveObjectBottom')
+    def moveObjectBottom(self, id, RESPONSE=None):
+        """ move an object to the bottom """
+        self.moveObject(id, sys.maxint)
+        if RESPONSE is not None:
+            RESPONSE.redirect('manage_workspace')        
 
     def manage_renameObject(self, id, new_id, REQUEST=None):
         " "
@@ -88,14 +114,21 @@ class MetadataSet(OrderedContainer):
         {'label':'Elements',
          'action':'manage_main'},        
         {'label':'Settings',
-         'action':'setSettingsForm'},        
+         'action':'manage_settings'},        
         {'label':'Action',
-         'action':'setActionForm'},
+         'action':'manage_action'},
         )
 
-    setSettingsForm = DTMLFile('ui/SetSettingsForm', globals())
-    setActionForm   = DTMLFile('ui/SetActionForm', globals())
+    security.declareProtected(Configuration.pMetadataManage, 'manage_settings')
+    manage_settings = DTMLFile('ui/SetSettingsForm', globals())
+    
+    security.declareProtected(Configuration.pMetadataManage, 'manage_action')    
+    manage_action  = DTMLFile('ui/SetActionForm', globals())
+
+    security.declareProtected(Configuration.pMetadataManage, 'addElementForm')    
     addElementForm  = DTMLFile('ui/ElementAddForm', globals())
+    
+    manage_main = DTMLFile('ui/SetContainerView', globals())
     
     initialized = None
     use_action_p = None

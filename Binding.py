@@ -368,7 +368,7 @@ class MetadataBindAdapter(Implicit):
             init_handler = BindingInitialize.getHandler(self.content)
             bind_data = metadata.setdefault(BindingRunTime, PersistentMapping())
             if init_handler is not None:
-                init_handler(bind_data)
+                init_handler(self.content, bind_data)
 
         return bind_data
 
