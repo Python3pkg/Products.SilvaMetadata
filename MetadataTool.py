@@ -157,10 +157,12 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         element = set.getElement(element_id)
         annotations = getattr(aq_base(content), '_portal_annotations_', None)
 
-        bind_data = annotations and annotations[MetadataNamespace].get(BindingRunTime)
-        if bind_data:
+        bind_data = None
+        if annotations is not None:
+            bind_data = annotations[MetadataNamespace].get(BindingRunTime)
+        if bind_data is not None:
             delegate = bind_data.get(ObjectDelegate)
-            if delegate:
+            if delegate is not None:
                 content = getattr(content,delegate)()
                 annotations = getattr(aq_base(content), '_portal_annotations_', None)
 
