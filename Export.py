@@ -74,7 +74,8 @@ class MetadataSetExporter:
             print >> out, '   <field_tales>'
             for k,v in f.tales.items():
                 if v is None:
-                    continue                
+                    continue
+                print >> out, '     <value key="%s">%s<value>'%(k, escape(str(v._text)))
             print >> out, '   </field_tales>'
 
             print >> out, '  </element>'

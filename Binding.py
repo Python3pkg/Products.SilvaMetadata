@@ -314,6 +314,10 @@ class MetadataBindAdapter(Implicit):
 
         return bind_data
 
+    def _getMutationTriggers(self, set_id):
+        bind_data = self._getBindData()
+        return bind_data.get(MutationTrigger, {})
+    
     def _getAnnotatableObject(self):
         # check for object delegation
         bind_data = self._getBindData()        
@@ -388,6 +392,14 @@ class MetadataBindAdapter(Implicit):
             if k not in eids:
                 raise Unauthorized('Not Allowed to Edit %s in this context'%k)
             
+        triggers = self._getMutationTriggers(set.getId())
+        for k in keys:
+            if triggers.has_key(k):
+                try:
+                    getattr(triggers[k])()
+                except: # gulp
+                    pass
+                
         annotations = getToolByName(ob, 'portal_annotations')
         metadata = annotations.getAnnotations(ob, MetadataNamespace)
         metadata[set.metadata_uri].update(data)
