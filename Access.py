@@ -36,6 +36,7 @@ def getAccessHandler(content_type):
     handler = _typeAccessHandlers.get(content_type)
     if handler is None:
         return _default_accessor
+    return handler
 
 def invokeAccessHandler(tool, content):
     ct = getContentType(content)
