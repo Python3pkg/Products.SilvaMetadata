@@ -280,8 +280,8 @@ class MetadataBindAdapter(Implicit):
         res = []
         for s in self.collection.values():
             sid = s.getId()
-            data = self._getData(set_id = sid)
-            for e in set.getElements():
+            data = self._getData(set_id = sid, acquire=0)
+            for e in s.getElements():
                 eid = e.getId()
                 if data.has_key(eid) and data[eid]:
                     continue
@@ -331,7 +331,7 @@ class MetadataBindAdapter(Implicit):
         assert getattr(self.content, method_name), "invalid mutation trigger %s"%method_name        
 
         bind_data = self._getBindData()
-        bind_data[MutationTrigger].set_default(set_id, {})[element_id]=method_name
+        bind_data.setdefault(MutationTrigger, {}).setdefault(set_id, {})[element_id]=method_name
 
     security.declarePublic('clearMutationTrigger')
     def clearMutationTrigger(self, set_id, element_id=None):
@@ -417,6 +417,7 @@ class MetadataBindAdapter(Implicit):
         if data is not None:
             return data
 
+        using_defaults = 0
         ob = self._getAnnotatableObject()
 
         # get the annotation data
@@ -427,6 +428,7 @@ class MetadataBindAdapter(Implicit):
         data = Data()
         
         if saved_data is None:
+            using_defaults = 1
             data.update(set.getDefaults())
         else:
             # make a copy so we can modify with acq metadata
@@ -442,7 +444,7 @@ class MetadataBindAdapter(Implicit):
         hk = data.has_key
         for e in set.getElements():
             eid = e.getId()
-            if hk(eid):
+            if hk(eid) and data[eid] and not using_defaults:
                 continue
             aqelname = encodeElement(sid, eid)
             try:
