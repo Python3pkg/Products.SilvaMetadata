@@ -11,6 +11,7 @@ from Exceptions import BindingError
 from Compatibility import IActionProvider, IPortalMetadata, ActionProviderBase
 from Compatibility import getContentType, getContentTypeNames
 from Acquisition import aq_base
+from Products.Annotations.AnnotationTool import Annotations
 
 class MetadataTool(UniqueObject, Folder, ActionProviderBase):
 
@@ -163,6 +164,24 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         # if not acquired, fall back on default
         return element.getDefault(content=content)
 
+    def setMetadataValues(self, content, set_id, values_dict):
+        """Another utter hack to set the metadata as quickly as possible.
+        """
+        # XXX how does this interact with security issues?
+        set = self.collection.getMetadataSet(set_id)
+
+        annotations = getattr(aq_base(content), '__portal_annotations__', None)
+        if annotations is None:
+            annotations = Annotations()
+            setattr(content, '__portal_annotations__', annotations)
+            content._p_changed = 1
+            
+        if not annotations.has_key(MetadataNamespace):
+            annotations.setdefault(MetadataNamespace, Annotations())
+            
+        for element_id, value in values_dict.items():
+            annotations[MetadataNamespace][element_id] = value
+    
     #################################
     # misc
 
