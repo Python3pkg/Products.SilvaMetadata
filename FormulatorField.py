@@ -1,6 +1,5 @@
 """
-provides access to formulator field registry, and some monkey
-patches to formulator field to allow easier reuse by metdata system
+provides access to formulator field registry
 
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
@@ -20,85 +19,4 @@ def listFields():
     field_types.sort()
     return field_types
 
-#################################
-### We are the monkies 
 
-def generate_field_key(self, validation=0):
-    if self.field_record is None:
-        return 'field_%s'%self.id
-    elif validation:
-        return self.id
-    elif isinstance(self.widget, MultiItemsWidget):
-        return "%s.%s:record:list"%(self.field_record, self.id)
-    else:
-        return '%s.%s:record'%(self.field_record, self.id)
-
-def generate_subfield_key(self, id, validation=0):
-    if self.field_record is None or validation:
-        return 'subfield_%s_%s'%(self.id, id)
-    return '%s.subfield_%s_%s:record'%(self.field_record, self.id, id)
-
-def render(self, value=None, REQUEST=None):
-    """ """
-    return self._render_helper( self.generate_field_key(), value, REQUEST )
-
-def render_from_request(self, REQUEST):
-    """ """
-    return self._render_helper( self.generate_field_key(), None, REQUEST )
-
-def render_sub_field(self, id, value=None, REQUEST=None):
-    """ """
-    return self.sub_form.get_field(id)._render_helper(
-        self.generate_subfield_key(id), value, REQUEST)
-
-def render_sub_field_from_request(self, id, REQUEST):
-    """ """
-    return self.sub_form.get_field(id)._render_helper(
-        self.generate_subfield_key(id), None, REQUEST)
-
-def validate(self, REQUEST):
-    """ """
-    return self._validate_helper( self.generate_field_key(validation=1), REQUEST)
-        
-def validate_sub_field(self, id, REQUEST):
-    """ """
-    return self.sub_form.get_field(id)._validate_helper(
-        self.generate_subfield_key(id, validation=1), REQUEST)
-
-## most of the above deal with form generation and validation and allowing
-## for the use of records, the below deals with adding additional context
-## variables for evaluation of formulator tales expressions.
-def get_value(self, id, **kw):
-    """Get value for id."""
-
-    tales_expr = self.tales.get(id, "")
-    
-    if tales_expr:
-        value = tales_expr.__of__(self)(field=self, form=self.aq_parent, **kw)
-    else:
-        override = self.overrides.get(id, "")
-        if override:
-            # call wrapped method to get answer
-            value = override.__of__(self)()
-        else:
-            # get normal value
-            value = self.get_orig_value(id)
-
-    # if normal value is a callable itself, wrap it
-    if callable(value):
-        return value.__of__(self)
-    else:
-        return value
-    
-# the one instance variable
-Field.field_record = None
-# methods
-Field.get_value = get_value    
-Field.generate_field_key = generate_field_key
-Field.generate_subfield_key = generate_subfield_key
-Field.render = render
-Field.render_from_request = render_from_request
-Field.render_sub_field = render_sub_field
-Field.render_sub_field_from_request = render_sub_field_from_request
-Field.validate = validate
-Field.validate_sub_field = validate_sub_field
