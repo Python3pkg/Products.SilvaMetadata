@@ -207,7 +207,7 @@ class MetadataSet(OrderedContainer):
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
 
-    def editSettings(self, title, description, ns_uri, ns_prefix, RESPONSE):
+    def editSettings(self, title, description, ns_uri, ns_prefix, minimal_role, RESPONSE):
         """ Edit Set Settings """
 
         if self.isInitialized():
@@ -217,6 +217,9 @@ class MetadataSet(OrderedContainer):
         self.title = title
         self.description = description
 
+        if minimal_role:
+            self.setMinimalRole(minimal_role)
+        
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
 

@@ -36,6 +36,21 @@
    <td> <dtml-if initialized> Yes <dtml-else> No </dtml-if> </td>
 </tr>
 
+<tr>
+   <td valign="top"> Restrict Access to Role (and higher):</td>
+   <td valign="top"> 
+      <dtml-var getMinimalRole><br /><br />
+      <small>change to:</small><br />
+      <select name="minimal_role"> 
+        <option value="">No Restriction</option>
+        <option value="Reader">Reader</option>
+        <option value="Author">Author</option>
+        <option value="Editor">Editor</option>
+        <option value="ChiefEditor">Chief Editor</option>
+      </select>
+   </td>
+</tr>
+
 <tr><td align="center" colspan="2">
      <input type="submit" value="edit settings" />
      </td></tr>
