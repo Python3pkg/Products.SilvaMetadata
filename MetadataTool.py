@@ -183,6 +183,32 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         form.add_fields(fields)
         return form
     
+    # Convenience methods
+    
+    def initializeMetadata(self):
+        # initialize the sets if not already initialized
+        collection = self.getCollection()
+        for set in collection.getMetadataSets():
+            if not set.isInitialized():
+                set.initialize()
+            
+    def addTypesMapping(self, types, setids, default=''):
+        mapping = self.getTypeMapping()
+        for type in types:
+            chain = mapping.getChainFor(type)
+            if chain == 'Default':
+                chain = ''
+            chain = [c.strip() for c in chain.split(',') if c]
+            for setid in setids:
+                if setid in chain:
+                    continue
+                chain.append(setid)
+            tm = {'type': type, 'chain': ','.join(chain)}
+            mapping.editMappings(default, (tm, ))
+            
+    def removeTypeMapping(self, type, setids):
+        pass
+    
     #################################
     # misc
 
