@@ -142,7 +142,8 @@ class MetadataSet(OrderedContainer):
         self.use_action_p = None
         self.title = ''
         self.description = ''
-
+        self._minimal_role = ''
+        
         # we can't do any verification till after we have a ctx
         self.metadata_uri = metadata_uri
         self.metadata_prefix = metadata_prefix
@@ -154,6 +155,12 @@ class MetadataSet(OrderedContainer):
     def getDescription(self):
         return self.description
 
+    def getMinimalRole(self):
+        return self._minimal_role
+
+    def setMinimalRole(self, role):
+        self._minimal_role = role
+        
     def addMetadataElement(self,
                            id,
                            field_type,

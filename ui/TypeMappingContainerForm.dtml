@@ -28,6 +28,7 @@
 
       <td><input name="type_chains.chain:records"
                  type="text"
+                 size="80"
                  value="<dtml-var "getChainFor(type_item)">" />
       </td>
   </tr>
