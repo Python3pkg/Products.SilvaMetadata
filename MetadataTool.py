@@ -70,7 +70,6 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
     ## dublin core hardcodes :-(
     # we don't have vocabulary implementation yet.
 
-
     def listAllowedSubjects(self, content=None):
         catalog = getToolByName(self, 'portal_catalog')
         return catalog.uniqueValuesFor('Subject')
@@ -160,6 +159,9 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
             saved_data = annotations[MetadataNamespace].get(set.metadata_uri)
         except (TypeError, KeyError):
             saved_data = None
+            
+        #print 'found it for:', repr((saved_data, content))
+            
         # if it's saved, we're done
         if saved_data is not None and saved_data.has_key(element_id):
             return saved_data[element_id]
@@ -167,8 +169,10 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         if element.isAcquireable():
             aqelname = encodeElement(set_id, element_id)
             try:
+                #print 'acquiring?', repr(aqelname)
                 return getattr(content, aqelname)
             except AttributeError:
+                #print 'attr error on', repr(aqelname)
                 pass
         # if not acquired, fall back on default
         return element.getDefault(content=content)
