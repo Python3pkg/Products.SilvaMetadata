@@ -52,6 +52,7 @@ class MetadataSetExporter:
             print >> out, '   <read_only_p>%s</read_only_p>'%e.read_only_p
 
             g = e.read_guard
+            
             print >> out, '   <read_guard>'
             print >> out, '     <roles>%s</roles>'%g.getRolesText()
             print >> out, '     <permissions>%s</permissions>'%g.getPermissionsText()

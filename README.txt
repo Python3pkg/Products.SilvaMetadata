@@ -28,7 +28,7 @@ Advanced Metadata System
     
     Restrict Displayable/Editable Metadata 
 
-    Delegate Metadata Element to a different Definition
+    Delegate Metadata Element to a different Definition (Not Implemented)
 
     Acquireable Metadata
 
@@ -36,7 +36,7 @@ Advanced Metadata System
 
     Index/Search Metadata
 
-    Integrated Actions for Content Types
+    Integrated Actions for Content Types (CMF Only)
 
   Design
 
