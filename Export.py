@@ -121,6 +121,8 @@ class ObjectMetadataExporter:
         self.sets = sets
 
     def __call__(self, out=None):
+        
+        external_out = not not out
 
         if out is None:
             out = StringBuffer()
@@ -146,4 +148,7 @@ class ObjectMetadataExporter:
 
         print >> out, '</metadata>'
 
+        if external_out:
+            return None
+        
         return out.getvalue()
