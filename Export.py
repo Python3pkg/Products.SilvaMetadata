@@ -157,7 +157,13 @@ class ObjectMetadataExporter:
                 if not check(k):
                     continue
                 
-                print >> out, '      <%s:%s>%s</%s:%s>'%(prefix, k, serialize(v), prefix, k)
+                print >> out, u'      <%s:%s>%s</%s:%s>'%(
+                    unicode(prefix),
+                    unicode(k),
+                    serialize(v),
+                    unicode(prefix),
+                    unicode(k)
+                    )
 
         print >> out, '</metadata>'
 
