@@ -31,7 +31,7 @@ def serialize( value):
         return '<element_list type="list">%s</element_list>'%(''.join(map(serialize, value)))
 
     elif isinstance(value, types.NoneType):
-        return '<element type="none">%s</element>'%unicode(value)
+        return '<element type="none">%s</element>'%unicode(str(value))
 
 def deserialize( node ):
     
