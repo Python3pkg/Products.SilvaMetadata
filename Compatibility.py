@@ -60,6 +60,7 @@ else:
             raise CompatibilityException(str(e))
 
         try:
+            print ctx, silva_name
             tool = aq_get(ctx, silva_name, default, 1)
         except AttributeError:
             if default is _marker:

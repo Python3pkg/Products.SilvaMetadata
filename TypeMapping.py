@@ -50,7 +50,7 @@ class TypeMappingContainer(Folder):
         try:
             ctm = self._getOb(content_type) # will throw attr error 
         except AttributeError:
-            return getMetadatSets(self, self.default_chain)
+            return getMetadataSets(self, self.default_chain)
         return ctm.getMetadataSets()        
 
     def getTypeMappings(self):

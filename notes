@@ -10,23 +10,14 @@ Issues
 
 TODO
 
-- type specific metadata runtime initialization
-  set defaults here.
+- issue with editing metadata set info.. seems confused
 
 - getform shouldn't acquire values
-
-- runtime initilization
 
 - element set delegation
   element computed attr manage interface
 
-- saving values
-
 - vocabulary
-
-- serializing metadata for an object.
-
-- compatiblity w/ cmf and silva
 
 
 Brief Use Cases
@@ -44,11 +35,6 @@ Brief Use Cases
 - field delegation
 
 - composition of metadata
-
-- export on per content type basis???
-
-  - too wacky
-
 
 
 Binding API Usage Examples

@@ -4,6 +4,7 @@ Common Zope Imports
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 from AccessControl import ClassSecurityInfo
+from Acquisition import Implicit, aq_inner, aq_parent
 from ComputedAttribute import ComputedAttribute
 from OFS.SimpleItem import SimpleItem
 from OFS.Folder import Folder

@@ -7,6 +7,7 @@ from ZopeImports import *
 from AccessControl import getSecurityManager
 from Compatibility import actionFactory
 from Element import MetadataElement, ElementFactory
+from Exceptions import NamespaceConflict, ConfigurationError
 from Export import MetadataSetExporter
 from FormulatorField import listFields
 from Index import createIndexes
@@ -43,7 +44,6 @@ class MetadataSet(Folder):
     setActionForm   = DTMLFile('ui/SetActionForm', globals())
     addElementForm  = DTMLFile('ui/ElementAddForm', globals())
     
-    # XXX remove me
     initialized = None
     use_action_p = None
     action = None
@@ -59,6 +59,9 @@ class MetadataSet(Folder):
         self.use_action_p = None
         self.metadata_uri = metadata_uri
         self.metadata_prefix = metadata_prefix
+
+    def getTitle(self):
+        return self.id
 
     def addMetadataElement(self,
                            id,
@@ -103,8 +106,9 @@ class MetadataSet(Folder):
         """ Edit Set Settings """
 
         if self.isInitialized():
-            raise Exception (" Set Already Initialized ")
-        
+            raise ConfigurationError (" Set Already Initialized ")
+
+        verifyNamespace(self, ns_uri, ns_prefix)
         self.setNamespace(ns_uri, ns_prefix)
 
         if RESPONSE is not None:
@@ -184,3 +188,15 @@ class MetadataSet(Folder):
     
 InitializeClass(MetadataSet)
 
+def verifyNamespace(ctx, uri, prefix):
+
+    sid = ctx.getId()
+    container = aq_parent(aq_inner(ctx))
+    
+    for s in container.getMetadataSets():
+        if s.getId() == sid:
+            continue
+        if s.metadata_uri == uri:
+            raise NamespaceConflict("%s uri is already in use"%uri)
+        elif s.metadata_prefix == prefix:
+            raise NamespaceConflict("%s prefix is already in use"%prefix)

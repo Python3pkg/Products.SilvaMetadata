@@ -3,14 +3,17 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
 import types, copy
+from UserDict import UserDict
 
 from Acquisition import Implicit, aq_base
 from zExceptions import Unauthorized
 from Exceptions import NotFound
+from Export import ObjectMetadataExporter
 import Initialize as BindingInitialize
 from Namespace import MetadataNamespace, BindingRunTime
 import View 
-from ZopeImports import Interface, ClassSecurityInfo, InitializeClass
+from ZopeImports import Interface, ClassSecurityInfo, InitializeClass, getToolByName
+from ZopeImports import PersistentMapping
 from utils import make_lookup
 
 #################################
@@ -26,9 +29,17 @@ MetadataAqVarPrefix = '_VarName_'
 
 _marker = []
 
+class Data(UserDict):
+    """
+    We use this as to escape some vagaries with the zope security policy
+    when using the __getitem__ interface of the binding
+    """
+    __roles__ = None
+
 class MetadataBindAdapter(Implicit):
 
     security = ClassSecurityInfo()
+    security.declareObjectPublic()
 
     def __init__(self, content, collection):
         self.content = content
@@ -46,6 +57,7 @@ class MetadataBindAdapter(Implicit):
 
     #################################
     ### Views
+    security.declarePublic('renderForm')
     def renderForm(self, set_id=None, namespace_key=None, REQUEST=None, messages=None):
         """
         return a rendered form.
@@ -75,6 +87,7 @@ class MetadataBindAdapter(Implicit):
             
         return '<br />\n<br />\n'.join(res)
 
+    security.declarePublic('renderView')
     def renderView(self, set_id=None, namespace_key=None):
         """
         render a view of a given metadata set corresponding
@@ -92,6 +105,7 @@ class MetadataBindAdapter(Implicit):
 
         return '<br />\n<br />\n'.join(res)
 
+    security.declarePublic('renderXML')
     def renderXML(self, set_id=None, namespace_key=None):
         """
         return an xml serialization of the object's metadata
@@ -109,6 +123,7 @@ class MetadataBindAdapter(Implicit):
     #################################
     ### Validation
 
+    security.declarePublic('validate')
     def validate(self, data, errors=None, set_id=None, namespace_key=None):
         """
         validate the data. implicit transforms may be preformed.
@@ -123,6 +138,7 @@ class MetadataBindAdapter(Implicit):
             res.append( validateData(self, data, set, errors) )
         return res
 
+    security.declarePublic('validateFromRequest')
     def validateFromRequest(self, REQUEST, errors=None, set_id=None, namespace_key=None):
         """
         validate from request
@@ -146,6 +162,7 @@ class MetadataBindAdapter(Implicit):
     #################################
     ### Storage (invokes validation)
 
+    security.declarePublic('setValues')
     def setValues(self, data, set_id=None, namespace_key=None):
         """
         returns a dictionary of errors if any, or none otherwise
@@ -159,7 +176,8 @@ class MetadataBindAdapter(Implicit):
 
         set = self._getSet(set_id, namespace_key)
         self._setData(data, set_id=set_id)
-    
+
+    security.declarePublic('setValuesFromRequest')
     def setValuesFromRequest(self, REQUEST, set_id=None, namespace_key=None): 
         """
         returns a dictionary of errors if any, or none otherwise
@@ -173,12 +191,14 @@ class MetadataBindAdapter(Implicit):
     #################################
     ### Discovery Introspection
 
+    security.declarePublic('getSetNameByURI')
     def getSetNameByURI(self, uri):
         for set in self.collection.values():
             if set.metadata_uri == uri:
                 return set.getId()
         raise NotFound(uri)
-    
+
+    security.declarePublic('getSetNames')
     def getSetNames(self):
         """
         return the ids of the metadata sets available for this content
@@ -188,8 +208,10 @@ class MetadataBindAdapter(Implicit):
         names.sort()
         return names
 
+    security.declarePublic('keys')
     keys = getSetNames
 
+    security.declarePublic('getElementNames')
     def getElementNames(self, set_id=None, namespace_key=None):
         """
         given a set identifier return the ids of the elements
@@ -212,6 +234,7 @@ class MetadataBindAdapter(Implicit):
     #################################
     ### RunTime Binding Methods
 
+    security.declarePublic('setAcquire')
     def setAcquire(self, set_id, element_id, flag):
         """
         set a flag for runtime acquisition of metadata
@@ -250,7 +273,8 @@ class MetadataBindAdapter(Implicit):
             # get rid of it from the bind data
             if token in acquire_runtime:
                 acquire_runtime.remove(token)
-        
+
+    security.declarePublic('listAcquired')        
     def listAcquired(self):
         """
         compute and return a list of (set_id, element_id)
@@ -274,6 +298,7 @@ class MetadataBindAdapter(Implicit):
                 
         return res
 
+    security.declarePublic('setObjectDelegator')
     def setObjectDelegator(self, method_name):
         """
         we get and set all metadata on a delegated object,
@@ -288,9 +313,11 @@ class MetadataBindAdapter(Implicit):
         bind_data = self._getBindData()
         bind_data[ObjectDelegate]=method_name
 
+    security.declarePrivate('getObjectDelegator')
     def getObjectDelegator(self):
         return self._getBindData()[ObjectDelegate]
 
+    security.declarePublic('setMutationTrigger')
     def setMutationTrigger(self, set_id, element_id, method_name):
         """
         support for simple events, based on path expression
@@ -319,7 +346,7 @@ class MetadataBindAdapter(Implicit):
         bind_data   = metadata.get(BindingRunTime)
 
         if bind_data is None:
-            init_handler = BindingInitialize.getHandler(content)
+            init_handler = BindingInitialize.getHandler(self.content)
             bind_data = metadata.setdefault(BindingRunTime, PersistentMapping())
             if init_handler is not None:
                 init_handler(bind_data)
@@ -339,7 +366,9 @@ class MetadataBindAdapter(Implicit):
             od = getattr(self.content, object_delegate)
             ob = od()
         else:
-            ob = self.content        
+            ob = self.content
+
+        return ob
 
     def _getData(self, set_id=None, namespace_key=None, acquire=1):
         """
@@ -358,13 +387,15 @@ class MetadataBindAdapter(Implicit):
         # get the annotation data
         annotations = getToolByName(ob, 'portal_annotations')
         metadata = annotations.getAnnotations(ob, MetadataNamespace)
-        data = metadata.get(set.metadata_uri)
-
-        if data is None:
-            data = set.getDefaults()
+        
+        saved_data = metadata.get(set.metadata_uri)
+        data = Data()
+        
+        if saved_data is None:
+            data.update(set.getDefaults())
         else:
             # make a copy so we can modify with acq metadata
-            data = copy.deepcopy(data)
+            data.update(saved_data)
             
         self.cached_values[set_id]=data
 
@@ -388,14 +419,13 @@ class MetadataBindAdapter(Implicit):
         return data
 
     def _setData(self, data, set_id=None, namespace_key=None):
-        # no checking of acquired values, a save operation
-        # saves all values passed in.
+
         set = self._getSet(set_id, namespace_key)
 
         # check for delegates
         ob = self._getAnnotatableObject()
 
-        # filter based on write guard and wheter field is readonly
+        # filter based on write guard and whether field is readonly
         eids = [e.getId() for e in set.getElementsFor(ob, mode='edit')]
         
         #todo, convert this to a hash lookup maybe..
@@ -404,7 +434,7 @@ class MetadataBindAdapter(Implicit):
         for k in keys:
             if k not in eids:
                 raise Unauthorized('Not Allowed to Edit %s in this context'%k)
-            
+        
         triggers = self._getMutationTriggers(set.getId())
         for k in keys:
             if triggers.has_key(k):
@@ -412,6 +442,14 @@ class MetadataBindAdapter(Implicit):
                     getattr(triggers[k])()
                 except: # gulp
                     pass
+
+        # update acquired
+        bind_data = self._getBindData()
+        set_id = set.getId()
+        update_list = [eid for sid, eid in  bind_data.get(AcquireRuntime, []) if sid==set_id and eid in keys]
+        for eid in update_list:
+            encodeElement(
+        
                 
         annotations = getToolByName(ob, 'portal_annotations')
         metadata = annotations.getAnnotations(ob, MetadataNamespace)
@@ -438,7 +476,7 @@ def validateData(binding, set, data, errors_dict=None):
                 raise
     return data
 
-def encodeVariable(set, element):
+def encodeElement(set_id, element_id):
     """
     after experimenting with various mechanisms for doing
     containment based metadata acquisition, using extension class
@@ -449,7 +487,7 @@ def encodeVariable(set, element):
     is used to minimize namespace pollution. acquired metadata is only
     specified in this manner on the source object.
     """
-    return MetadataAqPrefix+set.getId() + MetadataAqVarPrefix + element.getId()
+    return MetadataAqPrefix+set_id + MetadataAqVarPrefix + element_id
 
 def decodeVariable(name):
     """ decode an encode variable name... not used """

@@ -121,11 +121,12 @@ class ObjectMetadataExporter:
         print >> out, '<metadata '
         
         for set in self.sets:
-            print >> out, '    xmlns:%s="%s"'%(set.getId(), set.metadata_uri)
+            print >> out, '    xmlns:%s="%s"'%(set.metadata_prefix, set.metadata_uri)
         print >> out, '      >'
 
         for set in self.sets:
             sid = set.getId()
+            prefix = set.metadata_prefix
             check = make_lookup( set.objectIds(MetadataElement.meta_type) )
             data = self.binding._getData(sid)
 
@@ -134,7 +135,7 @@ class ObjectMetadataExporter:
                 # is no longer part of the metadata set, so we filter it out.
                 if not check(k):
                     continue
-                print >> out, '      <%s:%s>%s</%s:%s>'%(sid, k, escape(v), sid, k)
+                print >> out, '      <%s:%s>%s</%s:%s>'%(prefix, k, escape(v), sid, k)
 
         print >> out, '</metadata>'
 

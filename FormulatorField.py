@@ -50,7 +50,7 @@ def render_sub_field_from_request(self, id, REQUEST):
     return self.sub_form.get_field(id)._render_helper(
         self.generate_subfield_key(id), None, REQUEST)
 
-def validate(self):
+def validate(self, REQUEST):
     """ """
     return self._validate_helper( self.generate_field_key(), REQUEST)
         

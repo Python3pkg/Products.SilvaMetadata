@@ -53,15 +53,17 @@ def getView(binding, set, framed=1):
 
     for e in elements:
         print >> out, "<tr><td><b>%s</b></td>"%e.title()
-        print >> out, "<tr><td>%s</td></td>"%renderField(e, e.getId(), data.get(e.getId(),''))
+        print >> out, "<tr><td>%s</td></td>"%renderField(e, e.getId(), data.get(e.getId(), None))
         
     print >> out, '</table>'
     return out.getvalue()
 
-def renderField(field, key, value):
+def renderField(element, key, value):
     # XXX formulator specific
-    view_method = getattr(field.widget, 'render_view', None)
+    view_method = getattr(element.field.widget, 'render_view', None)
     if view_method is not None:
-        return view_method(field, key, value)
-    else: #shizer
+        return view_method(element.field, key, value)
+    elif not value: #shizer
+        return ''
+    else:
         return str(value)

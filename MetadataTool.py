@@ -8,6 +8,7 @@ from Binding import MetadataBindAdapter
 from Namespace import DublinCore
 
 from Compatibility import IActionProvider, IPortalMetadata, ActionProviderBase
+from Compatibility import getContentType
 
 class MetadataTool(UniqueObject, Folder, ActionProviderBase):
 
@@ -54,17 +55,18 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         return catalog.uniqueValuesFor()
 
     def listAllowedFormats(self, content=None):
-        catalog =getToolByName(self, 'portal_catalog')
+        catalog = getToolByName(self, 'portal_catalog')
         return catalog.uniqueValuesFor()
     
     def listAllowedLanguages(self, content=None):
-        catalog =getToolByName(self, 'portal_catalog')
+        catalog = getToolByName(self, 'portal_catalog')
         return catalog.uniqueValuesFor()
 
     def listAllowedRights(self, content=None):
-        catalog =getToolByName(self, 'portal_catalog')
+        catalog = getToolByName(self, 'portal_catalog')
         return catalog.uniqueValuesFor()
 
+    #################################
     ## validation hooks
     def setInitialMetadata(self, content):
         binding = self.getMetadata(content)
@@ -82,7 +84,7 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
             binding.validate(data, set_id=s)
             
     #################################
-    # new interface 
+    ## new interface 
 
     def getMetadataSet(self, set_id):
         return self.collection._getOb(set_id)
@@ -96,8 +98,8 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
 
     def getMetadata(self, content):
         ctm = self._getOb(Configuration.TypeMapping)
-        metadata_sets = ctm.getMetadataSetsFor(content.getPortalTypeName())
-        return MetadataBindAdapter(content, metadata_sets)
+        metadata_sets = ctm.getMetadataSetsFor(getContentType(content))
+        return MetadataBindAdapter(content, metadata_sets).__of__(content)
 
     #################################
     # misc
