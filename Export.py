@@ -87,7 +87,9 @@ class MetadataSetExporter:
             for k,v in f.tales.items():
                 if v is None:
                     continue
-                print >> out.write('     <value key="%s">%s</value>\n'%(k, escape(str(v), 1)))
+                # FIXME: we get to the actual "source" for the TALESMethod by getting its _text
+                # Needs a different way of retrieving this value?
+                print >> out.write('     <value key="%s">%s</value>\n'%(k, escape(getattr(v, '_text', ''), 1) ))
             print >> out, '   </field_tales>'
 
             print >> out, '   <field_messages>'
