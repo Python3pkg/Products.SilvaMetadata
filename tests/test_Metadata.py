@@ -1,7 +1,7 @@
 """
 Tests for the SilvaMetada.
 
-$Id: test_Metadata.py,v 1.17 2005/04/03 12:05:21 clemens Exp $
+$Id: test_Metadata.py,v 1.18 2005/04/03 12:11:38 clemens Exp $
 """
 
 from unittest import TestSuite, makeSuite, main
@@ -14,6 +14,10 @@ from AccessControl.SecurityManagement import newSecurityManager
 from AccessControl.SecurityManagement import noSecurityManager
 from Products.Annotations.AnnotationTool import AnnotationTool
 
+from Products.Formulator import StandardFields
+from Products.Formulator.TALESField import TALESMethod
+from Products.SilvaMetadata.MetadataTool import MetadataTool
+from Products.SilvaMetadata.Compatibility import getToolByName
 from Products.SilvaMetadata.Configuration import UsingCMF
 
 if UsingCMF:
@@ -23,30 +27,23 @@ if UsingCMF:
     from Products.CMFCore.TypesTool import FactoryTypeInformation as FTI
     from Products.CMFCore.TypesTool import TypesTool
     from Products.CMFCore.utils import getToolByName
-else:
-    from Products.Silva.tests import SilvaTestCase
-    
-from Products.Formulator import StandardFields
-from Products.Formulator.TALESField import TALESMethod
-from Products.SilvaMetadata.MetadataTool import MetadataTool
-from Products.SilvaMetadata.Compatibility import getToolByName
 
-if UsingCMF:
     ZopeTestCase.installProduct('Annotations')
     ZopeTestCase.installProduct('ProxyIndex')
     ZopeTestCase.installProduct('Formulator')
     ZopeTestCase.installProduct('CMFCore')
     TestBaseClass = ZopeTestCase.ZopeTestCase
 else:
+    from Products.Silva.tests import SilvaTestCase
     TestBaseClass = SilvaTestCase.SilvaTestCase
 
 SET_ID = 'ut_md'
 
 
 def setupFakePermissions(root):
-    # copy & paste from SilvaTestCase :-/
+    # copy & paste from ZopeTestCase :-/
     uf = root.acl_users
-    uf._doAddUser( '_test_user', 'secret', ['Manager'], [])
+    uf.userFolderAddUser( '_test_user', 'secret', ['Manager'], [])
     user = uf.getUserById('_test_user').__of__(uf)
     newSecurityManager(None, user)
 
