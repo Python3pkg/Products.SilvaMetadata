@@ -3,17 +3,17 @@ See also LICENSE.txt
 
 Meta::
 
-  Valid for:  Annotations 0.4
+  Valid for:  SilvaMetadata 0.7.1
   Author:     Martijn Faassen
   Email:      faassen@infrae.com
-  CVS:        $Revision: 1.1 $
+  CVS:        $Revision: 1.2 $
 
 Installing SilvaMetadata
 
   First make sure all requirements (see below) are installed. Then
   install SilvaMetadata in Zope's 'Products' directory and restart
-  Zope. See the instructions below on how to integrate it with Silva or the
-  CMF.
+  Zope. See the instructions below on how to integrate it with Silva
+  or the CMF.
 
 SilvaMetadata Requirements
 
