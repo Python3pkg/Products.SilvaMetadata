@@ -15,13 +15,17 @@
 <dtml-in getContentTypes prefix="type">
   <tr><td><dtml-let ctm="getTypeMappingFor(type_item)">
             <dtml-if ctm>
-	      <a href="<dtml-var "ctm.absolute_url()">"><dtml-var type_item></a>
+	      <a href="<dtml-var "ctm.absolute_url()">/manage_workspace"><dtml-var type_item></a>
 	    <dtml-else>
               <dtml-var type_item>
 	    </dtml-if>
 	  </dtml-let>
       </td>
-      <td><input name="type_chains:<dtml-var type_item>" 
+
+      <input type="hidden" name="type_chains.type:records"
+             value="<dtml-var type_item>" />
+
+      <td><input name="type_chains.chain:records" 
                  type="text" 
 		 value="<dtml-var "getChainFor(type_item)">" /> 
 		 </td>

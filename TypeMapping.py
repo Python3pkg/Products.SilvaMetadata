@@ -5,6 +5,7 @@ author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
 from ZopeImports import *
+from Compatibility import getContentTypeNames, getToolByName
 from Exceptions import ConfigurationError
 
 DEFAULT_MAPPING_NAME = 'Default'
@@ -25,9 +26,12 @@ class TypeMappingContainer(Folder):
         self.id = id
         self.default_chain = ''
         
-    def setDefaultChain(self, RESPONSE=None):
+    def setDefaultChain(self, chain, RESPONSE=None):
+
         if not verifyChain(self, chain):
             raise ConfigurationError("invalid metadata set")
+
+        self.default_chain = chain
 
         if RESPONSE is not None:
             return RESPONSE.redirect('manage_workspace')
@@ -60,13 +64,16 @@ class TypeMappingContainer(Folder):
         return ctm
 
     def editMappings(self, default_chain, type_chains, RESPONSE=None):
+        """ """
         self.setDefaultChain(default_chain)
 
-        for t, tc in type_chains.items():
+        for tcr in type_chains:
+            t = tcr['type']
+            tc = tcr['chain']
             tc = tc.strip()
             if tc == DEFAULT_MAPPING_NAME:
                 if self.getChainFor(t) != DEFAULT_MAPPING_NAME:
-                    self._delObjects([t])
+                    self._delObject(t)
             else:
                 self._setObject(t, TypeMapping(t))
                 ctm = self._getOb(t)
@@ -76,10 +83,7 @@ class TypeMappingContainer(Folder):
             return RESPONSE.redirect('manage_workspace')
 
     def getContentTypes(self):
-        pt = getToolByName(self, 'portal_types')
-        if pt is None:
-            return ()
-        return pt.objectIds()
+        return getContentTypeNames(self)
 
 class TypeMapping(Folder):
 
@@ -102,7 +106,7 @@ class TypeMapping(Folder):
 
 def getMetadataSets(ctx, chain):
     sets = filter(None, [c.strip() for c in chain.split(',')])
-    tool = ctx.getMetadataTool()
+    tool = getToolByName(ctx, 'portal_metadata')
     return map(tool.getMetadataSet, sets)
 
 def verifyChain(ctx, chain):
