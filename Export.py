@@ -26,7 +26,7 @@ class MetadataSetExporter:
             ext_out = 0
             out = StringBuffer()
 
-        print >> out, '<?xml version="1.0" encoding="iso-8859-1"?>\n\n'
+        print >> out, '<?xml version="1.0"?>\n\n'
         print >> out, '<metadata_set id="%s" ns_uri="%s" ns_prefix="%s">' % (
             self.set.getId(),
             self.set.metadata_uri,
@@ -102,8 +102,8 @@ class MetadataSetExporter:
                 # FIXME: we get to the actual "source" for the TALESMethod by
                 # getting its _text
                 # Needs a different way of retrieving this value?
-                print >> out.write('     <value key="%s">%s</value>\n'
-                                   % (k, escape(getattr(v, '_text', ''), 1)))
+                out.write('     <value key="%s">%s</value>\n'
+                          % (k, escape(getattr(v, '_text', ''), 1)))
             print >> out, '   </field_tales>'
 
             print >> out, '   <field_messages>'
