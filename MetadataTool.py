@@ -1,8 +1,13 @@
 """
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
-
-
+# Zope
+from Acquisition import aq_base
+# Annotations
+from Products.Annotations.AnnotationTool import Annotations
+# Formulator
+from Products.Formulator import Form
+# SilvaMetadata
 from Access import invokeAccessHandler
 import Configuration
 from ZopeImports import *
@@ -10,8 +15,6 @@ from Binding import MetadataNamespace, encodeElement
 from Exceptions import BindingError
 from Compatibility import IActionProvider, IPortalMetadata, ActionProviderBase
 from Compatibility import getContentType, getContentTypeNames
-from Acquisition import aq_base
-from Products.Annotations.AnnotationTool import Annotations
 
 class MetadataTool(UniqueObject, Folder, ActionProviderBase):
 
@@ -145,6 +148,8 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         # XXX how does this interact with security issues?
         set = self.collection.getMetadataSet(set_id)
         element = set.getElement(element_id)
+        if type(element) == type(''):
+            import pdb; pdb.set_trace()
         
         annotations = getattr(aq_base(content), '_portal_annotations_', None)
         try:
@@ -164,23 +169,15 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         # if not acquired, fall back on default
         return element.getDefault(content=content)
 
-    def setMetadataValues(self, content, set_id, values_dict):
-        """Another utter hack to set the metadata as quickly as possible.
-        """
-        # XXX how does this interact with security issues?
+    def getMetadataForm(self, context, set_id):
+        """Get a complete Formulator form for a metadata set. This helps
+        validating user input.
+        """        
         set = self.collection.getMetadataSet(set_id)
-
-        annotations = getattr(aq_base(content), '__portal_annotations__', None)
-        if annotations is None:
-            annotations = Annotations()
-            setattr(content, '__portal_annotations__', annotations)
-            content._p_changed = 1
-            
-        if not annotations.has_key(MetadataNamespace):
-            annotations.setdefault(MetadataNamespace, Annotations())
-            
-        for element_id, value in values_dict.items():
-            annotations[MetadataNamespace][element_id] = value
+        fields = [element.field for element in set.getElements()]
+        form = Form.BasicForm().__of__(context)
+        form.add_fields(fields)
+        return form
     
     #################################
     # misc

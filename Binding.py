@@ -1,13 +1,15 @@
 """
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
-
+# Python
 import types, copy
 from UserDict import UserDict
-
+# Zope
 from Acquisition import Implicit, aq_base, aq_parent
 from Products.ZCatalog.ZCatalog import ZCatalog
-
+# Formulator
+from Products.Formulator.Errors import FormValidationError
+#
 from zExceptions import Unauthorized
 from Exceptions import NotFound, BindingError
 from Export import ObjectMetadataExporter
@@ -139,33 +141,24 @@ class MetadataBindAdapter(Implicit):
         return None
 
     security.declarePublic('setValuesFromRequest')
-    def setValuesFromRequest(self, set_id, REQUEST, reindex=0):
+    def setValuesFromRequest(self, request, reindex=0):
+        """Returns a dictionary of errors if any
         """
-        returns a dictionary of errors if any, or none otherwise
-        """
-        set = self.collection[set_id]
-        data_from_request = REQUEST.form.get(set.getId(), {})
-
-        # We assume that setValuesFromRequest is called for TTW code,
-        # i.e. a form submit. This means, we can assume that all fields
-        # have been filled and submitted, although this does not necessarily
-        # mean, all fields are available in the REQUEST - e.g. for checkboxes
-        # turned off... ugh.
-        # So, the data dict we provide to setValues needs to contain all
-        # elements of the set. This, then, is the main use case (or semantic)
-        # difference between setValues and setValuesFromRequest.
-        # BTW, we need to take care of subforms too, e.g. in case of datetime
-        # fields...
-        data = {}
-        for e in set.getElements():
-            eid = e.getId()
-            if hasattr(aq_base(e.field), 'sub_form'):
-                for sfid in e.field.sub_form.get_field_ids():
-                    sfkey = e.field.generate_subfield_key(sfid, validation=1)
-                    data[sfkey] = data_from_request.get(sfkey, '')
+        all_errors = {}
+        ms = self.service_metadata
+        context = self._getAnnotatableObject()
+        setnames = self.getSetNames()
+        for setname in setnames:
+            try:
+                form = ms.getMetadataForm(context, setname)
+                result = form.validate_all(request[setname])
+            except FormValidationError, e:
+                all_errors[setname] = errors = {}
+                for error in e.errors:
+                    errors[error.field_id] = error.error_text
             else:
-                data[eid] = data_from_request.get(eid, '')
-        return self.setValues(set_id, data, reindex)
+                self._setData(result, setname)
+        return all_errors
 
     #################################
     ### Discovery Introspection // Definition Accessor Interface
