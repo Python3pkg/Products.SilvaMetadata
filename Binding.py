@@ -35,7 +35,8 @@ class Data(UserDict):
     when using the __getitem__ interface of the binding
     """
     __roles__ = None
-
+    __allow_access_to_unprotected_subobjects__ = 1
+    
 class MetadataBindAdapter(Implicit):
 
     security = ClassSecurityInfo()
@@ -245,7 +246,7 @@ class MetadataBindAdapter(Implicit):
     #################################
     ### Accessor Interface
     def __getitem__(self, key):
-        if key in self.collection.keys():
+        if self.collection.has_key(key):
             return self._getData(key)
         raise KeyError(str(key))
 
@@ -393,6 +394,7 @@ class MetadataBindAdapter(Implicit):
         find the metadata for the given content object,
         performs runtime binding work as well.
         """
+
         set = self._getSet(set_id, namespace_key)
         
         # cache lookup
@@ -508,7 +510,7 @@ def encodeElement(set_id, element_id):
     return MetadataAqPrefix+set_id + MetadataAqVarPrefix + element_id
 
 def decodeVariable(name):
-    """ decode an encode variable name... not used """
+    """ decode an encoded variable name... not used """
     assert name.startswith(MetadataAqPrefix)
 
     set_id = name[len(MetadataAqPrefix):name.find(MetadataAqVarPrefix)]
