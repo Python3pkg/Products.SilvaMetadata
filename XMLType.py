@@ -19,13 +19,13 @@ def serialize( value):
         return '<element type="float">%s</element>' % unicode(value)
     
     elif isinstance(value, types.StringType):
-        return '<element type="string">%s</element>'%unicode(escape(value))
+        return '<element type="string">%s</element>'%unicode(escape(value), 1)
     
     elif isinstance(value, DateTime):
         return '<element type="date">%s</element>'%unicode(value)
     
     elif isinstance(value, types.UnicodeType):
-        return '<element type="string">%s</element>'%escape(value)
+        return '<element type="string">%s</element>'%escape(value, 1)
     
     elif isinstance(value, types.ListType):
         return '<element_list type="list">%s</element_list>'%(''.join(map(serialize, value)))

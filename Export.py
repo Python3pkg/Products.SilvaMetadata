@@ -35,11 +35,11 @@ class MetadataSetExporter:
             )
 
         print >> out, '<title>%s</title>'%(
-            escape(self.set.getTitle())
+            escape(self.set.getTitle(), 1)
             )
 
         print >> out, '<description>%s</description>'%(
-            escape(self.set.getDescription())
+            escape(self.set.getDescription(), 1)
             )
 
         for e in self.set.getElements():
@@ -81,10 +81,10 @@ class MetadataSetExporter:
                         k, 'float', v )
                 elif isinstance(v, ListType):
                     print >> out,    '        <value key="%s" type="%s" value="%s" />'%(
-                        k, 'list', escape(str(v)) )
+                        k, 'list', escape(str(v), 1) )
                 else:
                     print >> out,    '        <value key="%s" type="str" value="%s" />'%(
-                        k, escape(str(v)) )
+                        k, escape(str(v), 1) )
 
             print >> out, '   </field_values>'            
 
@@ -92,20 +92,20 @@ class MetadataSetExporter:
             for k,v in f.tales.items():
                 if v is None:
                     continue
-                print >> out, '     <value key="%s">%s</value>'%(k, escape(str(v)))
+                print >> out, '     <value key="%s">%s</value>'%(k, escape(str(v), 1))
             print >> out, '   </field_tales>'
 
             print >> out, '   <field_messages>'
             for message_key in f.get_error_names():
                 print >> out, '     <message name="%s">%s</message>'%(
-                    escape(message_key),
-                    escape(f.get_error_message(message_key))
+                    escape(message_key, 1),
+                    escape(f.get_error_message(message_key), 1)
                     )
             print >> out, '   </field_messages>'
 
             print >> out, '   <index_args>'
             for k,v in e.index_constructor_args.items():
-                print >> out, '     <value key="%s">%s</value>'%(k, escape(str(v)))
+                print >> out, '     <value key="%s">%s</value>'%(k, escape(str(v), 1))
             print >> out, '   </index_args>'
             
             print >> out, '  </metadata_element>'
