@@ -12,16 +12,30 @@ from Compatibility import getContentType
 
 class MetadataTool(UniqueObject, Folder, ActionProviderBase):
 
-    id = 'portal_amt'
+    id = 'portal_metadata'
     meta_type = 'Advanced Metadata Tool'
-    titlte =  meta_type
+    title =  meta_type
 
+    manage_options = (
+        {'label':'Overview',
+         'action':'manage_main'},
+        
+        {'label':'Metadata Sets',
+         'action':'%s/manage_workspace'%Configuration.MetadataCollection},
+        
+        {'label':'Type Mapping',
+         'action':'%s/manage_workspace'%Configuration.TypeMapping},
+        )
+    
     __implements__ = (IActionProvider, IPortalMetadata)
 
     _actions = []
 
     security = ClassSecurityInfo()
-
+    #security.declareProtected('metadata_overview', Configuration.pMetadataManage)
+    #metadata_overview = DTMLFile('ui/MetadataToolOverview', globals())
+    manage_main = DTMLFile('ui/MetadataToolOverview', globals())
+    
     def __init__(self):
         pass
     
@@ -29,7 +43,7 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
     # Action Provider Interface
     def listActions(self, info=None):
         actions = []
-        for set in self.collection.getMetadataSets():
+        for set in self.getCollection().getMetadataSets():
             if set.use_action_p is not None and set.action is not None:
                 actions.append(set.action)
         return self._actions
@@ -49,7 +63,8 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
     
     ## dublin core hardcodes :-(
     # we don't have vocabulary implementation yet.
-    
+
+
     def listAllowedSubjects( self, content=None):
         catalog = getToolByName(self, 'portal_catalog')
         return catalog.uniqueValuesFor()
@@ -86,6 +101,12 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
     #################################
     ## new interface 
 
+    def getCollection(self):
+        return self._getOb(Configuration.MetadataCollection)
+    
+    def getTypeMapping(self):
+        return self._getOb(Configuration.TypeMapping)
+    
     def getMetadataSet(self, set_id):
         return self.collection._getOb(set_id)
 
@@ -116,17 +137,13 @@ def initializeTool(tool):
     from Collection import MetadataCollection
     from TypeMapping import TypeMappingContainer
     
-    cid = 'collection'
-    collection = MetadataCollection(cid)
-    collection.id = cid
+    collection = MetadataCollection(Configuration.MetadataCollection)
+    collection.id = Configuration.MetadataCollection
+    tool._setObject(Configuration.MetadataCollection, collection)
 
-    tool._setObject(cid, collection)
-
-    tid = 'ct_mapping'
-    mapping = TypeMappingContainer(tid)
-    mapping.id = tid
-    
-    tool._setObject(tid, mapping)    
+    mapping = TypeMappingContainer(Configuration.TypeMapping)
+    mapping.id = Configuration.TypeMapping
+    tool._setObject(Configuration.TypeMapping, mapping)    
 
     
     

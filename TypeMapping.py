@@ -15,12 +15,15 @@ class TypeMappingContainer(Folder):
     meta_type = 'Type Mapping Container'
 
     manage_options = (
+        
         {'label':'Content Types',
-         'action':'contentMappingForm'
-         },
+         'action':'manage_main'},
+        
+        {'label':'Metadata Tool',
+         'action':'../manage_workspace'},
         )
 
-    contentMappingForm = DTMLFile('ui/TypeMappingContainerForm', globals())
+    manage_main = DTMLFile('ui/TypeMappingContainerForm', globals())
 
     def __init__(self, id):
         self.id = id

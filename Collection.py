@@ -35,20 +35,6 @@ class MetadataCollection(Folder):
         if RESPONSE is not None:
             return self.manage_main(update_menu=1)
         
-    def getContentMetadata(self, object, namespace_key=None):
-        
-        annotations = getToolByName(self, 'portal_annotations')
-        
-        metadata_collection = annotations.getAnnotations(
-            object,
-            MetadataNamespace
-            )
-
-        if namespace_key:
-            return metadata_collection[namespace_key]
-
-        return metadata_collection
-
     def getMetadataSets(self):
         return self.objectValues('Metadata Set')
 

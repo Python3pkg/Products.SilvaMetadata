@@ -174,7 +174,7 @@ class MetadataSet(OrderedContainer):
         RESPONSE.setHeader('Content-Type', 'text/xml')
         return exporter()
         
-    def setNamespace(self, ns_prefix, ns_uri):
+    def setNamespace(self, ns_uri, ns_prefix):
         self.metadata_prefix = ns_prefix
         self.metadata_uri = ns_uri
 
