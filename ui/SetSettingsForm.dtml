@@ -47,7 +47,20 @@
   <form action="initialize" method="GET">
   <input type="submit" value="initialize set" />
   </form>
+<dtml-else>
+
+<h3> Make Editable </h3>
+<p class="form-help">
+ <font color="red">
+ making a set editable allows for modification of the set
+ at the risk data loss. 
+ <font>
+ <form action="setInitialized" method="GET">
+  <input type="hidden" value="0" name="initialization_flag:int" />
+  <input type="submit" value="make editable" />
+ </form>
 </dtml-if>
+ 
 
 
 <dtml-var manage_page_footer>

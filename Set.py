@@ -181,6 +181,19 @@ class MetadataSet(OrderedContainer):
     def isInitialized(self):
         return self.initialized
 
+    def setInitialized(self, initialization_flag, RESPONSE=None):
+        """ """
+        flag = not not initialization_flag
+
+        if flag != self.initialized:
+            if self.initialized:
+                self.initialized = 0
+            else:
+                self.initialize()
+
+        if RESPONSE:
+            return RESPONSE.redirect('manage_workspace')
+
     def initialize(self, RESPONSE=None):
         """ initialize the metadata set """
         if self.isInitialized():
