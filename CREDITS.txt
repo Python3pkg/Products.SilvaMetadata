@@ -6,7 +6,7 @@ Meta::
   Valid for:  SilvaMetadata 0.7.x
   Author:     Martijn Faassen
   Email:      faassen@infrae.com
-  CVS:        $Revision: 1.5 $
+  CVS:        $Revision: 1.6 $
 
 SilvaMetadata is developed by Infrae (http://www.infrae.com).
 
@@ -19,4 +19,5 @@ Infrae Silva Metadata team
   Jan-Wijbrand Kolman <jw@infrae.com>
   Martijn Faassen <faassen@infrae.com>
   Guido Wesdorp <guido@infrae.com>
+  Eric Casteleijn <eric@infrae.com>
 
