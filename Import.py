@@ -226,9 +226,18 @@ def make_set(container, set_node):
 
         # compatiblity.. ick
         if not e_node.has_key('acquire_p'):
-            e_node['acquire_p']=0
+            e_node['acquire_p'] = 0
         if not e_node.has_key('read_only_p'):
-            e_node['read_only_p']=0
+            e_node['read_only_p'] = 0
+        if not e_node.has_key('index_p'):
+            e_node['index_p'] = 0
+            
+        # type possible is string, convert to 'boolean'
+        for p in ['index_p', 'acquire_p', 'read_only_p']:
+            try:
+                e_node[p] = not not int(e_node[p])
+            except ValueError:
+                e_node[p] = 0
 
         set.addMetadataElement(e_node.id,
                                e_node.field_type,
