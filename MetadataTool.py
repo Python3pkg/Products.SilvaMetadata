@@ -155,9 +155,6 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         # XXX how does this interact with security issues?
         set = self.collection.getMetadataSet(set_id)
         element = set.getElement(element_id)
-        if type(element) == type(''):
-            import pdb; pdb.set_trace()
-        
         annotations = getattr(aq_base(content), '_portal_annotations_', None)
         try:
             saved_data = annotations[MetadataNamespace].get(set.metadata_uri)
