@@ -5,7 +5,7 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 import types, copy
 from UserDict import UserDict
 
-from Acquisition import Implicit, aq_base
+from Acquisition import Implicit, aq_base, aq_parent
 from zExceptions import Unauthorized
 from Exceptions import NotFound, BindingError
 from Export import ObjectMetadataExporter
@@ -382,12 +382,19 @@ class MetadataBindAdapter(Implicit):
         # check for object delegation
         bind_data = self._getBindData()        
         object_delegate = bind_data.get(ObjectDelegate)
+
+        # we want to use the content in its original acquisiton
+        # context, but because we retrieve it as an attribute
+        # it gets wrapped.. content.__of__(binding).__of__(content)
+        # so we remove the outer two wrappers to regain the original
+        # context
+        content = aq_parent( aq_parent( self.content ) )
         
         if object_delegate is not None:
             od = getattr(self.content, object_delegate)
             ob = od()
         else:
-            ob = self.content
+            ob = content
 
         return ob
 
