@@ -402,7 +402,7 @@ class MetadataBindAdapter(Implicit):
         
         if saved_data is None:
             using_defaults = 1
-            data.update(set.getDefaults())
+            data.update(set.getDefaults( content=ob ))
         else:
             # make a copy so we can modify with acq metadata
             data.update(saved_data)

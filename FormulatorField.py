@@ -64,8 +64,36 @@ def validate_sub_field(self, id, REQUEST):
     """ """
     return self.sub_form.get_field(id)._validate_helper(
         self.generate_subfield_key(id, validation=1), REQUEST)
+
+## most of the above deal with form generation and validation and allowing
+## for the use of records, the below deals with adding additional context
+## variables for evaluation of formulator tales expressions.
+def get_value(self, id, **kw):
+    """Get value for id."""
+
+    tales_expr = self.tales.get(id, "")
     
+    if tales_expr:
+        value = tales_expr.__of__(self)(field=self, form=self.aq_parent, **kw)
+    else:
+        override = self.overrides.get(id, "")
+        if override:
+            # call wrapped method to get answer
+            value = override.__of__(self)()
+        else:
+            # get normal value
+            value = self.get_orig_value(id)
+
+    # if normal value is a callable itself, wrap it
+    if callable(value):
+        return value.__of__(self)
+    else:
+        return value
+    
+# the one instance variable
 Field.field_record = None
+# methods
+Field.get_value = get_value    
 Field.generate_field_key = generate_field_key
 Field.generate_subfield_key = generate_subfield_key
 Field.render = render

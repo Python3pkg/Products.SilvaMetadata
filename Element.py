@@ -193,13 +193,13 @@ class MetadataElement(SimpleItem):
         """
         return self.field.is_required()
 
-    def getDefault(self):
+    def getDefault(self, content):
         """
         return the default value for this element
         """
-        return self.field.get_value('default')
+        return self.field.get_value('default', content=content)
 
-    def getVocabulary(self):
+    def getVocabulary(self, content):
         """
         return the set of allowed of words
         """
@@ -213,8 +213,8 @@ class MetadataElement(SimpleItem):
     ## values are changed, we catch the required message in
     ## order to maintain our invariant that an element can not
     ## be both required and acquired.
-    def on_value_required_change(self, required_value):
-        if required_value and self.acquired_p:
+    def on_value_required_changed(self, required_value):
+        if required_value and self.acquire_p:
             raise ConfigurationError("Acquired values may not be Required")
        
 InitializeClass(MetadataElement)

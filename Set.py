@@ -275,10 +275,10 @@ class MetadataSet(OrderedContainer):
     def getMetadataSet(self):
         return self
 
-    def getDefaults(self):
+    def getDefaults(self, content):
         res = {}
         for e in self.getElements():
-            res[e.getId()] = e.getDefault()
+            res[e.getId()] = e.getDefault(content)
         return res
 
     def listFieldTypes(self):

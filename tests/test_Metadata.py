@@ -129,6 +129,55 @@ class TestSetImportExport( MetadataTests ):
         xml2 = set.exportXML()
 
         assert xml == xml2, "Import/Export disjoint"
+
+class TestMetadataElement( MetadataTests ):
+
+    def testGetDefault(self):
+        from Products.Formulator.TALESField import TALESMethod
+        
+        pm = getToolByName(self.root, 'portal_metadata')
+        collection = pm.getCollection()
+        set = collection.getMetadataSet(SET_ID)
+
+        element = set.getElement('Title')
+        element.field._edit_tales( {'default':
+                                    TALESMethod('content/getPhysicalPath') } )
+
+        zoo = self.root.zoo
+        
+        binding = pm.getMetadata(zoo)
+        defaults = set.getDefaults(content = zoo)
+
+        self.assertEqual( defaults['Title'],
+                          zoo.getPhysicalPath(),
+                          "Tales Context Passing Failed" )
+
+    def testAcquisitionInvariant(self):
+        from Products.SilvaMetadata.Exceptions import ConfigurationError
+
+        pm = getToolByName(self.root, 'portal_metadata')
+        collection = pm.getCollection()
+        set = collection.getMetadataSet(SET_ID)        
+        element = set.getElement('Description')
+        
+        try:
+            element.field._edit( {'required':1} )
+            element.editElementPolicy(acquire_p = 1)
+        except ConfigurationError:
+            pass
+        else:
+            raise AssertionError("Acquisition / Required Element Invariant Failed")
+
+        try:
+            element.field._edit( {'required':0})
+            element.editElementPolicy(acquire_p = 1)
+            #import pdb; pdb.set_trace()
+            element.field._edit( {'required':1})
+        except ConfigurationError:
+            pass
+        else:
+            raise AssertionError("Acquisition / Required Element Invariant Failed 2")
+        
         
 class TestAdvancedMetadata( MetadataTests ):
     """ tests for runtime binding methods """
