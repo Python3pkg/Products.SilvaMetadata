@@ -143,8 +143,28 @@ class MetadataBindAdapter(Implicit):
         returns a dictionary of errors if any, or none otherwise
         """
         set = self.collection[set_id]
-        data = REQUEST.form.get(set.getId(), {})
-        return self.setValues(set_id, data.copy(), reindex)
+        data_from_request = REQUEST.form.get(set.getId(), {})
+
+        # We assume that setValuesFromRequest is called for TTW code,
+        # i.e. a form submit. This means, we can assume that all fields 
+        # have been filled and submitted, although this does not necessarily
+        # mean, all fields are available in the REQUEST - e.g. for checkboxes
+        # turned off... ugh.
+        # So, the data dict we provide to setValues needs to contain all
+        # elements of the set. This, then, is the main use case (or semantic)
+        # difference between setValues and setValuesFromRequest.
+        # BTW, we need to take care of subforms too, e.g. in case of datetime
+        # fields...
+        data = {}
+        for e in set.getElements():
+            eid = e.getId()
+            if hasattr(aq_base(e.field), 'sub_form'):
+                for sfid in e.field.sub_form.get_field_ids():
+                    data[sfid] = data_from_request.get(sfid, '')
+            else:
+                data[eid] = data_from_request.get(eid, '')
+
+        return self.setValues(set_id, data, reindex)
 
     #################################
     ### Discovery Introspection // Definition Accessor Interface
@@ -510,7 +530,17 @@ class MetadataBindAdapter(Implicit):
         
         for eid in update_list:
             aqelname = encodeElement(sid, eid)
-            setattr(ob, aqelname, data[eid])
+            value = data[eid]
+            if value:
+                setattr(ob, aqelname, value)
+            else:
+                # Try and get rid of encoded attribute on the
+                # annotatable object; this will get acquisition
+                # of the value working again.
+                try:
+                    delattr(ob, aqelname)
+                except (KeyError, AttributeError), err:
+                    pass
 
         # save in annotations
         annotations = getToolByName(ob, 'portal_annotations')
@@ -553,38 +583,44 @@ InitializeClass(MetadataBindAdapter)
 
 def validateData(binding, set, data, errors_dict=None):
     # XXX completely formulator specific
-    from Products.Formulator.Errors import ValidationError
-    
-    # we only validate elements that exist in the data or for which the element
-    # is required (so we can get the required validation error),
+    from Products.Formulator.Form import BasicForm
+    from Products.Formulator.Errors import ValidationError, FormValidationError
+
+    # Filter out elements not in the data dict, provided the element is 
+    # not required or the binding already has a value for this element.
     for e in set.getElements():
+        eid = e.getId()
+        has_a_value = not not binding.get(set.getId(), eid)
+        is_required = e.isRequired()
 
         if hasattr(aq_base(e.field), 'sub_form'):
-            # xxx this is really a datetime hack..
-            # fields with subforms will might have only there marshalled subform ids 
-            # stored in the data dict, there really isn't a good way to discover which 
-            # fields are sub form providers, so we use just try to introspect one.
-            
-            # get one of the subform field ids, just try one.. unfortunately
-            # the presence of a subform has little todo with the fields request
-            # encoding. sigh.
+            # XXX this is really a datetime hack..
+            # Fields with subforms will/might have only their marshalled
+            # subform ids stored in the data dict. There really isn't a
+            # good way to discover which fields are sub form providers,
+            # so we just try to introspect.
+            # Get one of the subform field ids, just try one.. unfortunately
+            # the presence of a subform has little todo with the fields
+            # request encoding. sigh.
             sfid = e.field.sub_form.get_field_ids()[0]
-            
-            if not data.has_key(e.field.generate_subfield_key(sfid, validation=1)) \
-               and not e.isRequired():
+            sfkey = e.field.generate_subfield_key(sfid, validation=1)
+
+            if not data.has_key(sfkey) and (not is_required or has_a_value):
                 continue
         
-        elif not data.has_key( e.getId() ) and not e.isRequired():
+        elif not data.has_key(eid) and (not is_required or has_a_value):
             continue
 
         try:
-            data[e.getId()] = e.validate(data)
+            data[eid] = e.validate(data)
         except ValidationError, exception:
             if errors_dict is not None:
-                errors_dict[e.getId()]=exception.error_text
+                errors_dict[eid] = exception.error_text
             else:
                 raise
-    return data
+
+        return data
+    
 
 def encodeElement(set_id, element_id):
     """
@@ -597,7 +633,7 @@ def encodeElement(set_id, element_id):
     is used to minimize namespace pollution. acquired metadata is only
     specified in this manner on the source object.
     """
-    return MetadataAqPrefix+set_id + MetadataAqVarPrefix + element_id
+    return MetadataAqPrefix + set_id + MetadataAqVarPrefix + element_id
 
 def decodeVariable(name):
     """ decode an encoded variable name... not used """
