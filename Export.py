@@ -91,7 +91,14 @@ class MetadataSetExporter:
                     )
             print >> out, '   </field_messages>'
 
+            print >> out, '   <index_args>'
+            for k,v in e.index_constructor_args.items():
+                print >> out, '     <value key="%s">%s</value>'%(k, escape(str(v)))
+            print >> out, '   </index_args>'
+            
             print >> out, '  </metadata_element>'
+
+
             
         print >> out, '</metadata_set>'
         

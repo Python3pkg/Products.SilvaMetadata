@@ -3,6 +3,7 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
 from ZopeImports import *
+from Exceptions import NotFound
 from Interfaces import IMetadataCollection
 from Import import read_set, make_set
 from Set import MetadataSet
@@ -46,9 +47,22 @@ class MetadataCollection(Folder):
 
         if RESPONSE is not None:
             return self.manage_main(update_menu=1)
-        
+
+    #security.declareProtected()
     def getMetadataSets(self):
         return self.objectValues('Metadata Set')
+
+    #security.declareProtected()
+    def getMetadataSet(self, set_id):
+        return self._getOb(set_id)
+
+    #security.declareProtected()
+    def getSetByNamespace(self, metadata_uri):
+        for set in self.getMetadataSets():
+            if set.metadata_uri == metadata_uri:
+                return set
+            
+        raise NotFound("No Metadata Set Matching %s"%str(metadata_namespace))
 
     security.declareProtected( pMetadataManage, 'importSet')
     def importSet(self, xml_file, RESPONSE=None):

@@ -157,10 +157,23 @@ class MetadataSetReader(MetaReader):
     def startFieldMmessage(self, attrs):
         fm = DefinitionNode(attrs)
         self.getElement().field_messages.append(fm)
-        
     
     def endFieldMmessage(self, chars):
         self.getElement().field_messages[-1].text = chars
+
+    def startIndex_args(self, attrs):
+        self.prefix = 'IndexArg'
+        self.getElement().index_args = []
+
+    def endIndexArgIndex_args(self, chars):
+        self.prefix = ''
+
+    def startIndexArgValue(self, attrs):
+        iav = DefinitionNode(attrs)
+        self.getElement().index_args.append(iav)
+
+    def endIndexArgValue(self, chars):
+        self.getElement().index_args[-1].value = chars
 
         
 def read_set( xml ):
@@ -220,6 +233,12 @@ def make_set( container, set_node ):
 
         for fm in e_node.field_messages:
             field.message_values[fm.name]=fm.text
+
+        constructor_args = {}
+        for iav in e_node.index_args:
+            constructor_args[iav['key']]=iav['value']
+        element.index_constructor_args = constructor_args
+
 
 def import_metadata( content, content_node):
     """

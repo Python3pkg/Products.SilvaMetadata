@@ -1,3 +1,10 @@
+"""
+description: some really ugly default view.. will likely be removed in the
+near future in favor of some zpt views
+
+author: kapil thangavelu
+"""
+
 from utils import StringBuffer
 from ZopeImports import getToolByName
 

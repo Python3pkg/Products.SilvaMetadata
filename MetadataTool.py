@@ -102,22 +102,28 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
     ## new interface 
 
     def getCollection(self):
+        """ return a container containing all known metadata sets """
         return self._getOb(Configuration.MetadataCollection)
     
     def getTypeMapping(self):
+        """ return the mapping of content types to metadata sets """
         return self._getOb(Configuration.TypeMapping)
     
     def getMetadataSet(self, set_id):
-        return self.collection._getOb(set_id)
+        """ get a particular metadata set """
+        return self.getCollection().getMetadataSet(set_id)
 
     def getMetadataSetFor(self, metadata_namespace):
-        for set in self.collection.getMetadataSets():
-            if set.metadata_uri == metadata_namespace:
-                return set
-            
-        raise NotFound("No Metadata Set Matching %s"%str(metadata_namespace))
+        """ get a particular metadata set by its namespace """
+        return self.getCollection().getSetByNamespace(metadata_namespace)
 
     def getMetadata(self, content):
+        """
+        return a metadata binding adapter for a particular content
+        object. a bind adapter encapsulates both metadata definitions,
+        data, and policy behavior into an api for manipulating and
+        introspecting metadata
+        """
         ctm = self._getOb(Configuration.TypeMapping)
         metadata_sets = ctm.getMetadataSetsFor(getContentType(content))
         return MetadataBindAdapter(content, metadata_sets).__of__(content)

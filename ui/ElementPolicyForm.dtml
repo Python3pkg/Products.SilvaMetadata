@@ -9,11 +9,15 @@
 An Element : <dtml-var id>
 </p>
 
+<dtml-comment>
+   <dtml-if "not getSet().isInitialized()"> </dtml-if>
+</dtml-comment>
+
 <form action="editElementPolicy" method="POST">
 
   <table>
 
-   <tr><td>Field Type</td>
+   <tr><td class="form-help">Field Type</td>
        <td>
            <select name="field_type">
 	   <dtml-in listFieldTypes prefix="ft">
@@ -24,7 +28,7 @@ An Element : <dtml-var id>
        </tr>
 
    <dtml-comment>
-   <tr><td>Required</td>
+   <tr><td class="form-help">Required</td>
        <td>
            <select name="required_p:int">
            <option value="1" <dtml-if "required_p">selected</dtml-if>>Yes</option>
@@ -34,7 +38,7 @@ An Element : <dtml-var id>
        </tr>
    </dtml-comment>
 
-   <tr><td>Index Field</td>
+   <tr><td class="form-help">Index Field</td>
        <td>
            <select name="index_p:int">
            <option value="1" <dtml-if "index_p">selected</dtml-if>>Yes</option>
@@ -43,7 +47,15 @@ An Element : <dtml-var id>
        </td>
        </tr>
 
-   <tr><td>Index Type</td>
+   <tr><td class="form-help">Read Only</td>
+       <td>
+           <select name="read_only_p:int">
+           <option value="1" <dtml-if "read_only_p">selected</dtml-if>>Yes</option>
+           <option value="0" <dtml-if "not read_only_p">selected</dtml-if>>No</option>         
+	   </select>
+       </td>
+
+   <tr><td class="form-help">Index Type</td>
        <td>
            <select name="index_type">
 	   <dtml-in listIndexTypes prefix="idx">
@@ -52,29 +64,79 @@ An Element : <dtml-var id>
        </tr>
 
        
-   <tr><td>Read Only</td>
-       <td>
-           <select name="read_only_p:int">
-           <option value="1" <dtml-if "read_only_p">selected</dtml-if>>Yes</option>
-           <option value="0" <dtml-if "not read_only_p">selected</dtml-if>>No</option>         
-	   </select>
+    <tr><td colspan="2"><hr /></td></tr>
+
+    <tr>
+       <td colspan="2">
+        <p class="form-help">
+       The following are key value pairs are for
+       passing to the index constructor for indexes
+       that need additional arguments (like zctextindex).
+        </p>
        </td>
+    </tr>
+
+   <dtml-in "index_constructor_args.items()" prefix="idx">
+     <tr>
+        <td class="form-help"> <dtml-var idx_key> </td>
+        <td> <dtml-var idx_item> </td>
+     </tr>
+   </dtml-in>
+ 
+   <tr>
+     <td align="left" valign="top">
+       <div class="form-label">
+         Key Value 
+       </div>
+     </td>
+     <td align="left" valign="top">
+       <input type="text" name="extra.key1:record:ignore_empty" size="40" />
+       <input type="text" name="extra.value1:record:ignore_empty" size="40" />
+      <br />
+     </td>
+   </tr>
 
 
-   <dtml-comment>
-   <tr><td>Use Default</td>
-       <td>
-           <select name="use_default_p:int">
-           <option value="1" <dtml-if "required_p">selected</dtml-if>>Yes</option>
-           <option value="0" <dtml-if "not required_p">selected</dtml-if>>No</option>         
-	   </select>
-       </td>
-       </tr>
+   <tr>
+     <td align="left" valign="top">
+       <div class="form-label">
+         Key Value 
+       </div>
+     </td>
+     <td align="left" valign="top">
+       <input type="text" name="extra.key2:record:ignore_empty" size="40" />
+       <input type="text" name="extra.value2:record:ignore_empty" size="40" />
+      <br />
+     </td>
+   </tr>
 
-   <tr><td>Default</td>
-       <td><input type="text" name="id"></td>
-       </tr>
-   </dtml-comment>
+
+   <tr>
+     <td align="left" valign="top">
+       <div class="form-label">
+         Key Value 
+       </div>
+     </td>
+     <td align="left" valign="top">
+       <input type="text" name="extra.key3:record:ignore_empty" size="40" />
+       <input type="text" name="extra.value3:record:ignore_empty" size="40" />
+      <br />
+     </td>
+   </tr>
+
+   <tr>
+     <td align="left" valign="top">
+       <div class="form-label">
+         Key Value 
+       </div>
+     </td>
+     <td align="left" valign="top">
+       <input type="text" name="extra.key4:record:ignore_empty" size="40" />
+       <input type="text" name="extra.value4:record:ignore_empty" size="40" />
+      <br />
+     </td>
+   </tr>
+
 
    <tr><td colspan="2">
        <input type="submit" value="edit metadata element">

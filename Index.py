@@ -45,7 +45,14 @@ def createIndexId(element):
     return "%s%s"%(ms.metadata_prefix, element.getId())
 
 def createIndexArguements(element):
-    d = {}
+    print element.index_constructor_args, type(element.index_constructor_args)
+
+    d = ProxyIndex.RecordStyle()
+
+    # try to get the element's index construction key/value pair 
+    if element.index_constructor_args is not None:
+        d.update(element.index_constructor_args)
+
     d['idx_type'] = element.index_type
     d['value_expr'] = createIndexExpression(element)
 
@@ -53,7 +60,7 @@ def createIndexArguements(element):
     # proxyindex needs to find the zcatalog in the containement
     # hierarchy to introspect the pluggable indexes.
     d['idx_context'] = getToolByName(element, 'portal_catalog')
-
+    
     return d
 
 def createIndexExpression(element):

@@ -4,11 +4,13 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
 from AccessControl import getSecurityManager
+import Configuration
 from Exceptions import NoContext, ConfigurationError
 from FormulatorField import getFieldFactory
 from Guard import Guard
 from Interfaces import IMetadataElement
 from ZopeImports import *
+from utils import normalize_kv_pairs
 
 _marker = []
 
@@ -16,7 +18,8 @@ encoding = 'UTF-8'
 
 class MetadataElement(SimpleItem):
     """
-    Property Bag For Element Policies
+    Property Bag For Element Policies, this implementation is
+    formulator specific
     """
     
     meta_type = 'Metadata Element'
@@ -33,7 +36,7 @@ class MetadataElement(SimpleItem):
     field_type = None
 
     ## defer to formulator for now
-    use_default_p = True
+    #use_default_p = True
     #required_p = False    
     #default = None
     
@@ -43,22 +46,31 @@ class MetadataElement(SimpleItem):
     
     manage_options = (
         {'label':'Settings',
-         'action':'elementSettingsForm'},
+         'action':'manage_settings'},
+        
         {'label':'Guards',
-         'action':'elementGuardForm'},
+         'action':'manage_guard_form'},
+        
         {'label':'Field',
          'action':'field/manage_main'},        
         )
-
-    elementSettingsForm = DTMLFile('ui/ElementPolicyForm', globals())
-    elementGuardForm   = DTMLFile('ui/ElementGuardForm', globals())
-
+    
     security = ClassSecurityInfo()
+
+    security.declareProtected(Configuration.pMetadataManage, 'manage_settings')
+    manage_settings = DTMLFile('ui/ElementPolicyForm', globals())
+    
+    security.declareProtected(Configuration.pMetadataManage, 'manage_guard_form')    
+    manage_guard_form = DTMLFile('ui/ElementGuardForm', globals())
+
+
+
     
     def __init__(self, id, **kw):
         self.id = id
         self.read_guard = Guard()
         self.write_guard = Guard()
+        self.index_constructor_args = {}
 
     def editElementGuards(self, read_guard, write_guard, RESPONSE=None):
 
@@ -73,7 +85,7 @@ class MetadataElement(SimpleItem):
                           index_type = None,
                           index_p = None,
                           read_only_p = None,
-                          use_default_p = None,
+                          extra = None,
                           RESPONSE = None
                           ):
         """
@@ -95,10 +107,6 @@ class MetadataElement(SimpleItem):
         
         if index_p is None:
             index_p = self.index_p
-
-
-        if use_default_p is None:
-            use_default_p = self.use_default_p
 
         if read_only_p is None:
             read_only_p = self.read_only_p
@@ -122,7 +130,11 @@ class MetadataElement(SimpleItem):
         # need to cascacde this so we can create indexes at the set level
         self.index_p = not not index_p
         self.read_only_p = not not read_only_p
-        self.use_default_p = not not use_default_p
+        
+        # normalize the key value pairs into a mapping[k]->v
+        if extra:
+            constructor_args = normalize_kv_pairs(extra)
+            self.index_constructor_args.update(constructor_args)
 
         if RESPONSE is not None:
             return RESPONSE.redirect('manage_workspace')
