@@ -97,16 +97,23 @@ else:
         
 #################################
 ### Permissions
+# only set if not overridden by user/developer
 if Configuration.UsingCMF:
     from Products.CMFCore import CMFCorePermissions
-    Configuration.pMetadataView = CMFCorePermissions.View
-    Configuration.pMetadataEdit = CMFCorePermissions.ModifyPortalContent
-    Configuration.pMetadataManage = CMFCorePermissions.ManagePortal
+    if Configuration.pMetadataView is None:
+        Configuration.pMetadataView = CMFCorePermissions.View
+    if Configuration.pMetadataEdit is None:
+        Configuration.pMetadataEdit = CMFCorePermissions.ModifyPortalContent
+    if Configuration.pMetadataManage is None:
+        Configuration.pMetadataManage = CMFCorePermissions.ManagePortal
 else:
     from Products.Silva import SilvaPermissions
-    Configuration.pMetadataView = SilvaPermissions.View
-    Configuration.pMetadataEdit = SilvaPermissions.ChangeSilvaContent
-    Configuration.pMetadataManage = SilvaPermissions.ViewManagementScreens
+    if Configuration.pMetadataView is None:    
+        Configuration.pMetadataView = SilvaPermissions.View
+    if Configuration.pMetadataEdit is None:        
+        Configuration.pMetadataEdit = SilvaPermissions.ChangeSilvaContent
+    if Configuration.pMetadataManage is None:        
+        Configuration.pMetadataManage = SilvaPermissions.ViewManagementScreens
 
 #################################
 ### Catalog Expressions for ProxyIndex
