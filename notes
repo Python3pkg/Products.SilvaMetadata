@@ -4,6 +4,10 @@ Issues
 - Ghost binding needs to deal with type mapping to 
   the original type. bummer.
 
+- export of element's field's values lists are not supported 
+  at this time. ask martijn about possible type restrictions
+  on these values.
+
 TODO
 
 - type specific metadata runtime initialization

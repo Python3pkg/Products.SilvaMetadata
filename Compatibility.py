@@ -48,7 +48,8 @@ else:
     
     SilvaToolMap = {
         'portal_catalog':'service_catalog',
-        'portal_annotations':'service_annotations'
+        'portal_annotations':'service_annotations',
+        'portal_metadata':'service_metadata'
         }
 
     def getToolByName(ctx, service_name, default=_marker):

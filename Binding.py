@@ -9,14 +9,20 @@ from zExceptions import Unauthorized
 from Exceptinos import NotFound
 import Initialize as BindingInitialize
 from Namespace import MetadataNamespace, BindingRunTime
+import View 
 from ZopeImports import Interface, ClassSecurityInfo, InitializeClass
-from utils import StringBuffer, make_lookup
+from utils import make_lookup
 
 #################################
-# runtime bind data keys
+### runtime bind data keys
 AcquireRuntime = 'acquire_runtime'
 ObjectDelegate = 'object_delegate'
 MutationTrigger = 'mutation_trigger'
+
+#################################
+### Acquired Metadata Prefix Encoding 
+MetadataAqPrefix = 'metadataAq'
+MetadataAqVarPrefix = '_VarName_'
 
 _marker = []
 
@@ -40,7 +46,6 @@ class MetadataBindAdapter(Implicit):
 
     #################################
     ### Views
-        
     def renderForm(self, set_id=None, namespace_key=None, REQUEST=None, messages=None):
         """
         return a rendered form.
@@ -61,12 +66,12 @@ class MetadataBindAdapter(Implicit):
         set = self._getSet(set_id, namespace_key)
 
         if not set is None:
-            return getForm(self, set, REQUEST=REQUEST)
+            return View.getForm(self, set, REQUEST=REQUEST)
 
         res = []
 
         for set in self.collection.values():
-            res.append(getForm(self, set, REQUEST=REQUEST))
+            res.append(View.getForm(self, set, REQUEST=REQUEST))
             
         return '<br />\n<br />\n'.join(res)
 
@@ -78,12 +83,12 @@ class MetadataBindAdapter(Implicit):
         set = self._getSet(set_id, namespace_key)
 
         if not set is None:
-            return getView(self, set)
+            return View.getView(self, set)
 
         res = []
 
         for set in self.collection.values():
-            res.append(getView(self, set))
+            res.append(View.getView(self, set))
 
         return '<br />\n<br />\n'.join(res)
 
@@ -386,7 +391,8 @@ class MetadataBindAdapter(Implicit):
         # filter based on write guard and wheter field is readonly
         eids = [e.getId() for e in set.getElementsFor(ob, mode='edit')]
         
-        #  todo, convert this to a hash lookup maybe..
+        #todo, convert this to a hash lookup maybe..
+        #valid_key = make_lookup(eids)
         keys = data.keys()
         for k in keys:
             if k not in eids:
@@ -412,72 +418,6 @@ class MetadataBindAdapter(Implicit):
 
 InitializeClass(MetadataBindAdapter)
 
-
-def getForm(binding, set, framed=1, REQUEST=None, errors=None):
-    content = binding.content
-    elements = set.getElementsFor(content, mode='edit')
-    annotations = getToolByName(content, 'portal_annotations')
-    
-    if REQUEST is not None and errors is not None:
-        data = REQUEST.form.get(set.getId())
-    else:
-        data = binding._getData(set.getId(), acquire=0)
-
-    out = StringBuffer()
-
-    if framed:
-        print >> out, '<form method="POST" action="edit_metadata" enctype="multipart/form-data">'
-        print >> out, '<input type="hidden" name="mset_id" value="%s">'%set.getId()
-
-    print >> out, '<h2 class="metadata_header">%s</h2>'%set.getTitle()
-    
-    if errors is not None:
-        print >> out, '<table class="form_errors">'
-        for k,v in errors.items():
-            print >> out, '<tr><td>%s: %s</td</tr>'%(k,v)
-        print >> out, '</table>'
-        
-    print >> out, '<table class="metadata_form">'
-    for e in elements:
-        print >> out, "<tr><td><b>%s</b></td>"%e.title()
-        print >> out, "<tr><td>%s</td>"%e.renderEdit(data.get(e.getId(), None)
-
-    if framed:
-        print >> out, '''<tr><td colspan="2">
-        <input type="submit" value="edit %s">
-        </td></tr>'''%set.getTitle()
-    
-    print >> out, '</table>'
-    
-    if framed:
-        print >> out, '</form>'
-
-    return out.getvalue()
-
-def getView(binding, set, framed=1):
-    content = binding.content
-    elements = set.getElementsFor(content, mode='view')
-    annotations = getToolByName(content, 'portal_annotations')
-    data = annotations.getAnnotations(content, set.metadata_uri)
-    out = StringBuffer()
-
-    print >> out, '<table class="metadata_view">'
-
-    for e in elements:
-        print >> out, "<tr><td><b>%s</b></td>"%e.title()
-        print >> out, "<tr><td>%s</td></td>"%renderField(e, e.getId(), data.get(e.getId(),''))
-        
-    print >> out, '</table>'
-    return out.getvalue()
-
-def renderField(field, key, value):
-    # XXX formulator specific
-    view_method = getattr(field.widget, 'render_view', None)
-    if view_method is not None:
-        return view_method(field, key, value)
-    else: #shizer
-        return str(value)
-
 def validateData(binding, set, data, errors_dict=None):
     # XXX formulator specific
     from Products.Formulator.Errors import ValidationError
@@ -491,25 +431,21 @@ def validateData(binding, set, data, errors_dict=None):
                 raise
     return data
 
-MetadataAqPrefix = 'metadataAq'
-MetadataAqVarPrefix = '_VarName_'
-
 def encodeVariable(set, element):
     """
     after experimenting with various mechanisms for doing
     containment based metadata acquisition, using extension class
     acquisition was found to be the quickest way to do the containment
     lookup. as attributes are stored as opaque objects, the current
-    implementation decorates the object heiarchy with encoded variables
+    implementation decorates the object heirarchy with encoded variables
     corresponding to the metadata specified as acquired. the encoding
     is used to minimize namespace pollution. acquired metadata is only
     specified in this manner on the source object.
     """
-
     return MetadataAqPrefix+set.getId() + MetadataAqVarPrefix + element.getId()
-    
 
 def decodeVariable(name):
+    """ decode an encode variable name... not used """
     assert name.startswith(MetadataAqPrefix)
 
     set_id = name[len(MetadataAqPrefix):name.find(MetadataAqVarPrefix)]

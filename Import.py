@@ -131,6 +131,9 @@ class MetadataSetReader(MetaReader):
     def startField_tales(self, attrs):
         self.getElement().field_tales = []
         self.prefix = 'FieldT'
+
+    def endFieldTField_tales(self, chars):
+        self.prefix = ''
     
     def startFieldTValue(self, attrs):
         ft = DefinitionNode(attrs)
@@ -139,7 +142,21 @@ class MetadataSetReader(MetaReader):
     def endFieldTValue(self, chars):
         self.getElement().field_tales[-1].expr = chars
         
-    
+    def startField_messages(self, attrs):
+        self.getElement().field_messages = []
+        self.prefix='FieldM'
+
+    def endFieldMField_message(self, chars):
+        self.prefix = ''
+
+    def startFieldMmessage(self, attrs):
+        fm = DefinitionNode(attrs)
+        self.getElement().field_messages.append(fm)
+
+    def endFieldMmessage(self, chars):
+        self.getElement().field_messages[-1].text = chars
+
+        
 def read_set( xml ):
     parser = make_parser()
     reader = MetadataSetReader()
@@ -147,11 +164,13 @@ def read_set( xml ):
     parser.parse( xml )
     return reader.getSet()
 
-def make_set( root, set_node):
+def make_set( container, set_node ):
 
     import Configuration
     from Compatiblity import getToolByName
-    pm = getToolByName(root, 'portal_metadata')
+    from Products.Formulator.TALESField import TALESMethod
+    
+    pm = getToolByName(container, 'portal_metadata')
     
     collection = getattr(pm, Configuration.MetadataCollection)
     collection.addMetadataSet( set_node.id,
@@ -165,6 +184,31 @@ def make_set( root, set_node):
                                 e_node.field_type,
                                 e_node.index_type,
                                 e_node.index_p )
+
+        element = set.getElement(e_node.id)
+
+        # XXX formulator specific..
+        field = element.field
+        for fv in e_node.field_values:
+            k = fv.key
+            v = fv.value
+            t = fv.type
+            if t == 'int':
+                v = int(v)
+            elif t == 'float':
+                v = float(v)
+            field.values[k]=v
+
+        # some sort of formulator hack
+        if e_node.field_type == 'DateTimeField':
+            field.on_value_input_style_changed(field.get_value('input_style'))
+            
+        for ft in e_node.field_tales:
+            field.field_tales[ft.key] = TALESMethod(ft.expr)
+
+        for fm in e_node.field_messages:
+            field.message_values[fm.name]=fm.text
+                
         
 if __name__ == '__main__':
     # visual check

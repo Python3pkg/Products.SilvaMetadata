@@ -145,6 +145,9 @@ class MetadataSet(Folder):
     def getElements(self):
         return self.objectValues(spec='Metadata Element')
 
+    def getElement(self, element_id):
+        return self._getOb(element_id)
+
     def getElementsFor(self, object, mode='view'):
 
         if mode == 'view':

@@ -4,6 +4,7 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 
 from ZopeImports import *
 from Interfaces import IMetadataCollection
+from Import import read_set, make_set
 from Set import MetadataSet
 
 class MetadataCollection(Folder):
@@ -46,6 +47,11 @@ class MetadataCollection(Folder):
 
     def getMetadataSets(self):
         return self.objectValues('Metadata Set')
+
+    def importSet(self, file_handle):
+        """ import an xml definition of a metadata set"""
+        set_node = read_set(file_handle)
+        make_set(self, set_node)
             
 
 InitializeClass(MetadataCollection)
