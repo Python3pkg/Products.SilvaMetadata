@@ -1,4 +1,4 @@
-Copyright (c) 2003 Infrae. All rights reserved.
+Copyright (c) 2003-2004 Infrae. All rights reserved.
 See also LICENSE.txt
 
 Meta::
@@ -6,7 +6,7 @@ Meta::
   Valid for:  SilvaMetadata 0.7.x
   Author:     Kapil Thangavelu
   Email:      <k_vertigo@objectrealms.net>
-  CVS:        $Revision: 1.7 $
+  CVS:        $Revision: 1.8 $
 
 Silva Metadata
 
