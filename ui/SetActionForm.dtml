@@ -8,8 +8,8 @@
 
 Use Action For Set <select name="use_action_p:int">
                    <option value="1"> Yes </option>
-		   <option value="0"> No  </option>
-		   </select>
+                   <option value="0"> No  </option>
+                   </select>
 
 <br />
 <br />

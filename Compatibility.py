@@ -4,7 +4,7 @@ Provides for code compatiblity between silva and the cmf.
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
-from Acquisition import aq_inner, aq_base, aq_get
+from Acquisition import aq_get
 from OFS.ObjectManager import UNIQUE
 from Interface import Interface
 from ExtensionClass import Base
@@ -23,7 +23,7 @@ else:
     class IPortalMetadata(Interface): pass
 
 #################################
-### Action Provider and Info 
+### Action Provider and Info
 if Configuration.UsingCMF:
     from Products.CMFCore.ActionInformation import ActionInformation
     from Products.CMFCore.ActionProviderBase import ActionProviderBase
@@ -46,7 +46,7 @@ if Configuration.UsingCMF:
 
 else:
     _marker = []
-    
+
     SilvaToolMap = {
         'portal_catalog':'service_catalog',
         'portal_annotations':'service_annotations',
@@ -65,12 +65,12 @@ else:
             if default is _marker:
                 raise
             return default
-        
+
         if tool is _marker:
             raise AttributeError(silva_name)
-        
+
         return tool
-        
+
 #################################
 ### Content Type Lookup
 if Configuration.UsingCMF:
@@ -95,7 +95,7 @@ if Configuration.UsingCMF:
 else:
     def getContentType(content):
         return content.meta_type
-        
+
 #################################
 ### Permissions
 # only set if not overridden by user/developer
@@ -109,22 +109,24 @@ if Configuration.UsingCMF:
         Configuration.pMetadataManage = CMFCorePermissions.ManagePortal
 else:
     from Products.Silva import SilvaPermissions
-    if Configuration.pMetadataView is None:    
+    if Configuration.pMetadataView is None:
         Configuration.pMetadataView = SilvaPermissions.View
-    if Configuration.pMetadataEdit is None:        
+    if Configuration.pMetadataEdit is None:
         Configuration.pMetadataEdit = SilvaPermissions.ChangeSilvaContent
-    if Configuration.pMetadataManage is None:        
+    if Configuration.pMetadataManage is None:
         Configuration.pMetadataManage = SilvaPermissions.ViewManagementScreens
 
 #################################
 ### Catalog Expressions for ProxyIndex
 if Configuration.UsingCMF:
-    index_expression_template = "python: object.portal_metadata.getMetdatata(object)['%s']['%s']"
+    tem = "python: object.portal_metadata.getMetdatata(object)['%s']['%s']"
+    index_expression_template = tem
 else:
-    index_expression_template = "python: object.service_metadata.getMetadataValue(object, '%s', '%s')"
-    
+    tem = "python: object.service_metadata.getMetadataValue(object, '%s', '%s')"
+    index_expression_template = tem
+
 #################################
-### Misc    
+### Misc
 if Configuration.UsingCMF:
     from Products.CMFCore.utils import UniqueObject
 else:

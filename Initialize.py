@@ -18,7 +18,7 @@ _typeInitHandlers = {}
 def registerInitHandler(content_type, handler):
     assert callable(handler)
     global _typeInitHandlers, _default_initializer
-    
+
     if content_type is None:
         _default_initializer = handler
     else:
@@ -26,9 +26,9 @@ def registerInitHandler(content_type, handler):
 
 def getHandler(content):
     ct = getContentType(content)
-    
+
     handler = _typeInitHandlers.get(ct)
-    
+
     if handler is None and _default_initializer:
         return _default_initializer
 

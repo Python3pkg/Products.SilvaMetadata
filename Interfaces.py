@@ -20,28 +20,28 @@ class IMetadataCollection(Interface):
 
 class IOrderedContainer(Interface):
 
-    def moveObject( id, position):
+    def moveObject(id, position):
         """
         move an object with the given an id to the specified
         position.
         """
-    def moveObjectUp( id, steps=1):
+    def moveObjectUp(id, steps=1):
         """
         move an object with the given id up the ordered list
         the given number of steps
         """
 
-    def moveObjectDown( id, steps=1):
+    def moveObjectDown(id, steps=1):
         """
         move an object with the given id down the ordered list
         the given number of steps
         """
 
-    def getObjectPosition( id):
+    def getObjectPosition(id):
         """
         given an object id return its position in the ordered list
         """
-    
+
 class IMetadataSet(Interface):
     pass
 

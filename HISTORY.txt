@@ -1,6 +1,6 @@
 Copyright (c) 2003 Infrae. All rights reserved.
 See also LICENSE.txt
-$Revision: 1.4 $
+$Revision: 1.5 $
 
 SilvaMetadata changes
 
@@ -13,13 +13,13 @@ SilvaMetadata changes
    0.7.2
 
      Bugs fixed
- 
+
        - getMetadataValue was buggy and didn't really work. Fixed.
 
    0.7.1
 
      Features added
- 
+
        - Added Infrae standard release documentation.
 
      Bugs fixed

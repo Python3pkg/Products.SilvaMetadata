@@ -5,7 +5,7 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 
 from AccessControl import getSecurityManager
 import Configuration
-from Exceptions import NoContext, ConfigurationError
+from Exceptions import ConfigurationError
 from FormulatorField import getFieldFactory
 from Guard import Guard
 from Interfaces import IMetadataElement
@@ -16,12 +16,13 @@ _marker = []
 
 encoding = 'UTF-8'
 
+
 class MetadataElement(SimpleItem):
     """
     Property Bag For Element Policies, this implementation is
     formulator specific
     """
-    
+
     meta_type = 'Metadata Element'
 
     __implements__ = IMetadataElement
@@ -29,7 +30,7 @@ class MetadataElement(SimpleItem):
     #################################
     # default element policy properties
     #################################
-    
+
     read_only_p = False
     index_p = False
     acquire_p = False
@@ -39,33 +40,34 @@ class MetadataElement(SimpleItem):
 
     ## defer to formulator for now
     #use_default_p = True
-    #required_p = False    
+    #required_p = False
     #default = None
-    
+
     ## out of scope for initial impl
     #export_p = True
     #enforce_vocabulary_p = True
-    
+
     manage_options = (
         {'label':'Settings',
          'action':'manage_settings'},
-        
+
         {'label':'Guards',
          'action':'manage_guard_form'},
-        
+
         {'label':'Field',
-         'action':'field/manage_main'},        
+         'action':'field/manage_main'},
         )
-    
+
     security = ClassSecurityInfo()
 
     security.declareProtected(Configuration.pMetadataManage, 'manage_settings')
     manage_settings = DTMLFile('ui/ElementPolicyForm', globals())
-    
-    security.declareProtected(Configuration.pMetadataManage, 'manage_guard_form')    
+
+    security.declareProtected(Configuration.pMetadataManage,
+                              'manage_guard_form')
     manage_guard_form = DTMLFile('ui/ElementGuardForm', globals())
 
-    
+
     def __init__(self, id, **kw):
         self.id = id
         self.read_guard = Guard()
@@ -78,7 +80,7 @@ class MetadataElement(SimpleItem):
 
         self.read_guard.changeFromProperties(read_guard)
         self.write_guard.changeFromProperties(write_guard)
-        
+
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
 
@@ -112,7 +114,7 @@ class MetadataElement(SimpleItem):
 
         field_type = field_type or self.field_type
         index_type = index_type or self.index_type
-        
+
         if index_p is None:
             index_p = self.index_p
 
@@ -121,28 +123,28 @@ class MetadataElement(SimpleItem):
 
         if acquire_p is None:
             acquire_p = self.acquire_p
-        
+
         if field_type != self.field_type:
             try:
                 factory = getFieldFactory(field_type)
             except KeyError:
-                raise ConfigurationError("invalid field type %s"%field_type)
-            self.field = factory( self.getId() )
+                raise ConfigurationError("invalid field type %s" % field_type)
+            self.field = factory(self.getId())
             self.field.field_record = self.getMetadataSet().getId()
             self.field_type = field_type
             self.field.values['unicode']=1
-            
+
         if index_type is not None:
             if index_type in self.getMetadataSet().listIndexTypes():
                 self.index_type = index_type
             else:
-                raise ConfigurationError("invalid index type %s"%index_type)
+                raise ConfigurationError("invalid index type %s" % index_type)
 
         # need to cascacde this so we can create indexes at the set level
         self.index_p = not not index_p
         self.read_only_p = not not read_only_p
         self.acquire_p = not not acquire_p
-        
+
         # normalize the key value pairs into a mapping[k]->v
         if extra:
             constructor_args = normalize_kv_pairs(extra)
@@ -150,7 +152,7 @@ class MetadataElement(SimpleItem):
 
         if RESPONSE is not None:
             return RESPONSE.redirect('manage_workspace')
-    
+
     def validate(self, data):
         return self.field.validate(data)
 
@@ -208,7 +210,7 @@ class MetadataElement(SimpleItem):
         return the set of allowed of words
         """
         raise NotImplemented
-    
+
     ## little hack to get formulator fields to do unicode
     def get_form_encoding(self):
         return encoding
@@ -220,12 +222,9 @@ class MetadataElement(SimpleItem):
     def on_value_required_changed(self, required_value):
         if required_value and self.acquire_p:
             raise ConfigurationError("Acquired values may not be Required")
-       
+
 InitializeClass(MetadataElement)
 
 def ElementFactory(id, **kw):
 
     return MetadataElement(id, **kw)
-    
-
-        

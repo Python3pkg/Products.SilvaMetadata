@@ -18,7 +18,7 @@
 <br />
 
 <p class="form-help">
- <a href="<dtml-var "getCollection().absolute_url()">/manage_workspace"> 
+ <a href="<dtml-var "getCollection().absolute_url()">/manage_workspace">
 
    Browse Metadata Sets
 

@@ -1,8 +1,6 @@
 """
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
-from __future__ import nested_scopes
-
 import sys
 
 from AccessControl import getSecurityManager, Permissions
@@ -15,7 +13,7 @@ from Export import MetadataSetExporter
 from FormulatorField import listFields
 from Index import createIndexes
 from Interfaces import IMetadataSet, IOrderedContainer
-from Namespace import MetadataNamespace, DefaultNamespace, DefaultPrefix
+from Namespace import DefaultNamespace, DefaultPrefix
 from ZopeImports import *
 
 from Products.ProxyIndex.ProxyIndex import getIndexTypes
@@ -48,7 +46,7 @@ class OrderedContainer(Folder):
         if om: # only 1 in list if any
             return om[0]
 
-        raise NotFound('Object %s was not found'%str(id))
+        raise NotFound('Object %s was not found' % str(id))
 
     security.declareProtected(Permissions.copy_or_move, 'moveObjectUp')
     def moveObjectUp(self, id, steps=1, RESPONSE=None):
@@ -68,21 +66,21 @@ class OrderedContainer(Folder):
             self.getObjectPosition(id) + int(steps)
             )
         if RESPONSE is not None:
-            RESPONSE.redirect('manage_workspace')        
-        
+            RESPONSE.redirect('manage_workspace')
+
     security.declareProtected(Permissions.copy_or_move, 'moveObjectTop')
     def moveObjectTop(self, id, RESPONSE=None):
         """ move an object to the top """
         self.moveObject(id, 0)
         if RESPONSE is not None:
-            RESPONSE.redirect('manage_workspace')        
+            RESPONSE.redirect('manage_workspace')
 
     security.declareProtected(Permissions.copy_or_move, 'moveObjectBottom')
     def moveObjectBottom(self, id, RESPONSE=None):
         """ move an object to the bottom """
         self.moveObject(id, sys.maxint)
         if RESPONSE is not None:
-            RESPONSE.redirect('manage_workspace')        
+            RESPONSE.redirect('manage_workspace')
 
     def manage_renameObject(self, id, new_id, REQUEST=None):
         " "
@@ -92,14 +90,14 @@ class OrderedContainer(Folder):
         self.moveObject(new_id, objidx)
 
         return result
-        
-InitializeClass(OrderedContainer)  
+
+InitializeClass(OrderedContainer)
 
 class MetadataSet(OrderedContainer):
     """
     Set of Elements constituting a metadata dialect
     """
-    
+
     meta_type = 'Metadata Set'
     __implements__ = IMetadataSet
 
@@ -112,44 +110,39 @@ class MetadataSet(OrderedContainer):
 
     manage_options = (
         {'label':'Elements',
-         'action':'manage_main'},        
+         'action':'manage_main'},
         {'label':'Settings',
-         'action':'manage_settings'},        
+         'action':'manage_settings'},
         {'label':'Action',
          'action':'manage_action'},
         )
 
     security.declareProtected(Configuration.pMetadataManage, 'manage_settings')
     manage_settings = DTMLFile('ui/SetSettingsForm', globals())
-    
-    security.declareProtected(Configuration.pMetadataManage, 'manage_action')    
+
+    security.declareProtected(Configuration.pMetadataManage, 'manage_action')
     manage_action  = DTMLFile('ui/SetActionForm', globals())
 
-    security.declareProtected(Configuration.pMetadataManage, 'addElementForm')    
+    security.declareProtected(Configuration.pMetadataManage, 'addElementForm')
     addElementForm  = DTMLFile('ui/ElementAddForm', globals())
-    
+
     manage_main = DTMLFile('ui/SetContainerView', globals())
-    
+
     initialized = None
     use_action_p = None
     action = None
     title = ''
     description = ''
-    
-    def __init__(self,
-                 id,
-                 title='',
-                 description='',                 
-                 metadata_prefix = DefaultPrefix,
-                 metadata_uri = DefaultNamespace
-                 ):
-        
+
+    def __init__(self, id, title='', description='',
+                 metadata_prefix=DefaultPrefix, metadata_uri=DefaultNamespace):
+
         self.id = id
         self.initialized = None
         self.use_action_p = None
         self.title = ''
         self.description = ''
-        
+
         # we can't do any verification till after we have a ctx
         self.metadata_uri = metadata_uri
         self.metadata_prefix = metadata_prefix
@@ -173,13 +166,13 @@ class MetadataSet(OrderedContainer):
         element = ElementFactory(id)
         self._setObject(id, element)
         element = self._getOb(id)
-        
+
         element.editElementPolicy(field_type = field_type,
                                   index_type = index_type,
                                   index_p = index_p,
                                   read_only_p = read_only_p,
                                   acquire_p = acquire_p)
-        
+
         if RESPONSE is not None:
             return RESPONSE.redirect('manage_main')
 
@@ -222,15 +215,15 @@ class MetadataSet(OrderedContainer):
 
     def exportXML(self, RESPONSE=None):
         """ export an xml serialized version of the policy """
-        
+
         exporter = MetadataSetExporter(self)
 
         if RESPONSE is not None:
             RESPONSE.setHeader('Content-Type', 'text/xml')
             RESPONSE.setHeader('Content-Disposition',
-                               'attachment; filename=%s.xml' % self.getId() )
+                               'attachment; filename=%s.xml' % self.getId())
         return exporter()
-        
+
     def setNamespace(self, ns_uri, ns_prefix):
         verifyNamespace(self, ns_uri, ns_prefix)
         self.metadata_prefix = ns_prefix
@@ -256,12 +249,12 @@ class MetadataSet(OrderedContainer):
         """ initialize the metadata set """
         if self.isInitialized():
             return None
-        
-        # install indexes        
+
+        # install indexes
         indexables = [e for e in self.getElements() if e.index_p]
         catalog = getToolByName(self, 'portal_catalog')
         createIndexes(catalog, indexables)
-        
+
         self.initialized = 1
 
         if RESPONSE is not None:
@@ -284,7 +277,7 @@ class MetadataSet(OrderedContainer):
             guard = 'write_guard'
 
         sm = getSecurityManager()
-        
+
         res = []
         for e in self.getElements():
             if getattr(e, guard).check(sm, e, object):
@@ -306,23 +299,23 @@ class MetadataSet(OrderedContainer):
         return listFields()
 
     def listIndexTypes(self):
-        return getIndexTypes( getToolByName(self, 'portal_catalog') )
+        return getIndexTypes(getToolByName(self, 'portal_catalog'))
 
     def manage_afterAdd(self, item, container):
         # verify our namespace
-        self.setNamespace(self.metadata_uri, self.metadata_prefix)        
-    
+        self.setNamespace(self.metadata_uri, self.metadata_prefix)
+
 InitializeClass(MetadataSet)
 
 def verifyNamespace(ctx, uri, prefix):
 
     sid = ctx.getId()
     container = aq_parent(aq_inner(ctx))
-    
+
     for s in container.getMetadataSets():
         if s.getId() == sid:
             continue
         if s.metadata_uri == uri:
-            raise NamespaceConflict("%s uri is already in use"%uri)
+            raise NamespaceConflict("%s uri is already in use" % uri)
         elif s.metadata_prefix == prefix:
-            raise NamespaceConflict("%s prefix is already in use"%prefix)
+            raise NamespaceConflict("%s prefix is already in use" % prefix)

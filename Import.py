@@ -18,13 +18,14 @@ class DefinitionNode(UserDict):
         if v is _marker:
             return self.data[name]
         return v
-    
+
     def __setattr__(self, name, value):
         if name in DefinitionNode.reserved:
             self.__dict__[name]=value
         else:
             self.data[name]=value
-            
+
+
 class MetaReader(ContentHandler):
 
     def __init__(self):
@@ -32,21 +33,21 @@ class MetaReader(ContentHandler):
         self.buf = []
         self.prefix = ''
         self.stack = []
-        
+
     def startElement(self, element_name, attrs):
         name = element_name.lower()
-        if self.prefix: name = '%s%s'%(self.prefix, name.capitalize())
+        if self.prefix: name = '%s%s' % (self.prefix, name.capitalize())
         else: name = name.capitalize()
 
-        method = getattr(self, 'start%s'%name, None)
+        method = getattr(self, 'start%s' % name, None)
         #print name, method
-        
+
         # get rid of unicode...
         d = {}
         for k, v in attrs.items():
             d[str(k)]= str(v)
-        
-        if method: 
+
+        if method:
             apply(method, (d,))
 
     def endElement(self, element_name):
@@ -54,20 +55,21 @@ class MetaReader(ContentHandler):
         self.buf = []
 
         name = element_name.lower()
-        
-        if self.prefix: name = '%s%s'%(self.prefix, name.capitalize())
+
+        if self.prefix: name = '%s%s' % (self.prefix, name.capitalize())
         else: name = name.capitalize()
-        method = getattr(self, 'end%s'%name, None)
+        method = getattr(self, 'end%s' % name, None)
         #print 'end', name, method
-        
-        if method: 
+
+        if method:
             apply(method, (chars,))
-         
+
     def characters(self, chars):
         self.buf.append(chars)
-        
+
+
 class MetadataSetReader(MetaReader):
-    
+
     def getSet(self):
         return self.set
 
@@ -80,14 +82,14 @@ class MetadataSetReader(MetaReader):
     def startMetadata_set(self, attrs):
         self.set = s = DefinitionNode(attrs)
         s.setdefault('elements', [])
-        
+
     def startMetadata_element(self, attrs):
         element = DefinitionNode(attrs)
         self.set.elements.append(element)
 
     def getElement(self):
         return self.set.elements[-1]
-    
+
     def endIndex_type(self, chars):
         self.getElement().index_type = chars
 
@@ -106,7 +108,7 @@ class MetadataSetReader(MetaReader):
     def startRead_guard(self, attrs):
         self.prefix = 'Read'
         self.getElement().read_guard = DefinitionNode()
-        
+
     def endReadRead_guard(self, chars):
         self.prefix = ''
 
@@ -134,7 +136,7 @@ class MetadataSetReader(MetaReader):
 
     def endWriteExpr(self, chars):
         self.getElement().read_guard.expr = chars
-    
+
     def startField_values(self, attrs):
         self.getElement().field_values = []
         self.prefix = 'FieldV'
@@ -152,14 +154,14 @@ class MetadataSetReader(MetaReader):
 
     def endFieldTField_tales(self, chars):
         self.prefix = ''
-    
+
     def startFieldTValue(self, attrs):
         ft = DefinitionNode(attrs)
         self.getElement().field_tales.append(ft)
 
     def endFieldTValue(self, chars):
         self.getElement().field_tales[-1].expr = chars
-        
+
     def startField_messages(self, attrs):
         self.getElement().field_messages = []
         self.prefix='FieldM'
@@ -170,7 +172,7 @@ class MetadataSetReader(MetaReader):
     def startFieldMmessage(self, attrs):
         fm = DefinitionNode(attrs)
         self.getElement().field_messages.append(fm)
-    
+
     def endFieldMmessage(self, chars):
         self.getElement().field_messages[-1].text = chars
 
@@ -188,15 +190,16 @@ class MetadataSetReader(MetaReader):
     def endIndexArgValue(self, chars):
         self.getElement().index_args[-1].value = chars
 
-        
-def read_set( xml ):
+
+def read_set(xml):
     parser = make_parser()
     reader = MetadataSetReader()
     parser.setContentHandler(reader)
-    parser.parse( xml )
+    parser.parse(xml)
     return reader.getSet()
 
-def make_set( container, set_node ):
+
+def make_set(container, set_node):
 
     import Configuration
     from Compatibility import getToolByName
@@ -207,18 +210,18 @@ def make_set( container, set_node ):
         set_node['title']=''
     if not set_node.has_key('description'):
         set_node['description']=''
-    
+
     pm = getToolByName(container, 'portal_metadata')
-    
+
     collection = getattr(pm, Configuration.MetadataCollection)
-    collection.addMetadataSet( set_node.id,
-                               set_node.ns_prefix,
-                               set_node.ns_uri,
-                               set_node.title,
-                               set_node.description )
-    
+    collection.addMetadataSet(set_node.id,
+                              set_node.ns_prefix,
+                              set_node.ns_uri,
+                              set_node.title,
+                              set_node.description)
+
     set = pm.getMetadataSet(set_node.id)
-    
+
     for e_node in set_node.elements:
 
         # compatiblity.. ick
@@ -226,16 +229,16 @@ def make_set( container, set_node ):
             e_node['acquire_p']=0
         if not e_node.has_key('read_only_p'):
             e_node['read_only_p']=0
-        
-        set.addMetadataElement( e_node.id,
-                                e_node.field_type,
-                                e_node.index_type,
-                                e_node.index_p,
-                                e_node.acquire_p,
-                                e_node.read_only_p)
+
+        set.addMetadataElement(e_node.id,
+                               e_node.field_type,
+                               e_node.index_type,
+                               e_node.index_p,
+                               e_node.acquire_p,
+                               e_node.read_only_p)
 
         element = set.getElement(e_node.id)
-        
+
         field = element.field
         for fv in e_node.field_values:
             k = fv.key
@@ -250,13 +253,13 @@ def make_set( container, set_node ):
                 # the originial version of formulator xml support
                 # did an eval here, which is not an option
                 v = filter(None, [vi.strip() for vi in v[1:-1].split(',')])
-                
+
             field.values[k]=v
 
         # some sort of formulator hack
         if e_node.field_type == 'DateTimeField':
             field.on_value_input_style_changed(field.get_value('input_style'))
-            
+
         for ft in e_node.field_tales:
             if ft.expr:
                 field.tales[ft.key] = TALESMethod(ft.expr)
@@ -276,13 +279,13 @@ def import_metadata(content, content_node):
     minimal import system for object metadata
 
     """
-    
-    from Compatibility import getToolByName, getContentType
-    
+
+    from Compatibility import getToolByName
+
     metadata_node = metadata_node_search(content_node)
     metadata_tool = getToolByName(content, 'portal_metadata')
-    
-    if not metadata_node: 
+
+    if not metadata_node:
         return
 
     metadata = {}
@@ -294,7 +297,7 @@ def import_metadata(content, content_node):
         # verify set exists
         set = metadata_tool.getMetadataSetFor(namespace_attr.value)
         metadata[namespace_attr.value] = {}
-    
+
     for child in metadata_node.childNodes:
         if not child.namespaceURI:
             continue
@@ -308,7 +311,7 @@ def import_metadata(content, content_node):
         for element_name in element_names:
             if not binding.isEditable(set_name, element_name):
                 del v[element_name]
-        
+
         # Set data
         errors = binding._setData(namespace_key=k,
                                   data=v,
@@ -317,20 +320,21 @@ def import_metadata(content, content_node):
         errors = None # discard errors for now
         if errors:
             raise ValidationError(
-                "%s %s"%(
+                "%s %s" % (
                     str(content.getPhysicalPath()),
                     str(errors)
                     )
                 )
 
-def metadata_node_search( content_node ):
+def metadata_node_search(content_node):
 
     for child_node in content_node.childNodes:
         if child_node.nodeName == 'metadata':
             return child_node
 
     return None
-        
+
+
 if __name__ == '__main__':
     # visual check
     import sys, pprint

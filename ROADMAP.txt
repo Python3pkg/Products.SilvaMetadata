@@ -1,12 +1,12 @@
 Copyright (c) 2003 Infrae. All rights reserved.
 See also LICENSE.txt
- 
+
 Meta:
- 
+
   Valid for:  SilvaMetadata 0.7.x
   Author:     Martijn Faassen
   Email:      <faassen@infrae.com>
-  CVS:        $Revision: 1.2 $
+  CVS:        $Revision: 1.3 $
 
 ================
 Metadata roadmap
@@ -134,7 +134,7 @@ Integration of different schema systems
 
 Through repeated refactorings, SilvaMetadata should grow to its
 essential core and at the same time increase its flexibility. It should
-allow for the plugging in of different schema/form systems, such as 
+allow for the plugging in of different schema/form systems, such as
 Archetypes or Zope 3 Schema/Forms.
 
 Of course these systems differ in their capabilities. Some take more

@@ -18,6 +18,10 @@ from Products.SilvaMetadata.MetadataTool import MetadataTool
 
 SET_ID = 'ut_md'
 
+class Configuration:
+    def __init__(self):
+        print "here"
+
 def setupTools(root):
     root._setObject('portal_types', TypesTool())
     root._setObject('portal_annotations', AnnotationTool())

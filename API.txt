@@ -6,7 +6,7 @@ Binding API Usage Examples
    # silva accessor
    metadata_system = content.service_metadata
 
-   # get a metadata binding   
+   # get a metadata binding
    binding = metadata_system.getMetadata(content)
 
    ## definition introspection
@@ -19,7 +19,7 @@ Binding API Usage Examples
    element_names = binding.getElementNames(set_name)
 
    element_name = element_names.pop()
- 
+
    # determine if an element is editable by the current user
    is_editable = binding.isEditable(set_name, element_name)
 
@@ -39,7 +39,7 @@ Binding API Usage Examples
 
    # render a form widget for an element
    binding.renderElementEdit('dublincore', 'subject')
-   
+
    # render a view widget for an element
    binding.renderElementView('dublincore', 'subject')
 
@@ -73,15 +73,15 @@ Binding API Usage Examples
 
    # set values from the request
    binding.setValuesFromRequest(REQUEST)
- 
+
    # set values from dictionary and reindex modified data
    binding.setValues('dublincore', data, reindex=1)
 
 
    ## advanced runtime
    # 1. delegation on object level
-   # 2. mutation events 
-   
+   # 2. mutation events
+
    # the binding will now get its metadata from the object returned by invoking
    # delegator method.
    binding.setObjectDelegate(DublinCore, 'Subject', delegator='getRealObject')

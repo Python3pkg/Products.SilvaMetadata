@@ -1,14 +1,14 @@
 ##############################################################################
 #
 # Copyright (c) 2001 Zope Corporation and Contributors. All Rights Reserved.
-# 
+#
 # This software is subject to the provisions of the Zope Public License,
 # Version 2.0 (ZPL).  A copy of the ZPL should accompany this distribution.
 # THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
 # WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
 # FOR A PARTICULAR PURPOSE
-# 
+#
 ##############################################################################
 """ Guard conditions in a web-configurable workflow.
 
@@ -16,15 +16,15 @@ Changes to file as per ZPL
 - 4/11/03 - permission import from accesscontrol in absense of cmf
 - 4/11/03 - change expression context creation
 - 4/11/03 - misc import cleanups
+- 9/15/03 - import cleanups
 
 """
 
 from string import split, strip, join
-from cgi import escape
 
 from AccessControl import ClassSecurityInfo
 from Acquisition import Explicit
-from Globals import DTMLFile, Persistent, InitializeClass
+from Globals import Persistent, InitializeClass
 
 from Configuration import pMetadataManage
 from Expression import Expression, createExprContext

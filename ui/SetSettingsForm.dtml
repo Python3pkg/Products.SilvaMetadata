@@ -9,7 +9,7 @@
 
 <form action="editSettings" method="POST">
 
-<table border="1"> 
+<table border="1">
 
 <tr>
    <td> Title </td>
@@ -25,7 +25,7 @@
    <td> Namespace URI </td>
    <td> <input name="ns_uri" type="text" size="60" value="<dtml-var metadata_uri>" /> </td>
 </tr>
-   
+
 <tr>
    <td> Namespace Prefix </td>
    <td> <input name="ns_prefix" type="text" value="<dtml-var metadata_prefix>" /></td>
@@ -63,14 +63,13 @@
 <p class="form-help">
  <font color="red">
  making a set editable allows for modification of the set
- at the risk data loss. 
+ at the risk data loss.
  <font>
  <form action="setInitialized" method="GET">
   <input type="hidden" value="0" name="initialization_flag:int" />
   <input type="submit" value="make editable" />
  </form>
 </dtml-if>
- 
 
 
 <dtml-var manage_page_footer>

@@ -14,9 +14,8 @@ from Export import ObjectMetadataExporter
 from Index import getIndexNamesFor
 import Initialize as BindingInitialize
 from Namespace import MetadataNamespace, BindingRunTime
-from ZopeImports import Interface, ClassSecurityInfo, InitializeClass, getToolByName
-from ZopeImports import PersistentMapping
-from utils import make_lookup
+from ZopeImports import Interface, ClassSecurityInfo, InitializeClass
+from ZopeImports import PersistentMapping, getToolByName
 
 #################################
 ### runtime bind data keys
@@ -25,11 +24,12 @@ ObjectDelegate = 'object_delegate'
 MutationTrigger = 'mutation_trigger'
 
 #################################
-### Acquired Metadata Prefix Encoding 
+### Acquired Metadata Prefix Encoding
 MetadataAqPrefix = 'metadataAq'
 MetadataAqVarPrefix = '_VarName_'
 
 _marker = []
+
 
 class Data(UserDict):
     """
@@ -38,7 +38,8 @@ class Data(UserDict):
     """
     __roles__ = None
     __allow_access_to_unprotected_subobjects__ = 1
-    
+
+
 class MetadataBindAdapter(Implicit):
 
     security = ClassSecurityInfo()
@@ -48,7 +49,7 @@ class MetadataBindAdapter(Implicit):
         self.content = content
 
         if isinstance(collection, types.ListType):
-            self.ordered_set_names = []            
+            self.ordered_set_names = []
             d = {}
             for s in collection:
                 d[s.getId()]=s
@@ -59,7 +60,7 @@ class MetadataBindAdapter(Implicit):
             self.ordered_set_names = collection.keys()
         else:
             raise BindingError ("metadata sets in wrong format")
-        
+
         self.collection = collection
         self.cached_values = {}
 
@@ -89,8 +90,8 @@ class MetadataBindAdapter(Implicit):
     def renderElementEdit(self, set_id, element_id):
         element = self.getElement(set_id, element_id)
         data = self._getData(set_id, acquire=0)
-        return element.renderEdit(data.get(element_id, None))        
-    
+        return element.renderEdit(data.get(element_id, None))
+
     #################################
     ### Validation
 
@@ -109,12 +110,12 @@ class MetadataBindAdapter(Implicit):
         data = REQUEST.form.get(set_id)
 
         if data is None:
-            raise NotFound("Metadata for %s/%s not found"%(
+            raise NotFound("Metadata for %s/%s not found" % (
                 str(set_id),
                 str(namespace_key)
                 )
                 )
-        
+
         return self.validate(set_id, data.copy(), errors)
 
     #################################
@@ -124,12 +125,12 @@ class MetadataBindAdapter(Implicit):
     def setValues(self, set_id, data, reindex=0):
         """
         data should be a mutable dictionary
-        
+
         returns a dictionary of errors if any, or none otherwise
         """
         errors = {}
         data = self.validate(set_id, data, errors)
-        
+
         if errors:
             return errors
 
@@ -146,7 +147,7 @@ class MetadataBindAdapter(Implicit):
         data_from_request = REQUEST.form.get(set.getId(), {})
 
         # We assume that setValuesFromRequest is called for TTW code,
-        # i.e. a form submit. This means, we can assume that all fields 
+        # i.e. a form submit. This means, we can assume that all fields
         # have been filled and submitted, although this does not necessarily
         # mean, all fields are available in the REQUEST - e.g. for checkboxes
         # turned off... ugh.
@@ -210,7 +211,7 @@ class MetadataBindAdapter(Implicit):
         # if mode is not specified this returns all elements of a set.
         # not all elements visible will be viewable/editable
         set = self.collection[set_id]
-        
+
         if mode is not None:
             elements = set.getElementsFor(self.content, mode=mode)
         else:
@@ -222,7 +223,7 @@ class MetadataBindAdapter(Implicit):
     def isViewable(self, set_id, element_id):
         """
         is the element viewable for the content object
-        """        
+        """
         element = self.collection[set_id].getElement(element_id)
         ob = self._getAnnotatableObject()
         return element.isViewable(ob)
@@ -231,13 +232,13 @@ class MetadataBindAdapter(Implicit):
     def isEditable(self, set_id, element_id):
         """
         is the element editable for the content object
-        """        
+        """
         element = self.collection[set_id].getElement(element_id)
         ob = self._getAnnotatableObject()
         return element.isEditable(ob)
 
 
-    security.declarePublic('listAcquired')        
+    security.declarePublic('listAcquired')
     def listAcquired(self):
         """
         compute and return a list of (set_id, element_id)
@@ -246,7 +247,7 @@ class MetadataBindAdapter(Implicit):
         """
         res = []
         ob = self._getAnnotatableObject()
-        
+
         for s in self.collection.values():
             sid = s.getId()
             data = self._getData(set_id = sid, acquire=0)
@@ -262,7 +263,7 @@ class MetadataBindAdapter(Implicit):
                 # filter out any empty metadata fields
                 # defined on ourselves to acquire
                 if not hasattr(aq_base(ob), name):
-                    res.append( (sid, eid) )
+                    res.append((sid, eid))
 
         return res
 
@@ -293,9 +294,9 @@ class MetadataBindAdapter(Implicit):
                              acquire=acquire,
                              no_defaults=no_defaults)
         if element_id is not None:
-            return data.get(element_id) 
+            return data.get(element_id)
         return data
-    
+
     def __getitem__(self, key):
         if self.collection.has_key(key):
             return self._getData(key)
@@ -314,8 +315,9 @@ class MetadataBindAdapter(Implicit):
         an object, we return the default metadata values
         associated (not a good idea).
         """
-        assert getattr(self.content, method_name), "invalid object delegate %s"%method_name
-        
+        assert getattr(self.content, method_name), \
+                       "invalid object delegate %s" % method_name
+
         bind_data = self._getBindData()
         bind_data[ObjectDelegate]=method_name
 
@@ -332,7 +334,7 @@ class MetadataBindAdapter(Implicit):
             pass
         # invalidate cache
         self.cached_values = {}
-        
+
         return None
 
     security.declarePublic('setMutationTrigger')
@@ -342,10 +344,12 @@ class MetadataBindAdapter(Implicit):
         invocation. major use case.. cache invalidation on
         metadata setting.
         """
-        assert getattr(self._getAnnotatableObject(), method_name), "invalid mutation trigger %s"%method_name        
+        assert getattr(self._getAnnotatableObject(), method_name), \
+                       "invalid mutation trigger %s" % method_name
 
         bind_data = self._getBindData()
-        bind_data.setdefault(MutationTrigger, {}).setdefault(set_id, {})[element_id]=method_name
+        tr = bind_data.setdefault(MutationTrigger, {}).setdefault(set_id, {})
+        tr[element_id]=method_name
 
     security.declarePublic('clearMutationTrigger')
     def clearMutationTrigger(self, set_id, element_id=None):
@@ -370,7 +374,7 @@ class MetadataBindAdapter(Implicit):
             except KeyError:
                 pass
         return None
-        
+
     #################################
     ### Private
 
@@ -380,12 +384,13 @@ class MetadataBindAdapter(Implicit):
         elif namespace_key:
             return self._getSetByKey(namespace_key)
         else:
-            raise NotFound("metadata set not found %s %s"%(set_id, namespace_key))
+            raise NotFound("metadata set not found %s %s"
+                           % (set_id, namespace_key))
 
     def _getBindData(self):
         annotations = getToolByName(self.content, 'portal_annotations')
-        metadata    = annotations.getAnnotations(self.content, MetadataNamespace)
-        bind_data   = metadata.get(BindingRunTime)
+        metadata = annotations.getAnnotations(self.content, MetadataNamespace)
+        bind_data = metadata.get(BindingRunTime)
 
         if bind_data is None:
             init_handler = BindingInitialize.getHandler(self.content)
@@ -398,10 +403,10 @@ class MetadataBindAdapter(Implicit):
     def _getMutationTriggers(self, set_id):
         bind_data = self._getBindData()
         return bind_data.get(MutationTrigger, {}).get(set_id, [])
-    
+
     def _getAnnotatableObject(self):
         # check for object delegation
-        bind_data = self._getBindData()        
+        bind_data = self._getBindData()
         object_delegate = bind_data.get(ObjectDelegate)
 
         # we want to use the content in its original acquisiton
@@ -409,8 +414,8 @@ class MetadataBindAdapter(Implicit):
         # it gets wrapped.. content.__of__(binding).__of__(content)
         # so we remove the outer two wrappers to regain the original
         # context
-        content = aq_parent( aq_parent( self.content ) )
-        
+        content = aq_parent(aq_parent(self.content))
+
         if object_delegate is not None:
             od = getattr(self.content, object_delegate)
             ob = od()
@@ -418,7 +423,7 @@ class MetadataBindAdapter(Implicit):
             ob = content
 
         return ob
-        
+
     def _getData(self, set_id=None, namespace_key=None,
                  acquire=1, no_defaults=0):
         """
@@ -430,7 +435,7 @@ class MetadataBindAdapter(Implicit):
         set = self._getSet(set_id, namespace_key)
 
         # cache lookup
-        data = self.cached_values.get( (acquire, set.getId()) )
+        data = self.cached_values.get((acquire, set.getId()))
         if data is not None:
             return data
 
@@ -440,7 +445,7 @@ class MetadataBindAdapter(Implicit):
         # get the annotation data
         annotations = getToolByName(ob, 'portal_annotations')
         metadata = annotations.getAnnotations(ob, MetadataNamespace)
-        
+
         saved_data = metadata.get(set.metadata_uri)
         data = Data()
 
@@ -451,8 +456,8 @@ class MetadataBindAdapter(Implicit):
             pass
         elif saved_data is None:
             # use the sets defaults
-            data.update(set.getDefaults( content=ob ))
-            
+            data.update(set.getDefaults(content=ob))
+
             # record which elements we used default values for
             using_defaults = element_ids
         else:
@@ -465,7 +470,7 @@ class MetadataBindAdapter(Implicit):
                 for eid in element_ids:
                     if data.has_key(eid):
                         continue
-                    data[eid] = set.getElement(eid).getDefault( content=ob)
+                    data[eid] = set.getElement(eid).getDefault(content=ob)
                     using_defaults.append(eid)
 
         # cache metadata
@@ -492,7 +497,7 @@ class MetadataBindAdapter(Implicit):
     def _setData(self, data, set_id=None, namespace_key=None, reindex=0):
 
         set = self._getSet(set_id, namespace_key)
-        set_id = set.getId()        
+        set_id = set.getId()
 
         # check for delegates
         ob = self._getAnnotatableObject()
@@ -502,14 +507,14 @@ class MetadataBindAdapter(Implicit):
         all_eids = [e.getId() for e in all_elements]
         elements = [e for e in set.getElementsFor(ob, mode='edit')]
         eids = [e.getId() for e in elements]
-        
+
         keys = data.keys()
 
         for k in keys:
             if k in eids:
                 continue
             elif k in all_eids:
-                raise Unauthorized('Not Allowed to Edit %s in this context'%k)
+                raise Unauthorized('Not Allowed to Edit %s in this context' % k)
             else:
                 del data[k]
 
@@ -519,7 +524,7 @@ class MetadataBindAdapter(Implicit):
         if triggers:
             for k in keys:
                 if triggers.has_key(k):
-                    try: 
+                    try:
                         getattr(ob, triggers[k])()
                     except: # gulp
                         pass
@@ -528,7 +533,7 @@ class MetadataBindAdapter(Implicit):
         update_list = [e.getId() for e in set.getElements() \
                                  if  e.isAcquireable() and e.getId() in keys]
         sid = set.getId()
-        
+
         for eid in update_list:
             aqelname = encodeElement(sid, eid)
             value = data[eid]
@@ -554,10 +559,10 @@ class MetadataBindAdapter(Implicit):
 
         # invalidate the cache version of the set if any
         # we do a check for cached acquired/non-acquired
-        if self.cached_values.has_key( (0, set_id) ):
-            del self.cached_values[ (0, set_id) ]
-        if self.cached_values.has_key( (1, set_id) ):
-            del self.cached_values[ (1, set_id) ]
+        if self.cached_values.has_key((0, set_id)):
+            del self.cached_values[(0, set_id)]
+        if self.cached_values.has_key((1, set_id)):
+            del self.cached_values[(1, set_id)]
 
         # mark both the content and the annotatable object as changed so
         # on txn commit bindings in other objectspaces get invalidated as well
@@ -567,13 +572,13 @@ class MetadataBindAdapter(Implicit):
         # reindex object
         if reindex:
             reindex_elements = [
-                e for e in elements 
-                if (e.getId() in keys) and e.index_p]            
+                e for e in elements
+                if (e.getId() in keys) and e.index_p]
             idx_names = getIndexNamesFor(reindex_elements)
             catalog = getToolByName(ob, 'portal_catalog')
             # cmf compatibility hack
             ZCatalog.catalog_object(catalog, ob, idxs=idx_names)
-    
+
     def _getSetByKey(self, namespace_key):
         for s in self.collection.values():
             if s.metadata_uri == namespace_key:
@@ -584,10 +589,9 @@ InitializeClass(MetadataBindAdapter)
 
 def validateData(binding, set, data, errors_dict=None):
     # XXX completely formulator specific
-    from Products.Formulator.Form import BasicForm
-    from Products.Formulator.Errors import ValidationError, FormValidationError
+    from Products.Formulator.Errors import ValidationError
 
-    # Filter out elements not in the data dict, provided the element is 
+    # Filter out elements not in the data dict, provided the element is
     # not required or the binding already has a value for this element.
     for e in set.getElements():
         eid = e.getId()
@@ -608,7 +612,7 @@ def validateData(binding, set, data, errors_dict=None):
 
             if not data.has_key(sfkey) and (not is_required or has_a_value):
                 continue
-        
+
         elif not data.has_key(eid) and (not is_required or has_a_value):
             continue
 
@@ -620,7 +624,6 @@ def validateData(binding, set, data, errors_dict=None):
             else:
                 raise
     return data
-    
 
 def encodeElement(set_id, element_id):
     """
@@ -643,5 +646,4 @@ def decodeVariable(name):
     e_id = name[name.find(MetadataAqVarPrefix)+len(MetadataAqVarPrefix):]
 
     return set_id, e_id
-    
-    
+

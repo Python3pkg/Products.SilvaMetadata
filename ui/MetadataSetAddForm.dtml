@@ -2,7 +2,7 @@
 
 <dtml-var "manage_form_title(this(), _,
            form_title='Add Metadata Set',
-	   )">
+           )">
 
 <p class="form-help">
 A Metadata Set represents a aggregation of metadata fields. some

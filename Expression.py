@@ -9,6 +9,7 @@ from Persistence import Persistent
 from Products.PageTemplates.Expressions import getEngine
 from Products.PageTemplates.Expressions import SecureModuleImporter
 
+
 class Expression (Persistent):
     text = ''
     _v_compiled = None
@@ -40,7 +41,7 @@ def createExprContext(element, ob):
         'container':    aq_parent(aq_inner(ob)),
         'nothing':      None,
         'element':      element,
-        'request':      getattr( ob, 'REQUEST', None ),
+        'request':      getattr(ob, 'REQUEST', None),
         'modules':      SecureModuleImporter,
         'user':         getSecurityManager().getUser(),
         }

@@ -2,7 +2,7 @@
 
 <dtml-var "manage_form_title(this(), _,
            form_title='Add Metadata Element',
-	   )">
+           )">
 
 <p class="form-help">
 An Element
@@ -19,10 +19,10 @@ An Element
    <tr><td>Field Type</td>
        <td>
            <select name="field_type">
-	   <dtml-in listFieldTypes prefix="ft">
-	   <option value="<dtml-var ft_item>"><dtml-var ft_item></option>
-	   </dtml-in>
-	   </select>
+           <dtml-in listFieldTypes prefix="ft">
+           <option value="<dtml-var ft_item>"><dtml-var ft_item></option>
+           </dtml-in>
+           </select>
        </td>
        </tr>
 
@@ -31,8 +31,8 @@ An Element
        <td>
            <select name="required_p:int">
            <option value="1">Yes</option>
-           <option value="0">No</option>         
-	   </select>
+           <option value="0">No</option>
+           </select>
        </td>
        </tr>
    </dtml-comment>
@@ -41,17 +41,17 @@ An Element
        <td>
            <select name="index_p:int">
            <option value="1">Yes</option>
-           <option value="0">No</option>         
-	   </select>
+           <option value="0">No</option>
+           </select>
        </td>
        </tr>
 
    <tr><td>Index Type</td>
        <td>
            <select name="index_type">
-	   <dtml-in listIndexTypes prefix="idx">
-	    <option value="<dtml-var idx_item>"><dtml-var idx_item></option>
-  	   </dtml-in>
+           <dtml-in listIndexTypes prefix="idx">
+            <option value="<dtml-var idx_item>"><dtml-var idx_item></option>
+           </dtml-in>
        </tr>
 
    <dtml-comment>
@@ -59,8 +59,8 @@ An Element
        <td>
            <select name="use_default_p:int">
            <option value="1">Yes</option>
-           <option value="0">No</option>         
-	   </select>
+           <option value="0">No</option>
+           </select>
        </td>
        </tr>
 

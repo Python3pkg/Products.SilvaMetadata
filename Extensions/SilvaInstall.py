@@ -6,7 +6,7 @@ def install(self):
     out = StringBuffer()
 
     print >> out, "Installing Silva Metadata Service"
-    
+
     silva_id = 'service_metadata'
     root = self.get_root()
     ob = MetadataTool()

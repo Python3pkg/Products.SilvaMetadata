@@ -3,7 +3,7 @@
 
 <dtml-var "manage_form_title(this(), _,
            form_title='Edit Metadata Element',
-	   )">
+           )">
 
 <p class="form-help">
 An Element : <dtml-var id>
@@ -20,10 +20,10 @@ An Element : <dtml-var id>
    <tr><td class="form-help">Field Type</td>
        <td>
            <select name="field_type">
-	   <dtml-in listFieldTypes prefix="ft">
-	   <option value="<dtml-var ft_item>" <dtml-if "field_type == ft_item">selected</dtml-if>><dtml-var ft_item></option>
-	   </dtml-in>
-	   </select>
+           <dtml-in listFieldTypes prefix="ft">
+           <option value="<dtml-var ft_item>" <dtml-if "field_type == ft_item">selected</dtml-if>><dtml-var ft_item></option>
+           </dtml-in>
+           </select>
        </td>
        </tr>
 
@@ -32,8 +32,8 @@ An Element : <dtml-var id>
        <td>
            <select name="required_p:int">
            <option value="1" <dtml-if "required_p">selected</dtml-if>>Yes</option>
-           <option value="0" <dtml-if "not required_p">selected</dtml-if>>No</option>         
-	   </select>
+           <option value="0" <dtml-if "not required_p">selected</dtml-if>>No</option>
+           </select>
        </td>
        </tr>
    </dtml-comment>
@@ -42,8 +42,8 @@ An Element : <dtml-var id>
        <td>
            <select name="index_p:int">
            <option value="1" <dtml-if "index_p">selected</dtml-if>>Yes</option>
-           <option value="0" <dtml-if "not index_p">selected</dtml-if>>No</option>         
-	   </select>
+           <option value="0" <dtml-if "not index_p">selected</dtml-if>>No</option>
+           </select>
        </td>
        </tr>
 
@@ -51,8 +51,8 @@ An Element : <dtml-var id>
        <td>
            <select name="acquire_p:int">
            <option value="1" <dtml-if "acquire_p">selected</dtml-if>>Yes</option>
-           <option value="0" <dtml-if "not acquire_p">selected</dtml-if>>No</option>         
-	   </select>
+           <option value="0" <dtml-if "not acquire_p">selected</dtml-if>>No</option>
+           </select>
        </td>
        </tr>
 
@@ -60,21 +60,21 @@ An Element : <dtml-var id>
        <td>
            <select name="read_only_p:int">
            <option value="1" <dtml-if "read_only_p">selected</dtml-if>>Yes</option>
-           <option value="0" <dtml-if "not read_only_p">selected</dtml-if>>No</option>         
-	   </select>
+           <option value="0" <dtml-if "not read_only_p">selected</dtml-if>>No</option>
+           </select>
        </td>
        </tr>
 
    <tr><td class="form-help">Index Type</td>
        <td>
            <select name="index_type">
-	   <dtml-in listIndexTypes prefix="idx">
-	    <option value="<dtml-var idx_item>" <dtml-if "idx_item==index_type">selected</dtml-if>><dtml-var idx_item></option>
-  	   </dtml-in>
+           <dtml-in listIndexTypes prefix="idx">
+            <option value="<dtml-var idx_item>" <dtml-if "idx_item==index_type">selected</dtml-if>><dtml-var idx_item></option>
+           </dtml-in>
        </td>
        </tr>
 
-       
+
     <tr><td colspan="2"><hr /></td></tr>
 
     <tr>
@@ -93,11 +93,11 @@ An Element : <dtml-var id>
         <td> <dtml-var idx_item> </td>
      </tr>
    </dtml-in>
- 
+
    <tr>
      <td align="left" valign="top">
        <div class="form-label">
-         Key Value 
+         Key Value
        </div>
      </td>
      <td align="left" valign="top">
@@ -111,7 +111,7 @@ An Element : <dtml-var id>
    <tr>
      <td align="left" valign="top">
        <div class="form-label">
-         Key Value 
+         Key Value
        </div>
      </td>
      <td align="left" valign="top">
@@ -125,7 +125,7 @@ An Element : <dtml-var id>
    <tr>
      <td align="left" valign="top">
        <div class="form-label">
-         Key Value 
+         Key Value
        </div>
      </td>
      <td align="left" valign="top">
@@ -138,7 +138,7 @@ An Element : <dtml-var id>
    <tr>
      <td align="left" valign="top">
        <div class="form-label">
-         Key Value 
+         Key Value
        </div>
      </td>
      <td align="left" valign="top">

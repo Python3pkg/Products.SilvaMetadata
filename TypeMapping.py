@@ -15,10 +15,10 @@ class TypeMappingContainer(Folder):
     meta_type = 'Type Mapping Container'
 
     manage_options = (
-        
+
         {'label':'Content Types',
          'action':'manage_main'},
-        
+
         {'label':'Metadata Tool',
          'action':'../manage_workspace'},
         )
@@ -28,7 +28,7 @@ class TypeMappingContainer(Folder):
     def __init__(self, id):
         self.id = id
         self.default_chain = ''
-        
+
     def setDefaultChain(self, chain, RESPONSE=None):
 
         if not verifyChain(self, chain):
@@ -48,13 +48,13 @@ class TypeMappingContainer(Folder):
         except AttributeError:
             return DEFAULT_MAPPING_NAME
         return ctm.getMetadataChain()
-        
+
     def getMetadataSetsFor(self, content_type):
         try:
-            ctm = self._getOb(content_type) # will throw attr error 
+            ctm = self._getOb(content_type) # will throw attr error
         except AttributeError:
             return getMetadataSets(self, self.default_chain)
-        return ctm.getMetadataSets()        
+        return ctm.getMetadataSets()
 
     def getTypeMappings(self):
         return self.objectValues(TypeMapping.meta_type)
@@ -101,7 +101,7 @@ class TypeMapping(Folder):
     def __init__(self, id):
         self.id = id
         self.chain = None
-        
+
     def getMetadataChain(self):
         return self.chain
 

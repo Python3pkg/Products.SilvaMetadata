@@ -31,9 +31,9 @@ def normalize_kv_pairs(mapping):
     vals.sort()
 
     pairs = zip(keys, vals)
-    
+
     for k,v in pairs:
-        res[mapping[k]]=mapping[v]    
+        res[mapping[k]]=mapping[v]
 
     return res
 
