@@ -1,8 +1,25 @@
 Copyright (c) 2003-2004 Infrae. All rights reserved.
 See also LICENSE.txt
-$Revision: 1.17 $
+$Revision: 1.18 $
 
 SilvaMetadata changes
+
+   unreleased
+
+     Features added
+
+       - Metadata sets can have a 'category' property. This property
+         can be used to define special purpose metadata sets.
+
+       - The minimal_role and category properties are exported and
+         imported to/from the XML metadata set definitions.
+
+     Bugs fixed
+
+       - MetadataTool.setMetadataValues() has been removed.
+
+       - XML export/import now works with latest Formulator release
+         (fixing issues with Formulator's i18n support).
 
    0.8
 

@@ -47,25 +47,21 @@ class MetadataBindAdapter(Implicit):
     security = ClassSecurityInfo()
     security.declareObjectPublic()
 
-    def __init__(self, content, collection):
+    def __init__(self, content, sets):
         self.content = content
-
-        if isinstance(collection, types.ListType):
-            self.ordered_set_names = []
-            d = {}
-            for s in collection:
-                d[s.getId()]=s
-                self.ordered_set_names.append(s.getId())
-            collection = d
-        elif isinstance(collection, types.DictType):
-            # no explicit order defined
-            self.ordered_set_names = collection.keys()
-        else:
-            raise BindingError ("metadata sets in wrong format")
-
-        self.collection = collection
+        self.collection = {}
+        self.setnames = []
+        self.category_to_setnames = {}
         self.cached_values = {}
-
+        
+        for set in sets:
+            setid = set.getId()
+            self.setnames.append(setid)
+            self.collection[setid] = set
+            category = set.getCategory()
+            setnames = self.category_to_setnames.setdefault(category, [])
+            setnames.append(setid)
+            
     #################################
     ### Views
     security.declarePublic('renderXML')
@@ -113,10 +109,7 @@ class MetadataBindAdapter(Implicit):
 
         if data is None:
             raise NotFound("Metadata for %s/%s not found" % (
-                str(set_id),
-                str(namespace_key)
-                )
-                )
+                str(set_id), str(namespace_key)))
 
         return self.validate(set_id, data.copy(), errors)
 
@@ -163,41 +156,22 @@ class MetadataBindAdapter(Implicit):
     #################################
     ### Discovery Introspection // Definition Accessor Interface
 
-    security.declarePublic('getSetNameByURI')
-    def getSetNameByURI(self, uri):
-        for set in self.collection.values():
-            if set.metadata_uri == uri:
-                return set.getId()
-        raise NotFound(uri)
-
-    security.declarePublic('getSet')
-    def getSet(self, set_id):
-        """
-        to invoke methods on the set requires permissions on
-        the set not the content, whereas binding methods
-        merely require permissions on the content.
-        """
-        return self.collection[set_id]
-
-    security.declarePublic('getElement')
-    def getElement(self, set_id, element_id):
-        return self.getSet(set_id).getElement(element_id)
-
     security.declarePublic('getSetNames')
-    def getSetNames(self):
+    def getSetNames(self, category=None):
+        """Return the ids of the metadata sets available for this 
+        content type.
         """
-        return the ids of the metadata sets available for this content
-        type.
-        """
-        return tuple(self.ordered_set_names)
+        if category is None:
+            return tuple(self.setnames)
+        setnames = self.category_to_setnames.get(category, [])
+        return tuple(setnames)
 
     security.declarePublic('keys')
     keys = getSetNames
 
     security.declarePublic('getElementNames')
     def getElementNames(self, set_id, mode=None):
-        """
-        given a set identifier return the ids of the elements
+        """Given a set identifier return the ids of the elements
         within the set.
         """
         # XXX
@@ -212,6 +186,25 @@ class MetadataBindAdapter(Implicit):
 
         return [e.getId() for e in elements]
 
+    security.declarePublic('getSetNameByURI')
+    def getSetNameByURI(self, uri):
+        for set in self.collection.values():
+            if set.metadata_uri == uri:
+                return set.getId()
+        raise NotFound(uri)
+
+    security.declarePublic('getSet')
+    def getSet(self, set_id):
+        """To invoke methods on the set requires permissions on
+        the set not the content, whereas binding methods
+        merely require permissions on the content.
+        """
+        return self.collection[set_id]
+
+    security.declarePublic('getElement')
+    def getElement(self, set_id, element_id):
+        return self.getSet(set_id).getElement(element_id)
+    
     security.declarePublic('isViewable')
     def isViewable(self, set_id, element_id):
         """
