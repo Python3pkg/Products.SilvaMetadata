@@ -263,8 +263,8 @@ class MetadataBindAdapter(Implicit):
         should be used. default values are only used when there is no
         value stored on the object.
 
-        the use case of using tales defaults to defer an element's
-        value to another element within the same set. also when
+        the use case for no_defaults is whe using tales defaults to defer
+        an element's value to another element within the same set. also when
         no_defaults is used not all elements of the set will nesc. be
         in the data object returned only those which were findable.
         """

@@ -29,8 +29,8 @@ def registerAccessHandler(content_type, handler):
     
     if content_type is None:
         _default_accessor = handler
-        
-    _typeAccessHandlers[content_type]=handler
+    else:
+        _typeAccessHandlers[content_type]=handler
 
 def getAccessHandler(content_type):
     handler = _typeAccessHandlers.get(content_type)
