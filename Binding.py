@@ -142,9 +142,11 @@ class MetadataBindAdapter(Implicit):
         context = self._getAnnotatableObject()
         setnames = self.getSetNames()
         for setname in setnames:
+            if setname not in request.form:
+                continue
             try:
                 form = ms.getMetadataForm(context, setname)
-                result = form.validate_all(request[setname])
+                result = form.validate_all(request.form[setname])
             except FormValidationError, e:
                 all_errors[setname] = errors = {}
                 for error in e.errors:
