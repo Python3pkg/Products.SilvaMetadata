@@ -159,6 +159,9 @@ class MetadataElement(SimpleItem):
 
     def isRequired(self):
         return self.field.is_required()
+
+    def getDefault(self):
+        return self.field.get_value('default')
            
     ## little hack to get formulator fields to do unicode
     def get_form_encoding(self):

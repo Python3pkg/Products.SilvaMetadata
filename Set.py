@@ -241,9 +241,7 @@ class MetadataSet(OrderedContainer):
     def getDefaults(self):
         res = {}
         for e in self.getElements():
-            d = e.field.get_value('default')
-            if d:
-                res[e.getId()]=d
+            res[e.getId()] = e.getDefault()
         return res
 
     def listFieldTypes(self):
