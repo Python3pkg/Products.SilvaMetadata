@@ -204,7 +204,11 @@ class MetadataSet(OrderedContainer):
         """ export an xml serialized version of the policy """
         
         exporter = MetadataSetExporter(self)
-        RESPONSE.setHeader('Content-Type', 'text/xml')
+
+        if RESPONSE is not None:
+            RESPONSE.setHeader('Content-Type', 'text/xml')
+            RESPONSE.setHeader('Content-Disposition',
+                               'attachment; filename=%s' % self.getId() )
         return exporter()
         
     def setNamespace(self, ns_uri, ns_prefix):
