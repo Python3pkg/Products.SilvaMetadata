@@ -255,8 +255,9 @@ class TestMetadataElement( MetadataTests ):
         element = set.getElement('Description')
 
         # yikes, narly tales expression
+        method = "python: content.portal_metadata.getMetadata(content).get('%s', 'Title', no_defaults=1)"%SET_ID
         element.field._edit_tales( {'default': TALESMethod(
-            "python: content.portal_metadata.getMetadata(content).get('%s', 'Title', no_defaults=1)"%SET_ID
+            method
             )
             }
             )

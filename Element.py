@@ -104,8 +104,9 @@ class MetadataElement(SimpleItem):
             if ms.isInitialized():
                 raise ConfigurationError("Not Allowed Set Already initialized")
 
-        if acquire_p is not None and self.field is not None:
-            required_p = self.field.get_value('required')
+        f = self.field
+        if acquire_p is not None and f is not None:
+            required_p = f.has_value('required') and f.get_value('required')
             if required_p and acquire_p:
                 raise ConfigurationError("Required Values may not be Acquired")
 
