@@ -1,6 +1,6 @@
 """
-
-$Id: MetadataTool.py,v 1.1 2003/04/22 14:45:30 hazmat Exp $
+Author: kapil thangavelu <k_vertigo@objectrealms.net>
+$Id: MetadataTool.py,v 1.2 2003/04/22 17:58:48 hazmat Exp $
 """
 
 import Configuration
@@ -8,8 +8,8 @@ from ZopeImports import *
 from Binding import MetadataBindAdapter
 from Namespace import DublinCore
 
-from Products.CMFCore.interfaces import portal_actions, portal_metadata
-from Products.CMFCore.ActionProviderBase import ActionProviderBase
+from Compatiblity import IActionProvider, IPortalMetadata
+from Compatiblity import ActionProviderBase
 
 class MetadataTool(UniqueObject, Folder, ActionProviderBase):
 
@@ -17,19 +17,17 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
     meta_type = 'Advanced Metadata Tool'
     titlte =  meta_type
 
-    __implements__ = (portal_actions.ActionProvider,
-                      portal_metadata.portal_metadata)
+    __implements__ = (IActionProvider, IPortalMetadata)
 
     _actions = []
 
     security = ClassSecurityInfo()
 
     def __init__(self):
-        #self._chains_by_type = PersistentMapping()
         pass
+    
     #################################
     # Action Provider Interface
-
     def listActions(self, info=None):
         return self._actions
 

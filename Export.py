@@ -1,18 +1,16 @@
-from Interfaces import IMetadataSetExporter
 from cgi import escape
 from types import IntType
 
-class StringBuffer:
+from Interfaces import IMetadataSetExporter
 
-    def __init__(self):
-        self.buf =[]
-    def write(self, data):
-        self.buf.append(data)
-    def getvalue(self):
-        return ''.join(self.buf)
+from Element import MetadataElement
+from utils import StringBuffer, make_lookup
+
 
 class MetadataSetExporter:
-
+    """
+    for exporting a metadata set definition
+    """
     __implements__ = IMetadataSetExporter
 
     def __init__(self, set):
@@ -80,5 +78,45 @@ class MetadataSetExporter:
             print >> out, '</metadata_set>'
         if ext_out:
             return out
+
+        return out.getvalue()
+
+class ObjectMetadataExporter:
+    """
+    for exporting the metadata of an object, returns
+    an xml fragement.
+
+    XXX encoding issues
+    XXX file/image binary metadata issues
+    """
+
+    def __init__(self, binding, sets):
+        self.binding = binding
+        self.sets = sets
+
+    def __call__(self, out=None):
+
+        if out is None:
+            out = StringBuffer()
+
+        print >> out, '<metadata '
+        
+        for set in self.sets:
+            print >> out, '    xmlns:%s="%s"'%(set.getId(), set.metadata_uri)
+        print >> out, '      >'
+
+        for set in self.sets:
+            sid = set.getId()
+            check = make_lookup( set.objectIds(MetadataElement.meta_type) )
+            data = self.binding._getData(sid)
+
+            for k,v in data.items():
+                # with updates its possible that certain annotation data
+                # is no longer part of the metadata set, so we filter it out.
+                if not check(k):
+                    continue
+                print >> out, '      <%s:%s>%s</%s:%s>'%(sid, k, escape(v), sid, k)
+
+        print >> out, '</metadata>'
 
         return out.getvalue()

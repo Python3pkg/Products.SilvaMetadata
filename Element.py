@@ -1,7 +1,7 @@
 """
 Metadata Elements
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
-$Id: Element.py,v 1.1 2003/04/22 14:45:30 hazmat Exp $
+$Id: Element.py,v 1.2 2003/04/22 17:58:48 hazmat Exp $
 """
 
 from ZopeImports import *
@@ -43,10 +43,6 @@ class MetadataElement(SimpleItem):
     ## out of scope for initial impl
     #export_p = True
     #enforce_vocabulary_p = True
-    
-    ## use guards instead for flexibility
-    #read_permission = CMFCorePermissions.View
-    #write_permission = CMFCorePermissions.ModifyPortalContent
     
     manage_options = (
         {'label':'Settings',

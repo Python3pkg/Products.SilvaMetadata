@@ -1,12 +1,12 @@
 """
 author: kapil thangavelu <k_vertigo@objectrealms.net>
-$Id: Set.py,v 1.1 2003/04/22 14:45:30 hazmat Exp $
+$Id: Set.py,v 1.2 2003/04/22 17:58:48 hazmat Exp $
 """
 from __future__ import nested_scopes
 
 from ZopeImports import *
 from AccessControl import getSecurityManager
-from Action import actionFactory
+from Compatiblity import actionFactory
 from Element import MetadataElement, ElementFactory
 from Export import MetadataSetExporter
 from FormulatorField import listFields

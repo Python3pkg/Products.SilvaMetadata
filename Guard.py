@@ -17,21 +17,17 @@ Changes to file as per ZPL
 - 4/11/03 - change expression context creation
 - 4/11/03 - misc import cleanups
 
-$Id: Guard.py,v 1.1 2003/04/22 14:45:30 hazmat Exp $
+$Id: Guard.py,v 1.2 2003/04/22 17:58:48 hazmat Exp $
 """
 
 from string import split, strip, join
 from cgi import escape
 
-from Globals import DTMLFile, Persistent, InitializeClass
 from AccessControl import ClassSecurityInfo
 from Acquisition import Explicit
+from Globals import DTMLFile, Persistent, InitializeClass
 
-try:
-    from Products.CMFCore.CMFCorePermissions import ManagePortal as GuardManagePerm
-except ImportError:
-    from AccessControl.Permissions import view_management_screens as GuardManagePerm
-    
+from Configuration import pMetadataManage
 from Expression import Expression, createExprContext
 
 class Guard (Persistent, Explicit):
@@ -40,7 +36,7 @@ class Guard (Persistent, Explicit):
     expr = None
 
     security = ClassSecurityInfo()
-    security.declareObjectProtected(GuardManagePerm)
+    security.declareObjectProtected(pMetadataManage)
 
     def check(self, sm, element, ob):
         '''
@@ -97,19 +93,19 @@ class Guard (Persistent, Explicit):
             self.expr = Expression(s)
         return res
 
-    security.declareProtected(GuardManagePerm, 'getPermissionsText')
+    security.declareProtected(pMetadataManage, 'getPermissionsText')
     def getPermissionsText(self):
         if not self.permissions:
             return ''
         return join(self.permissions, '; ')
 
-    security.declareProtected(GuardManagePerm, 'getRolesText')
+    security.declareProtected(pMetadataManage, 'getRolesText')
     def getRolesText(self):
         if not self.roles:
             return ''
         return join(self.roles, '; ')
 
-    security.declareProtected(GuardManagePerm, 'getExprText')
+    security.declareProtected(pMetadataManage, 'getExprText')
     def getExprText(self):
         if not self.expr:
             return ''

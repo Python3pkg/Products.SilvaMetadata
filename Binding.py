@@ -1,12 +1,11 @@
 """
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
-$Id: Binding.py,v 1.1 2003/04/22 14:45:30 hazmat Exp $
+$Id: Binding.py,v 1.2 2003/04/22 17:58:48 hazmat Exp $
 """
 
 import types, copy
 
 from Acquisition import Implicit, aq_base
-from ComputedAttribute import ComputedAttribute
 from zExceptions import Unauthorized
 
 from Namespace import MetadataNamespace, BindingRunTime
@@ -25,10 +24,6 @@ class MetadataBindAdapter(Implicit):
 
     security = ClassSecurityInfo()
 
-    def cached_values(self):
-        self.cached_values = d = {}
-    cached_values = ComputedAttribute(cached_values)
-        
     def __init__(self, content, collection):
         self.content = content
 
@@ -37,9 +32,11 @@ class MetadataBindAdapter(Implicit):
             for s in collection:
                 d[s.getId()]=s
             collection = d
+            
+        assert isinstance(collection, types.DictType)
         
         self.collection = collection
-        #self.values = self.getStorage(object).load()
+        self.cached_values = {}
 
     #################################
     ### Views
@@ -96,17 +93,12 @@ class MetadataBindAdapter(Implicit):
         """
 
         if set_id or namespace_key:
-            sets = [self._getSet(set_id, namespace_key).getId()]
+            sets = [self._getSet(set_id, namespace_key)]
         else:
-            sets = self.collection.keys()
+            sets = self.collection.values()
 
-        out = StringBuffer()
-        
-        for sid in sets:
-            data = self._getData(sid)
-            for k,v in data.items():
-                 pass
-            
+        exporter = ObjectMetadataExporter(self, sets)
+        return exporter()
             
 
     #################################

@@ -2,7 +2,7 @@
 provides access to formulator field registry
 
 author: kapil thangavelu <k_vertigo@objectrealms.net>
-$Id: FormulatorField.py,v 1.1 2003/04/22 14:45:30 hazmat Exp $
+$Id: FormulatorField.py,v 1.2 2003/04/22 17:58:48 hazmat Exp $
 """
 from Acquisition import aq_inner, aq_parent
 from Interfaces import IMetadataElement
