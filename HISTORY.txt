@@ -1,6 +1,6 @@
 Copyright (c) 2003 Infrae. All rights reserved.
 See also LICENSE.txt
-$Revision: 1.10 $
+$Revision: 1.11 $
 
 SilvaMetadata changes
  
@@ -8,8 +8,12 @@ SilvaMetadata changes
 
      Bugs fixed
 
-       - XML import with unrecognized metadata sets now passes silently.
- 
+       - XML import with unrecognized metadata sets now skips these
+         sets silently.
+
+       - XML export for integers and floats should now work properly
+         when Python 2.1 is used.
+    
    0.7.4 
 
      Bugs fixed

@@ -13,16 +13,16 @@ from Exceptions import XMLMarshallError
 def serialize(value):
 
     if isinstance(value, types.IntType):
-        return '<element type="integer">%s</element>' % unicode(value)
+        return '<element type="integer">%s</element>' % unicode(str(value))
 
     elif isinstance(value, types.FloatType):
-        return '<element type="float">%s</element>' % unicode(value)
+        return '<element type="float">%s</element>' % unicode(str(value))
 
     elif isinstance(value, types.StringType):
         return '<element type="string">%s</element>' % unicode(escape(value, 1))
 
     elif isinstance(value, DateTime):
-        return '<element type="date">%s</element>' % unicode(value)
+        return '<element type="date">%s</element>' % unicode(str(value))
 
     elif isinstance(value, types.UnicodeType):
         return '<element type="string">%s</element>' % escape(value, 1)
