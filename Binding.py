@@ -252,6 +252,7 @@ class MetadataBindAdapter(Implicit):
         attr_name = encodeElement(set_id, element_id)
         bind_data = self._getBindData()
         acquire_runtime = bind_data.get(AcquireRuntime)
+        ob = self._getAnnotatableObject()
         
         if acquire_runtime is None:
             acquire_runtime = []
@@ -266,8 +267,8 @@ class MetadataBindAdapter(Implicit):
             
         else:
             # get rid of the acq lookup value
-            if hasattr(aq_base(self.content), attr_name):
-                delattr(self.content, attr_name)
+            if hasattr(aq_base(ob), attr_name):
+                delattr(ob, attr_name)
 
             # get rid of it from the bind data
             if token in acquire_runtime:
@@ -281,6 +282,8 @@ class MetadataBindAdapter(Implicit):
         acquires from the containment hiearchy.
         """
         res = []
+        ob = self._getAnnotatableObject()
+        
         for s in self.collection.values():
             sid = s.getId()
             data = self._getData(set_id = sid, acquire=0)
@@ -290,11 +293,14 @@ class MetadataBindAdapter(Implicit):
                     continue
                 name = encodeElement(sid, e.getId())
                 try:
-                    value = getattr(self.content, name)
-                except:
+                    value = getattr(ob, name)
+                except AttributeError:
                     continue
-                res.append( (sid, eid) )
-                
+                # filter out any empty metadata fields
+                # defined on ourselves to acquire
+                if not hasattr(aq_base(ob), name):
+                    res.append( (sid, eid) )
+
         return res
 
     security.declarePublic('setObjectDelegator')
@@ -502,7 +508,7 @@ class MetadataBindAdapter(Implicit):
         update_list = [eid for sid, eid in  bind_data.get(AcquireRuntime, []) if sid==set_id and eid in keys]
         for eid in update_list:
             aqelname = encodeElement(sid, eid)
-            setattr(self.content, aqelname, data[eid])
+            setattr(ob, aqelname, data[eid])
 
         # save in annotations
         annotations = getToolByName(ob, 'portal_annotations')

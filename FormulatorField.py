@@ -9,6 +9,7 @@ from Interfaces import IMetadataElement
 
 from Products.Formulator.FieldRegistry import FieldRegistry
 from Products.Formulator.Field import Field
+from Products.Formulator.Widget import MultiItemsWidget
 
 def getFieldFactory(fieldname):
     return FieldRegistry.get_field_class(fieldname)
@@ -27,7 +28,10 @@ def generate_field_key(self, validation=0):
         return 'field_%s'%self.id
     elif validation:
         return self.id
-    return '%s.%s:record'%(self.field_record, self.id)
+    elif isinstance(self.widget, MultiItemsWidget):
+        return "%s.%s:record:list"%(self.field_record, self.id)
+    else:
+        return '%s.%s:record'%(self.field_record, self.id)
 
 def generate_subfield_key(self, id, validation=0):
     if self.field_record is None or validation:

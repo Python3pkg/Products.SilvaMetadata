@@ -42,7 +42,6 @@ def setupContentTypes(context):
                                   , filter_content_types=0
                                   )
                              )
-    #types_tool._setObject( 'Dummy Content', DummyFTI )    
 
 def setupContentTree(container):
     ttool = getToolByName(container, 'portal_types')
@@ -55,9 +54,6 @@ def setupContentTree(container):
 
     mammals = zoo._getOb('mammals')
     reptiles = zoo._getOb('reptiles')
-
-    #ttool.constructContent('Dummy Content', mammals,  'elephant')
-    #ttool.constructContent('Dummy Content', reptiles, 'snake')
 
     return zoo
 
@@ -166,13 +162,26 @@ class TestAdvancedMetadata( MetadataTests ):
         mammals = zoo.mammals
 
         m_binding = getToolByName(mammals, 'portal_metadata').getMetadata(mammals)
-        
+        z_binding = getToolByName(zoo, 'portal_metadata').getMetadata(zoo)
+
         set_id = SET_ID
 
         acquired = m_binding.listAcquired()
 
-        assert len(acquired) == 1
-        assert acquired[0][1] == 'Description'
+        # test the contained's list acquired
+        self.assertEqual(len(acquired), 1)
+        self.assertEqual(acquired[0][1], 'Description')
+
+        # test the container's listacquired
+        acquired = z_binding.listAcquired()
+        self.assertEqual( len(acquired), 0)
+
+        # special case for 
+        z_binding.setValues(set_id, {'Title':'', 'Description':''} )
+        acquired = z_binding.listAcquired()
+        self.assertEqual( len(acquired), 0)
+        
+        
         
     def testObjectDelegation(self):
 
