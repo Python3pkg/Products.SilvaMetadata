@@ -71,6 +71,12 @@ class MetadataSetReader(MetaReader):
     def getSet(self):
         return self.set
 
+    def endTitle(self, chars):
+        self.set.title = chars
+
+    def endDescription(self, chars):
+        self.set.description = chars
+
     def startMetadata_set(self, attrs):
         self.set = s = DefinitionNode(attrs)
         s.setdefault('elements', [])
@@ -87,6 +93,12 @@ class MetadataSetReader(MetaReader):
 
     def endIndex_p(self, chars):
         self.getElement().index_p = chars
+
+    def endRead_only_p(self, chars):
+        self.getElement().read_only_p = int(chars)
+
+    def endAcquire_p(self, chars):
+        self.getElement().acquire_p = int(chars)
 
     def endField_type(self, chars):
         self.getElement().field_type = chars
@@ -189,21 +201,38 @@ def make_set( container, set_node ):
     import Configuration
     from Compatibility import getToolByName
     from Products.Formulator.TALESField import TALESMethod
+
+    # compatiblity.. ick
+    if not set_node.has_key('title'):
+        set_node['title']=''
+    if not set_node.has_key('description'):
+        set_node['description']=''
     
     pm = getToolByName(container, 'portal_metadata')
     
     collection = getattr(pm, Configuration.MetadataCollection)
     collection.addMetadataSet( set_node.id,
                                set_node.ns_prefix,
-                               set_node.ns_uri )
+                               set_node.ns_uri,
+                               set_node.title,
+                               set_node.description )
     
     set = pm.getMetadataSet(set_node.id)
     
     for e_node in set_node.elements:
+
+        # compatiblity.. ick
+        if not e_node.has_key('acquire_p'):
+            e_node['acquire_p']=0
+        if not e_node.has_key('read_only_p'):
+            e_node['read_only_p']=0
+        
         set.addMetadataElement( e_node.id,
                                 e_node.field_type,
                                 e_node.index_type,
-                                e_node.index_p )
+                                e_node.index_p,
+                                e_node.acquire_p,
+                                e_node.read_only_p)
 
         element = set.getElement(e_node.id)
         

@@ -35,6 +35,7 @@ class MetadataElement(SimpleItem):
     acquire_p = False
     index_type = None
     field_type = None
+    field = None
 
     ## defer to formulator for now
     #use_default_p = True
@@ -71,6 +72,8 @@ class MetadataElement(SimpleItem):
         self.write_guard = Guard()
         self.index_constructor_args = {}
 
+        self.editElementPolicy(**kw)
+
     def editElementGuards(self, read_guard, write_guard, RESPONSE=None):
 
         self.read_guard.changeFromProperties(read_guard)
@@ -101,7 +104,7 @@ class MetadataElement(SimpleItem):
             if ms.isInitialized():
                 raise ConfigurationError("Not Allowed Set Already initialized")
 
-        if acquire_p is not None:
+        if acquire_p is not None and self.field is not None:
             required_p = self.field.get_value('required')
             if required_p and acquire_p:
                 raise ConfigurationError("Required Values may not be Acquired")

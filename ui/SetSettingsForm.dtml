@@ -12,6 +12,16 @@
 <table border="1"> 
 
 <tr>
+   <td> Title </td>
+   <td> <input name="title" type="text" size="60" value="<dtml-var getTitle>" /> </td>
+</tr>
+
+<tr>
+   <td> Description </td>
+   <td> <textarea rows="15" cols="60" name="description"><dtml-var getDescription></textarea></td>
+</tr>
+
+<tr>
    <td> Namespace URI </td>
    <td> <input name="ns_uri" type="text" size="60" value="<dtml-var metadata_uri>" /> </td>
 </tr>

@@ -39,10 +39,18 @@ class MetadataCollection(Folder):
                        id,
                        namespace_prefix,
                        namespace_uri,
+                       title='',
+                       description='',                      
                        RESPONSE=None):
         " "
 
-        set = MetadataSet(id, namespace_prefix, namespace_uri)
+        set = MetadataSet(id=id,
+                          title = title,
+                          description = description,
+                          metadata_prefix = namespace_prefix,
+                          metadata_uri = namespace_uri,
+                          )
+        
         self._setObject(id, set)
 
         if RESPONSE is not None:

@@ -133,33 +133,52 @@ class MetadataSet(OrderedContainer):
     initialized = None
     use_action_p = None
     action = None
+    title = ''
+    description = ''
     
     def __init__(self,
                  id,
-                 metadata_prefix=DefaultPrefix,
-                 metadata_uri=DefaultNamespace
+                 title='',
+                 description='',                 
+                 metadata_prefix = DefaultPrefix,
+                 metadata_uri = DefaultNamespace
                  ):
         
         self.id = id
         self.initialized = None
         self.use_action_p = None
+        self.title = ''
+        self.description = ''
+        
+        # we can't do any verification till after we have a ctx
         self.metadata_uri = metadata_uri
         self.metadata_prefix = metadata_prefix
 
+
     def getTitle(self):
-        return self.id
+        return self.title
+
+    def getDescription(self):
+        return self.description
 
     def addMetadataElement(self,
                            id,
                            field_type,
                            index_type,
                            index_p=None,
+                           acquire_p=None,
+                           read_only_p=None,
                            RESPONSE=None):
         """ """
         element = ElementFactory(id)
         self._setObject(id, element)
         element = self._getOb(id)
-        element.editElementPolicy(field_type, index_type, index_p)
+        
+        element.editElementPolicy(field_type = field_type,
+                                  index_type = index_type,
+                                  index_p = index_p,
+                                  read_only_p = read_only_p,
+                                  acquire_p = acquire_p)
         
         if RESPONSE is not None:
             return RESPONSE.redirect('manage_main')
@@ -188,14 +207,15 @@ class MetadataSet(OrderedContainer):
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
 
-    def editSettings(self, ns_uri, ns_prefix, RESPONSE):
+    def editSettings(self, title, description, ns_uri, ns_prefix, RESPONSE):
         """ Edit Set Settings """
 
         if self.isInitialized():
             raise ConfigurationError (" Set Already Initialized ")
 
-        verifyNamespace(self, ns_uri, ns_prefix)
         self.setNamespace(ns_uri, ns_prefix)
+        self.title = title
+        self.description = description
 
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
@@ -212,6 +232,7 @@ class MetadataSet(OrderedContainer):
         return exporter()
         
     def setNamespace(self, ns_uri, ns_prefix):
+        verifyNamespace(self, ns_uri, ns_prefix)
         self.metadata_prefix = ns_prefix
         self.metadata_uri = ns_uri
 
@@ -286,6 +307,10 @@ class MetadataSet(OrderedContainer):
 
     def listIndexTypes(self):
         return getIndexTypes( getToolByName(self, 'portal_catalog') )
+
+    def manage_afterAdd(self, item, container):
+        # verify our namespace
+        self.setNamespace(self.metadata_uri, self.metadata_prefix)        
     
 InitializeClass(MetadataSet)
 
