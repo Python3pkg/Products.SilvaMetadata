@@ -11,7 +11,7 @@ from Globals import DTMLFile, InitializeClass
 from Interface import Base as Interface
 from ZODB.PersistentMapping import PersistentMapping
 
-from Compatiblity import getToolByName, UniqueObject
+from Compatibility import getToolByName, UniqueObject
 
 # py2.2.2 forward decl
 try:

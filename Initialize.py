@@ -8,7 +8,7 @@ def metadata_initialization()
 
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
-from Compatiblity import getContentType
+from Compatibility import getContentType
 
 _typeHandlers = {}
 

@@ -3,6 +3,7 @@ author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
 from xml.sax import make_parser, ContentHandler
+from xml.dom import XMLNS_NAMESPACE
 from UserDict import UserDict
 
 _marker = []
@@ -187,7 +188,6 @@ def make_set( container, set_node ):
 
         element = set.getElement(e_node.id)
 
-        # XXX formulator specific..
         field = element.field
         for fv in e_node.field_values:
             k = fv.key
@@ -208,8 +208,47 @@ def make_set( container, set_node ):
 
         for fm in e_node.field_messages:
             field.message_values[fm.name]=fm.text
-                
+
+def import_metadata( content, content_node):
+    """
+
+    minimal import system.
+
+    """
+    
+    from Compatiblity import getToolByName, getContentType
+    
+    metadata_node = metadata_node_search(content_node)
+    metadata_tool = getToolByName(content, 'portal_metadata')
+    
+    if not metadata_node: 
+        return
+
+    metadata = {}
+    binding = metadata_tool.getMetadata(content)
+    
+    for ns, uri_node in metadata_node.attributes.items():
+        if not ns[0] == XMLNS_NAMESPACE:
+            continue
         
+        # verify set exists
+        set = metadata_tool.getMetadataSetFor(uri_node.value)
+        metadata[uri_node.value]={}
+
+    for node in metadata_node.childNodes:
+        if not node.namespaceURI:
+            continue
+        
+        metadata[node.namespaceURI][node.localName]=node.firstChild.nodeValue
+        
+    for k, v in metadata.items():
+        errors = binding.setValues(namespace_key=k, data=v)
+        if errors:
+            raise ValidationError( "%s %s"%(
+                str(content.getPhysicalPath()),
+                str(errors)
+                )
+                                   )
 if __name__ == '__main__':
     # visual check
     import sys, pprint

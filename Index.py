@@ -6,7 +6,7 @@ author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
 from Products.ProxyIndex import ProxyIndex
-from Compatiblity import index_expression_template
+from Compatibility import index_expression_template
 
 def createIndexes(catalog, elements):
 

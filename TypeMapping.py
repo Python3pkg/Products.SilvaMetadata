@@ -103,7 +103,7 @@ class TypeMapping(Folder):
 def getMetadataSets(ctx, chain):
     sets = filter(None, [c.strip() for c in chain.split(',')])
     tool = ctx.getMetadataTool()
-    return map(tool.getMetadataSets, sets)
+    return map(tool.getMetadataSet, sets)
 
 def verifyChain(ctx, chain):
     try:

@@ -6,10 +6,11 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 
 from Acquisition import aq_inner, aq_base, aq_get
 from OFS.ObjectManager import UNIQUE
+from Interface import Interface
 from ExtensionClass import Base
 
 import Configuration
-from Exceptions import CompatilbilityException
+from Exceptions import CompatibilityException
 
 #################################
 ### Interface declarations/assertions
@@ -56,7 +57,7 @@ else:
         try:
             silva_name = SilvaToolMap[service_name]
         except KeyError, e:
-            raise CompatilbilityException(str(e))
+            raise CompatibilityException(str(e))
 
         try:
             tool = aq_get(ctx, silva_name, default, 1)

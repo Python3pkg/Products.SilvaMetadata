@@ -3,7 +3,7 @@ Marker Interfaces
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 from Interface import Interface
-from Compatiblity import IPortalMetadata
+from Compatibility import IPortalMetadata
 
 #################################
 # Metadata Tool/Service Interface

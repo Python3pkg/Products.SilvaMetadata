@@ -6,7 +6,7 @@ import types, copy
 
 from Acquisition import Implicit, aq_base
 from zExceptions import Unauthorized
-from Exceptinos import NotFound
+from Exceptions import NotFound
 import Initialize as BindingInitialize
 from Namespace import MetadataNamespace, BindingRunTime
 import View 
@@ -172,6 +172,13 @@ class MetadataBindAdapter(Implicit):
 
     #################################
     ### Discovery Introspection
+
+    def getSetNameByURI(self, uri):
+        for set in self.collection.values():
+            if set.metadata_uri == uri:
+                return set.getId()
+        raise NotFound(uri)
+    
     def getSetNames(self):
         """
         return the ids of the metadata sets available for this content
@@ -304,7 +311,7 @@ class MetadataBindAdapter(Implicit):
         elif namespace_key:
             return self.getSetByKey(namespace_key)
         else:
-            raise NotFound("metadata set not found %s %s"%(set_id, namespace_key)
+            raise NotFound("metadata set not found %s %s"%(set_id, namespace_key))
 
     def _getBindData(self):
         annotations = getToolByName(self.content, 'portal_annotations')

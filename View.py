@@ -28,7 +28,7 @@ def getForm(binding, set, framed=1, REQUEST=None, errors=None):
     print >> out, '<table class="metadata_form">'
     for e in elements:
         print >> out, "<tr><td><b>%s</b></td>"%e.title()
-        print >> out, "<tr><td>%s</td>"%e.renderEdit(data.get(e.getId(), None)
+        print >> out, "<tr><td>%s</td>"%e.renderEdit(data.get(e.getId(), None))
 
     if framed:
         print >> out, '''<tr><td colspan="2">

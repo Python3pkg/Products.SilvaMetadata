@@ -5,7 +5,7 @@ from __future__ import nested_scopes
 
 from ZopeImports import *
 from AccessControl import getSecurityManager
-from Compatiblity import actionFactory
+from Compatibility import actionFactory
 from Element import MetadataElement, ElementFactory
 from Export import MetadataSetExporter
 from FormulatorField import listFields

@@ -7,8 +7,7 @@ from ZopeImports import *
 from Binding import MetadataBindAdapter
 from Namespace import DublinCore
 
-from Compatiblity import IActionProvider, IPortalMetadata
-from Compatiblity import ActionProviderBase
+from Compatibility import IActionProvider, IPortalMetadata, ActionProviderBase
 
 class MetadataTool(UniqueObject, Folder, ActionProviderBase):
 
@@ -125,7 +124,7 @@ def initializeTool(tool):
     mapping = TypeMappingContainer(tid)
     mapping.id = tid
     
-    self._setObject(tid, mapping)    
+    tool._setObject(tid, mapping)    
 
     
     

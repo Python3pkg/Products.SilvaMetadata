@@ -3,7 +3,7 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
 import Configuration
-import Compatiblity
+import Compatibility
 import Collection
 import Set
 import Element
