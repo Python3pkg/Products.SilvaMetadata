@@ -590,7 +590,7 @@ def validateData(binding, set, data, errors_dict=None):
     # not required or the binding already has a value for this element.
     for e in set.getElements():
         eid = e.getId()
-        has_a_value = not not binding.get(set.getId(), eid)
+        has_a_value = not not binding.get(set.getId(), eid, acquire=0)
         is_required = e.isRequired()
 
         if hasattr(aq_base(e.field), 'sub_form'):
@@ -618,8 +618,7 @@ def validateData(binding, set, data, errors_dict=None):
                 errors_dict[eid] = exception.error_text
             else:
                 raise
-
-        return data
+    return data
     
 
 def encodeElement(set_id, element_id):
