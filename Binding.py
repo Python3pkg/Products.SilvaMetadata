@@ -164,7 +164,6 @@ class MetadataBindAdapter(Implicit):
                     data[sfkey] = data_from_request.get(sfkey, '')
             else:
                 data[eid] = data_from_request.get(eid, '')
-        print data_from_request, data
         return self.setValues(set_id, data, reindex)
 
     #################################
