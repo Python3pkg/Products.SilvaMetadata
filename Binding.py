@@ -229,7 +229,7 @@ class MetadataBindAdapter(Implicit):
         for s in self.collection.values():
             sid = s.getId()
             data = self._getData(set_id = sid, acquire=0)
-            for e in s.getElements():
+            for e in [e for e in s.getElements() if e.isAcquireable()]:
                 eid = e.getId()
                 if data.has_key(eid) and data[eid]:
                     continue
@@ -245,21 +245,6 @@ class MetadataBindAdapter(Implicit):
 
         return res
 
-    security.declarePublic('listAcquirable')
-    def listAcquirable(self):
-        """
-        compute and return a list of (set_id, element_id)
-        values for all metadata which this binding/content
-        has defined to acquire for content *lower* in
-        the containment heirarchy.
-        """
-
-        acquire_runtime = self._getBindData().get(AcquireRuntime)
-        if acquire_runtime is None:
-            return ()
-        return tuple(acquire_runtime)
-            
-        
     #################################
     ### Data Accessor Interface
 
@@ -277,49 +262,6 @@ class MetadataBindAdapter(Implicit):
 
     #################################
     ### RunTime Binding Methods
-
-    security.declarePublic('setAcquire')
-    def setAcquire(self, set_id, element_id, flag):
-        """
-        set a flag for runtime acquisition of metadata
-        for all objects *below* this one, such that
-        if they don't define their own values for the
-        metadata element, it will be acquired from
-        the nearest container which has this flag
-        set on the element. IE this method is called
-        on containers when you want contained content
-        to acquire metadata from the container
-        """
-
-        set = self._getSet(set_id)
-        flag = not not flag
-        token = (set_id, element_id)        
-        attr_name = encodeElement(set_id, element_id)
-        bind_data = self._getBindData()
-        acquire_runtime = bind_data.get(AcquireRuntime)
-        ob = self._getAnnotatableObject()
-        
-        if acquire_runtime is None:
-            acquire_runtime = []
-        
-        if flag:
-            # add a cache lookup value.. see encode el doc string
-            data = self._getData(set_id)
-            setattr(self.content, attr_name, data[element_id])
-            if not token in acquire_runtime:
-                acquire_runtime.append(token)
-            bind_data[AcquireRuntime] = acquire_runtime
-            
-        else:
-            # get rid of the acq lookup value
-            if hasattr(aq_base(ob), attr_name):
-                delattr(ob, attr_name)
-
-            # get rid of it from the bind data
-            if token in acquire_runtime:
-                acquire_runtime.remove(token)
-
-
 
     security.declarePublic('setObjectDelegator')
     def setObjectDelegator(self, method_name):
@@ -473,7 +415,7 @@ class MetadataBindAdapter(Implicit):
         # get the acquired metadata
         sid = set.getId()        
         hk = data.has_key
-        for e in set.getElements():
+        for e in [e for e in set.getElements() if e.isAcquireable()]:
             eid = e.getId()
             if hk(eid) and data[eid] and not using_defaults:
                 continue
@@ -522,9 +464,10 @@ class MetadataBindAdapter(Implicit):
                         pass
 
         # update acquireable metadata
-        bind_data = self._getBindData()
-
-        update_list = [eid for sid, eid in  bind_data.get(AcquireRuntime, []) if sid==set_id and eid in keys]
+        update_list = [e.getId() for e in set.getElements() \
+                                 if  e.isAcquireable() and e.getId() in keys]
+        sid = set.getId()
+        
         for eid in update_list:
             aqelname = encodeElement(sid, eid)
             setattr(ob, aqelname, data[eid])

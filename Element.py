@@ -27,11 +27,12 @@ class MetadataElement(SimpleItem):
     __implements__ = IMetadataElement
 
     #################################
-    # element policy properties
+    # default element policy properties
     #################################
     
     read_only_p = False
     index_p = False
+    acquire_p = False
     index_type = None
     field_type = None
 
@@ -84,12 +85,12 @@ class MetadataElement(SimpleItem):
                           index_p = None,
                           read_only_p = None,
                           extra = None,
+                          acquire_p = None,
                           RESPONSE = None
                           ):
         """
         edit an element's policy
         """
-
         if index_type is not None:
             ms = self.getMetadataSet()
             if ms.isInitialized():
@@ -100,6 +101,11 @@ class MetadataElement(SimpleItem):
             if ms.isInitialized():
                 raise ConfigurationError("Not Allowed Set Already initialized")
 
+        if acquire_p is not None:
+            required_p = self.field.get_value('required')
+            if required_p:
+                raise ConfigurationError("Required Values may not be Acquired")
+
         field_type = field_type or self.field_type
         index_type = index_type or self.index_type
         
@@ -108,6 +114,9 @@ class MetadataElement(SimpleItem):
 
         if read_only_p is None:
             read_only_p = self.read_only_p
+
+        if acquire_p is None:
+            acquire_p = self.acquire_p
         
         if field_type != self.field_type:
             try:
@@ -128,6 +137,7 @@ class MetadataElement(SimpleItem):
         # need to cascacde this so we can create indexes at the set level
         self.index_p = not not index_p
         self.read_only_p = not not read_only_p
+        self.acquire_p = not not acquire_p
         
         # normalize the key value pairs into a mapping[k]->v
         if extra:
@@ -157,6 +167,12 @@ class MetadataElement(SimpleItem):
         is this element editable for the content object
         """
         return self.write_guard.check(getSecurityManager(), self, content)
+
+    def isAcquireable(self):
+        """
+        is this field acquireable to objects lower in the container
+        """
+        return self.acquire_p
 
     def renderView(self, value=None):
         """
@@ -191,6 +207,14 @@ class MetadataElement(SimpleItem):
     ## little hack to get formulator fields to do unicode
     def get_form_encoding(self):
         return encoding
+
+    ## formulator sends on change messages when internal field
+    ## values are changed, we catch the required message in
+    ## order to maintain our invariant that an element can not
+    ## be both required and acquired.
+    def on_value_required_change(self, required_value):
+        if required_value and self.acquired_p:
+            raise ConfigurationError("Acquired values may not be Required")
        
 InitializeClass(MetadataElement)
 

@@ -79,11 +79,17 @@ def setupMetadataSet(context):
                            1
                            )
 
+
     set.addMetadataElement('Description',
                            StandardFields.StringField.meta_type,
                            'KeywordIndex',
                            1
-                           )                           
+                           )
+
+    element = set.getElement('Description')
+    element.field._edit({'required':0})
+    element.editElementPolicy(acquire_p = 1)
+    
     return set
 
 def setupMetadataMapping(context):
@@ -136,14 +142,11 @@ class TestAdvancedMetadata( MetadataTests ):
             {'Title':'hello world',
              'Description':'cruel place'}
             )
-
-        binding.setAcquire(set_id, 'Description', 1)
         
     def testContainmentAcquisitionValue(self):
         self.setupAcquiredMetadata()
         zoo = self.root.zoo
         mammals = zoo.mammals
-        
 
         z_binding = getToolByName(zoo, 'portal_metadata').getMetadata(zoo)
         m_binding = getToolByName(mammals, 'portal_metadata').getMetadata(mammals)

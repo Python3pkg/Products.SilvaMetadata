@@ -47,6 +47,15 @@ An Element : <dtml-var id>
        </td>
        </tr>
 
+   <tr><td class="form-help">Enable Acquisition</td>
+       <td>
+           <select name="acquire_p:int">
+           <option value="1" <dtml-if "acquire_p">selected</dtml-if>>Yes</option>
+           <option value="0" <dtml-if "not acquire_p">selected</dtml-if>>No</option>         
+	   </select>
+       </td>
+       </tr>
+
    <tr><td class="form-help">Read Only</td>
        <td>
            <select name="read_only_p:int">
@@ -54,6 +63,7 @@ An Element : <dtml-var id>
            <option value="0" <dtml-if "not read_only_p">selected</dtml-if>>No</option>         
 	   </select>
        </td>
+       </tr>
 
    <tr><td class="form-help">Index Type</td>
        <td>
@@ -61,6 +71,7 @@ An Element : <dtml-var id>
 	   <dtml-in listIndexTypes prefix="idx">
 	    <option value="<dtml-var idx_item>" <dtml-if "idx_item==index_type">selected</dtml-if>><dtml-var idx_item></option>
   	   </dtml-in>
+       </td>
        </tr>
 
        
