@@ -17,6 +17,13 @@
 </tr>
 
 <tr>
+   <td valign="top"> Category:</td>
+   <td valign="top"> 
+      <input type="text" name="category" value="<dtml-var getCategory>" size="60" /> 
+   </td>
+</tr>
+
+<tr>
    <td> Description </td>
    <td> <textarea rows="15" cols="60" name="description"><dtml-var getDescription></textarea></td>
 </tr>
@@ -39,7 +46,7 @@
 <tr>
    <td valign="top"> Restrict Access to Role (and higher):</td>
    <td valign="top"> 
-      <dtml-var getMinimalRole><br /><br />
+      <dtml-var getMinimalRole><br />
       <small>change to:</small><br />
       <select name="minimal_role"> 
         <option value="">No Restriction</option>
@@ -48,14 +55,6 @@
         <option value="Editor">Editor</option>
         <option value="ChiefEditor">Chief Editor</option>
       </select>
-   </td>
-</tr>
-
-<tr>
-   <td valign="top"> Category:</td>
-   <td valign="top"> 
-      <small>change to:</small><br />
-      <input type="text" name="category" value="<dtml-var getCategory>" size="20" /> 
    </td>
 </tr>
 
