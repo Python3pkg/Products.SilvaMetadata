@@ -65,7 +65,7 @@ class MetadataCollection(Folder):
             if set.metadata_uri == metadata_uri:
                 return set
 
-        raise NotFound("No Metadata Set Matching %s" % str(metadata_namespace))
+        raise NotFound("No Metadata Set Matching %s" % str(metadata_uri))
 
     security.declareProtected(pMetadataManage, 'importSet')
     def importSet(self, xml_file, RESPONSE=None):
