@@ -5,7 +5,7 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 #################################
 ### Silva / CMF Compatiblity Flag
 # if using Silva set to 0
-UsingCMF = 1
+UsingCMF = 0
 
 #################################
 # this module gets populated with
