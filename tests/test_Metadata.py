@@ -66,7 +66,7 @@ def setupMetadataSet(context):
     
     mtool = getToolByName(context, 'portal_metadata')
     collection = mtool.getCollection()
-    collection.addMetadataSet(SET_ID,
+    collection.addMetadataSet( SET_ID,
                               'tmd',
                               'http://www.example.com/xml/test_md')
 
@@ -200,6 +200,7 @@ class TestObjectImportExport( MetadataTests ):
         dom = createDOMDocument(xml)
         import_metadata(mammals, dom.childNodes[0])
 
+
         mammals_binding = pm.getMetadata(mammals)
         mammal_values = binding.get(SET_ID)
 
@@ -236,7 +237,40 @@ class TestMetadataElement( MetadataTests ):
                           zoo.getPhysicalPath(),
                           "Tales Context Passing Failed" )
 
+
+    def testGetDefaultWithTalesDelegate(self):
+        
+        from Products.Formulator.TALESField import TALESMethod
+        
+        pm = getToolByName(self.root, 'portal_metadata')
+        collection = pm.getCollection()
+        set = collection.getMetadataSet(SET_ID)
+
+        zoo = self.root.zoo
+        test_value = 'Rabbits4Ever'
+
+        binding = pm.getMetadata(zoo)
+        binding.setValues(SET_ID, {'Title':test_value})
+
+        element = set.getElement('Description')
+
+        # yikes, narly tales expression
+        element.field._edit_tales( {'default': TALESMethod(
+            "python: content.portal_metadata.getMetadata(content).get('%s', 'Title', no_defaults=1)"%SET_ID
+            )
+            }
+            )
+
+        value = binding.get(SET_ID, 'Description')
+        self.assertEqual(value, test_value, "Tales delegate for default didn't work")
+
+         # make sure the right cached value was stored.
+        value = binding.get(SET_ID, 'Description')
+
+        self.assertEqual(value, test_value, "Wrong Data Object Cached")
+        
     def testAcquisitionInvariant(self):
+        # invariant == can't be required and acquired
         from Products.SilvaMetadata.Exceptions import ConfigurationError
 
         pm = getToolByName(self.root, 'portal_metadata')

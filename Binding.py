@@ -249,10 +249,30 @@ class MetadataBindAdapter(Implicit):
     ### Data Accessor Interface
 
     security.declarePublic('get')
-    def get(self, set_id, element_id=None, acquire=1):
-        data = self._getData(set_id=set_id, acquire=acquire)
+    def get(self, set_id, element_id=None, acquire=1, no_defaults=0):
+        """
+        if element_id is specified, only the value of that element is
+        returned, otherwise a Data object is returned. Data objects
+        implement a mapping interface.
+
+        the acquire flag determines whether or not metadata acquisition
+        will be used in retrieving values, acquired values will override
+        default values but not values stored on the object.
+
+        the no_defaults flag specifies whether an element's default values
+        should be used. default values are only used when there is no
+        value stored on the object.
+
+        the use case of using tales defaults to defer an element's
+        value to another element within the same set. also when
+        no_defaults is used not all elements of the set will nesc. be
+        in the data object returned only those which were findable.
+        """
+        data = self._getData(set_id=set_id,
+                             acquire=acquire,
+                             no_defaults=no_defaults)
         if element_id is not None:
-            return data.get(element_id) # hmm
+            return data.get(element_id) 
         return data
     
     def __getitem__(self, key):
@@ -371,26 +391,21 @@ class MetadataBindAdapter(Implicit):
 
         return ob
 
-    def _getData(self, set_id=None, namespace_key=None, acquire=1):
+    def _getData(self, set_id=None, namespace_key=None, acquire=1, no_defaults=0):
         """
         find the metadata for the given content object,
         performs runtime binding work as well.
+
         """
 
         set = self._getSet(set_id, namespace_key)
 
-        # sanity check
-        try:
-            acquire = not not int(acquire)
-        except:
-            raise SyntaxError( "acquire flag must be an integer" )
-        
         # cache lookup
         data = self.cached_values.get( (acquire, set.getId()) )
         if data is not None:
             return data
 
-        using_defaults = 0
+        using_defaults = []
         ob = self._getAnnotatableObject()
 
         # get the annotation data
@@ -399,25 +414,42 @@ class MetadataBindAdapter(Implicit):
         
         saved_data = metadata.get(set.metadata_uri)
         data = Data()
-        
-        if saved_data is None:
-            using_defaults = 1
+
+        sid = set.getId()
+        element_ids = self.getElementNames(sid)
+
+        if saved_data is None and no_defaults:
+            pass
+        elif saved_data is None:
+            # use the sets defaults
             data.update(set.getDefaults( content=ob ))
+            
+            # record which elements we used default values for
+            using_defaults = element_ids
         else:
             # make a copy so we can modify with acq metadata
             data.update(saved_data)
-            
+
+            if not no_defaults:
+                # update individual elements with default values
+                # if they don't have a saved value.
+                for eid in element_ids:
+                    if data.has_key(eid):
+                        continue
+                    data[eid] = set.getElement(eid).getDefault( content=ob)
+                    using_defaults.append(eid)
+
+        # cache metadata
         self.cached_values[ (acquire, set_id) ]=data
 
         if not acquire:
             return data
 
         # get the acquired metadata
-        sid = set.getId()        
         hk = data.has_key
         for e in [e for e in set.getElements() if e.isAcquireable()]:
             eid = e.getId()
-            if hk(eid) and data[eid] and not using_defaults:
+            if hk(eid) and data[eid] and not eid in using_defaults:
                 continue
             aqelname = encodeElement(sid, eid)
             try:
@@ -458,7 +490,7 @@ class MetadataBindAdapter(Implicit):
         if triggers:
             for k in keys:
                 if triggers.has_key(k):
-                    try: # hmm.. get the trigger from the ob or the delegated ob?
+                    try: 
                         getattr(ob, triggers[k])()
                     except: # gulp
                         pass
@@ -506,9 +538,11 @@ InitializeClass(MetadataBindAdapter)
 
 def validateData(binding, set, data, errors_dict=None):
     # XXX formulator specific
-    
     from Products.Formulator.Errors import ValidationError
-    for e in set.getElements():
+    
+    # we only validate elements that exist in the data or for which the element
+    # is required (so we can get the required validation error)
+    for e in [e for e in set.getElements() if data.has_key(e.getId()) or e.isRequired()]:
         try:
             data[e.getId()] = e.validate(data)
         except ValidationError, exception:
