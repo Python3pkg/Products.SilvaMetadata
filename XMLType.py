@@ -19,7 +19,7 @@ def serialize( value):
         return '<element type="float">%s</element>' % unicode(value)
     
     elif isinstance(value, types.StringType):
-        return '<element type="string">%s</element>'%unicode(escape(value), 1)
+        return '<element type="string">%s</element>'%unicode(escape(value))
     
     elif isinstance(value, DateTime):
         return '<element type="date">%s</element>'%unicode(value)
