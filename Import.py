@@ -6,6 +6,7 @@ from xml.sax import make_parser, ContentHandler
 from xml.dom import XMLNS_NAMESPACE
 from UserDict import UserDict
 from XMLType import deserialize
+from Exceptions import NotFound
 
 _marker = []
 
@@ -305,8 +306,6 @@ def import_metadata(content, content_node):
     for namespace_attr in metadata_node.attributes.values():
         if not namespace_attr.namespaceURI == XMLNS_NAMESPACE:
             continue
-        # verify set exists
-        set = metadata_tool.getMetadataSetFor(namespace_attr.value)
         metadata[namespace_attr.value] = {}
 
     for child in metadata_node.childNodes:
@@ -317,7 +316,10 @@ def import_metadata(content, content_node):
 
     for k, v in metadata.items():
         # First delete 'read-only' elements from dictionary
-        set_name = binding.getSetNameByURI(k)
+        try:
+            set_name = binding.getSetNameByURI(k)
+        except NotFound:
+            continue
         element_names = v.keys()
         for element_name in element_names:
             if not binding.isEditable(set_name, element_name):
