@@ -2,7 +2,7 @@
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 from cgi import escape
-from types import IntType, FloatType
+from types import IntType, FloatType, ListType
 
 from Interfaces import IMetadataSetExporter
 
@@ -35,7 +35,7 @@ class MetadataSetExporter:
 
         for e in self.set.getElements():
             
-            print >> out, '  <element id="%s">'%e.getId()
+            print >> out, '  <metadata_element id="%s">'%e.getId()
             print >> out, '   <index_type>%s</index_type>'%e.index_type
             print >> out, '   <index_p>%s</index_p>'%e.index_p
             print >> out, '   <field_type>%s</field_type>'%e.field_type
@@ -67,6 +67,9 @@ class MetadataSetExporter:
                 elif isinstance(v, FloatType):
                     print >> out,    '        <value key="%s" type="%s" value="%d" />'%(
                         k, 'float', v )
+                elif isinstance(v, ListType):
+                    print >> out,    '        <value key="%s" type="%s" value="%s" />'%(
+                        k, 'list', escape(str(v)) )
                 else:
                     print >> out,    '        <value key="%s" type="str" value="%s" />'%(
                         k, escape(str(v)) )
@@ -88,7 +91,7 @@ class MetadataSetExporter:
                     )
             print >> out, '   </field_messages>'
 
-            print >> out, '  </element>'
+            print >> out, '  </metadata_element>'
             
         print >> out, '</metadata_set>'
         

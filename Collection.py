@@ -22,9 +22,13 @@ class MetadataCollection(Folder):
 
     security = ClassSecurityInfo()
 
-    def addMetadataSet(self, id, namespace_prefix, namespace_uri, RESPONSE=None):
+    def addMetadataSet(self,
+                       id,
+                       namespace_prefix,
+                       namespace_uri,
+                       RESPONSE=None):
         " "
-        
+
         set = MetadataSet(id, namespace_prefix, namespace_uri)
         self._setObject(id, set)
 
@@ -48,10 +52,14 @@ class MetadataCollection(Folder):
     def getMetadataSets(self):
         return self.objectValues('Metadata Set')
 
-    def importSet(self, file_handle):
+    def importSet(self, xml_file, RESPONSE=None):
         """ import an xml definition of a metadata set"""
-        set_node = read_set(file_handle)
+            
+        set_node = read_set(xml_file)
         make_set(self, set_node)
+
+        if RESPONSE is not None:
+            return self.manage_main(update_menu=1)
             
 
 InitializeClass(MetadataCollection)

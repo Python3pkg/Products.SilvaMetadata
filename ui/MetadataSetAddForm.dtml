@@ -18,18 +18,32 @@ examples include DublinCore (www.dublincore.org), LOM, and SCORM.
        </tr>
 
    <tr><td>XML Namespace Prefix</td>
-       <td><input type="text" name="namespace_prefix:ignore_empty"></td>
+       <td><input type="text" name="namespace_prefix:ignore_empty" /></td>
        </tr>
 
    <tr><td>XML Namespace URI</td>
-       <td><input type="text" name="namespace_uri:ignore_empty"></td>
+       <td><input type="text" name="namespace_uri:ignore_empty" /></td>
        </tr>
 
    <tr><td colspan="2">
-       <input type="submit" value="add metadata set">
+       <input type="submit" value="add metadata set" />
        </td></tr>
 
   </table>
+
+</form>
+
+<form action="importSet" method="POST" enctype="multipart/form-data">
+
+  <table>
+
+  <tr><td>Metadata Set XML </td>
+      <td><input type="file" name="xml_file"/></td>
+  </tr>
+
+  <tr><td colspan="2">
+      <input type="submit" value="import metadata set" />
+      </td></tr>
 
 </form>
 

@@ -13,13 +13,13 @@ class DefinitionNode(UserDict):
 
     def __getattr__(self, name):
 
-        v = self.__dict__.get(name, marker)
-        if v is marker:
+        v = self.__dict__.get(name, _marker)
+        if v is _marker:
             return self.data[name]
         return v
     
     def __setattr__(self, name, value):
-        if name in PolicyNode.reserved:
+        if name in DefinitionNode.reserved:
             self.__dict__[name]=value
         else:
             self.data[name]=value
@@ -36,8 +36,10 @@ class MetaReader(ContentHandler):
         name = element_name.lower()
         if self.prefix: name = '%s%s'%(self.prefix, name.capitalize())
         else: name = name.capitalize()
-        method = getattr(self, 'start%s'%name, None)
 
+        method = getattr(self, 'start%s'%name, None)
+        #print name, method
+        
         # get rid of unicode...
         d = {}
         for k, v in attrs.items():
@@ -52,8 +54,10 @@ class MetaReader(ContentHandler):
 
         name = element_name.lower()
         
-        if self.prefix: name = '%s%s'%(self.prefix, name.capitalize())            
-        method = getattr(self, 'end%s'%name.capitalize(), None)
+        if self.prefix: name = '%s%s'%(self.prefix, name.capitalize())
+        else: name = name.capitalize()
+        method = getattr(self, 'end%s'%name, None)
+        #print 'end', name, method
         
         if method: 
             apply(method, (chars,))
@@ -70,14 +74,14 @@ class MetadataSetReader(MetaReader):
         self.set = s = DefinitionNode(attrs)
         s.setdefault('elements', [])
         
-    def startElement(self, attrs):
+    def startMetadata_element(self, attrs):
         element = DefinitionNode(attrs)
         self.set.elements.append(element)
 
     def getElement(self):
         return self.set.elements[-1]
     
-    def endIndextype(self, chars):
+    def endIndex_type(self, chars):
         self.getElement().index_type = chars
 
     def endIndex_p(self, chars):
@@ -147,13 +151,14 @@ class MetadataSetReader(MetaReader):
         self.getElement().field_messages = []
         self.prefix='FieldM'
 
-    def endFieldMField_message(self, chars):
+    def endFieldMField_messages(self, chars):
         self.prefix = ''
 
     def startFieldMmessage(self, attrs):
         fm = DefinitionNode(attrs)
         self.getElement().field_messages.append(fm)
-
+        
+    
     def endFieldMmessage(self, chars):
         self.getElement().field_messages[-1].text = chars
 
@@ -168,7 +173,7 @@ def read_set( xml ):
 def make_set( container, set_node ):
 
     import Configuration
-    from Compatiblity import getToolByName
+    from Compatibility import getToolByName
     from Products.Formulator.TALESField import TALESMethod
     
     pm = getToolByName(container, 'portal_metadata')
@@ -187,7 +192,7 @@ def make_set( container, set_node ):
                                 e_node.index_p )
 
         element = set.getElement(e_node.id)
-
+        
         field = element.field
         for fv in e_node.field_values:
             k = fv.key
@@ -197,6 +202,12 @@ def make_set( container, set_node ):
                 v = int(v)
             elif t == 'float':
                 v = float(v)
+            elif t == 'list':
+                # XXX this is incomplete support for lists
+                # the originial version of formulator xml support
+                # did an eval here, which is not an option
+                v = filter(None, [vi.strip() for vi in v[1:-1].split(',')])
+                
             field.values[k]=v
 
         # some sort of formulator hack
@@ -204,7 +215,8 @@ def make_set( container, set_node ):
             field.on_value_input_style_changed(field.get_value('input_style'))
             
         for ft in e_node.field_tales:
-            field.field_tales[ft.key] = TALESMethod(ft.expr)
+            if ft.expr:
+                field.tales[ft.key] = TALESMethod(ft.expr)
 
         for fm in e_node.field_messages:
             field.message_values[fm.name]=fm.text
@@ -212,7 +224,7 @@ def make_set( container, set_node ):
 def import_metadata( content, content_node):
     """
 
-    minimal import system.
+    minimal import system for object metadata
 
     """
     
@@ -230,7 +242,6 @@ def import_metadata( content, content_node):
     for ns, uri_node in metadata_node.attributes.items():
         if not ns[0] == XMLNS_NAMESPACE:
             continue
-        
         # verify set exists
         set = metadata_tool.getMetadataSetFor(uri_node.value)
         metadata[uri_node.value]={}
@@ -257,5 +268,8 @@ if __name__ == '__main__':
     for k,v in set_node.items():
         print k
 
-        for k,v in v.items():
-            print "  "*5, k, v
+        if isinstance(v, DefinitionNode):
+            for k,v in v.items():
+                print "  "*5, k, v
+        else:
+            print v
