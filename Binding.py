@@ -7,7 +7,7 @@ from UserDict import UserDict
 
 from Acquisition import Implicit, aq_base
 from zExceptions import Unauthorized
-from Exceptions import NotFound
+from Exceptions import NotFound, BindingError
 from Export import ObjectMetadataExporter
 from Index import getIndexNamesFor
 import Initialize as BindingInitialize
@@ -47,12 +47,17 @@ class MetadataBindAdapter(Implicit):
         self.content = content
 
         if isinstance(collection, types.ListType):
+            self.ordered_set_names = []            
             d = {}
             for s in collection:
                 d[s.getId()]=s
+                self.set_order.append(s.getId())
             collection = d
-            
-        assert isinstance(collection, types.DictType)
+        elif isinstance(collection, types.DictType):
+            # no explicit order defined
+            self.ordered_set_names = collection.keys()
+        else:
+            raise BindingError ("metadata sets in wrong format")
         
         self.collection = collection
         self.cached_values = {}
@@ -169,9 +174,7 @@ class MetadataBindAdapter(Implicit):
         return the ids of the metadata sets available for this content
         type.
         """
-        names = self.collection.keys()
-        names.sort()
-        return names
+        return tuple(self.ordered_set_names)
 
     security.declarePublic('keys')
     keys = getSetNames
