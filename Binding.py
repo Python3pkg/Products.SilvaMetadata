@@ -214,6 +214,51 @@ class MetadataBindAdapter(Implicit):
         element = self.collection[set_id].getElement(element_id)
         ob = self._getAnnotatableObject()
         return element.isEditable(ob)
+
+
+    security.declarePublic('listAcquired')        
+    def listAcquired(self):
+        """
+        compute and return a list of (set_id, element_id)
+        values for all metadata which this binding/content
+        acquires from above in the containment hiearchy.
+        """
+        res = []
+        ob = self._getAnnotatableObject()
+        
+        for s in self.collection.values():
+            sid = s.getId()
+            data = self._getData(set_id = sid, acquire=0)
+            for e in s.getElements():
+                eid = e.getId()
+                if data.has_key(eid) and data[eid]:
+                    continue
+                name = encodeElement(sid, e.getId())
+                try:
+                    value = getattr(ob, name)
+                except AttributeError:
+                    continue
+                # filter out any empty metadata fields
+                # defined on ourselves to acquire
+                if not hasattr(aq_base(ob), name):
+                    res.append( (sid, eid) )
+
+        return res
+
+    security.declarePublic('listAcquirable')
+    def listAcquirable(self):
+        """
+        compute and return a list of (set_id, element_id)
+        values for all metadata which this binding/content
+        has defined to acquire for content *lower* in
+        the containment heirarchy.
+        """
+
+        acquire_runtime = self._getBindData().get(AcquireRuntime)
+        if acquire_runtime is None:
+            return ()
+        return tuple(acquire_runtime)
+            
         
     #################################
     ### Data Accessor Interface
@@ -274,34 +319,7 @@ class MetadataBindAdapter(Implicit):
             if token in acquire_runtime:
                 acquire_runtime.remove(token)
 
-    security.declarePublic('listAcquired')        
-    def listAcquired(self):
-        """
-        compute and return a list of (set_id, element_id)
-        values for all metadata which this binding/content
-        acquires from the containment hiearchy.
-        """
-        res = []
-        ob = self._getAnnotatableObject()
-        
-        for s in self.collection.values():
-            sid = s.getId()
-            data = self._getData(set_id = sid, acquire=0)
-            for e in s.getElements():
-                eid = e.getId()
-                if data.has_key(eid) and data[eid]:
-                    continue
-                name = encodeElement(sid, e.getId())
-                try:
-                    value = getattr(ob, name)
-                except AttributeError:
-                    continue
-                # filter out any empty metadata fields
-                # defined on ourselves to acquire
-                if not hasattr(aq_base(ob), name):
-                    res.append( (sid, eid) )
 
-        return res
 
     security.declarePublic('setObjectDelegator')
     def setObjectDelegator(self, method_name):
@@ -322,6 +340,7 @@ class MetadataBindAdapter(Implicit):
     def getObjectDelegator(self):
         return self._getBindData().get(ObjectDelegate)
 
+    security.declarePublic('clearObjectDelegator')
     def clearObjectDelegator(self):
         bind_data = self._getBindData()
         try:
