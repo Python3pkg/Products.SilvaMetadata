@@ -160,10 +160,11 @@ class MetadataBindAdapter(Implicit):
             eid = e.getId()
             if hasattr(aq_base(e.field), 'sub_form'):
                 for sfid in e.field.sub_form.get_field_ids():
-                    data[sfid] = data_from_request.get(sfid, '')
+                    sfkey = e.field.generate_subfield_key(sfid, validation=1)
+                    data[sfkey] = data_from_request.get(sfkey, '')
             else:
                 data[eid] = data_from_request.get(eid, '')
-
+        print data_from_request, data
         return self.setValues(set_id, data, reindex)
 
     #################################
