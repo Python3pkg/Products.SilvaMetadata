@@ -1,0 +1,104 @@
+
+Issues
+
+- Ghost binding needs to deal with type mapping to 
+  the original type. bummer.
+
+TODO
+
+- type specific metadata runtime initialization
+  set defaults here.
+
+- getform shouldn't acquire values
+
+- runtime initilization
+
+- element set delegation
+  element computed attr manage interface
+
+- saving values
+
+- vocabulary
+
+- serializing metadata for an object.
+
+- compatiblity w/ cmf and silva
+
+
+Brief Use Cases
+
+- import/export
+
+- per content type customization... sigh
+
+- form generation
+
+- presentation generation
+
+- validation
+
+- field delegation
+
+- composition of metadata
+
+- export on per content type basis???
+
+  - too wacky
+
+
+
+Binding API Usage Examples
+
+   portal_amt = getToolByName(self, 'portal_amt')
+   binding = portal_amt.getMetadata(content)
+
+   ## views
+   # render a form for dublincore
+   binding.renderForm('dublincore')
+
+   # render a view for all metadata
+   binding.renderForm()
+
+   # render all from request for building forms with validation
+   binding.renderForm( set_id='dublincore', REQUEST=REQUEST)
+
+   ## validation
+   # validation against a dictionary
+   errors = {}
+   data = binding.validate(mydict, errors, 'dublincore')
+
+   # validate against the request, when no errors dict, passed..
+   # errors will be raised.
+   data = binding.validateRequest(request, set_id='dublincore')
+
+   ## store
+
+   # set values from the request
+   binding.setValuesFromRequest(REQUEST)
+   binding.setValues(set_id='dublincore', data=data)
+
+   ## advanced runtime
+   # 1. containment acquisition of metadata
+   # 2. delegation on object level
+   # 3. accessors/mutators
+   # 4. events ?
+
+   # sets it such that all objects below this object will
+   # acquire it from this object (assuming they don't have their
+   # own value for the metadata element set, and that there is
+   # not another object with acquisition set to true closer to
+   # the target acquiring  object. # ugh.. a diagram would be nice
+   binding.setAcquire(DublinCore, 'Subject')
+
+   
+   binding.setObjectDelegate(DublinCore, 'Subject', delegator='getRealObject')
+
+
+
+## class ContentTypeMetadataPolicy(EventContainer):
+
+##     def updateObjects(self):
+##         portal_catalog = getToolByName(self, 'portal_catalog')
+##         results = portal_catalog(content_type=self.content_type)
+##         for r in results:
+##             r.getObject()

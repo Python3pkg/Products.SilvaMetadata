@@ -1,0 +1,87 @@
+<dtml-var manage_page_header>
+<dtml-var manage_tabs>
+
+<dtml-var "manage_form_title(this(), _,
+           form_title='Edit Metadata Element',
+	   )">
+
+<p class="form-help">
+An Element : <dtml-var id>
+</p>
+
+<form action="editElementPolicy" method="POST">
+
+  <table>
+
+   <tr><td>Field Type</td>
+       <td>
+           <select name="field_type">
+	   <dtml-in listFieldTypes prefix="ft">
+	   <option value="<dtml-var ft_item>" <dtml-if "field_type == ft_item">selected</dtml-if>><dtml-var ft_item></option>
+	   </dtml-in>
+	   </select>
+       </td>
+       </tr>
+
+   <dtml-comment>
+   <tr><td>Required</td>
+       <td>
+           <select name="required_p:int">
+           <option value="1" <dtml-if "required_p">selected</dtml-if>>Yes</option>
+           <option value="0" <dtml-if "not required_p">selected</dtml-if>>No</option>         
+	   </select>
+       </td>
+       </tr>
+   </dtml-comment>
+
+   <tr><td>Index Field</td>
+       <td>
+           <select name="index_p:int">
+           <option value="1" <dtml-if "index_p">selected</dtml-if>>Yes</option>
+           <option value="0" <dtml-if "not index_p">selected</dtml-if>>No</option>         
+	   </select>
+       </td>
+       </tr>
+
+   <tr><td>Index Type</td>
+       <td>
+           <select name="index_type">
+	   <dtml-in listIndexTypes prefix="idx">
+	    <option value="<dtml-var idx_item>" <dtml-if "idx_item==index_type">selected</dtml-if>><dtml-var idx_item></option>
+  	   </dtml-in>
+       </tr>
+
+       
+   <tr><td>Read Only</td>
+       <td>
+           <select name="read_only_p:int">
+           <option value="1" <dtml-if "read_only_p">selected</dtml-if>>Yes</option>
+           <option value="0" <dtml-if "not read_only_p">selected</dtml-if>>No</option>         
+	   </select>
+       </td>
+
+
+   <dtml-comment>
+   <tr><td>Use Default</td>
+       <td>
+           <select name="use_default_p:int">
+           <option value="1" <dtml-if "required_p">selected</dtml-if>>Yes</option>
+           <option value="0" <dtml-if "not required_p">selected</dtml-if>>No</option>         
+	   </select>
+       </td>
+       </tr>
+
+   <tr><td>Default</td>
+       <td><input type="text" name="id"></td>
+       </tr>
+   </dtml-comment>
+
+   <tr><td colspan="2">
+       <input type="submit" value="edit metadata element">
+       </td></tr>
+
+  </table>
+
+</form>
+
+<dtml-var manage_page_footer>
