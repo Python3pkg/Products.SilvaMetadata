@@ -418,8 +418,9 @@ class MetadataBindAdapter(Implicit):
             ob = content
 
         return ob
-
-    def _getData(self, set_id=None, namespace_key=None, acquire=1, no_defaults=0):
+        
+    def _getData(self, set_id=None, namespace_key=None,
+                 acquire=1, no_defaults=0):
         """
         find the metadata for the given content object,
         performs runtime binding work as well.

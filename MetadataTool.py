@@ -6,7 +6,7 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 from Access import invokeAccessHandler
 import Configuration
 from ZopeImports import *
-from Binding import MetadataBindAdapter
+from Binding import MetadataBindAdapter, encodeElement
 from Exceptions import BindingError
 from Namespace import DublinCore
 from Compatibility import IActionProvider, IPortalMetadata, ActionProviderBase
@@ -134,6 +134,32 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
                 )
         return invokeAccessHandler(self, content)
 
+    def getMetadataValue(self, content, set_id, element_id):
+        """Get a metadata value right away. This can avoid
+        building up the binding over and over while indexing.
+        """
+        # XXX how does this interact with security issues?
+        # get binding, unfortunately can't avoid creating it
+        binding = invokeAccessHandler(self, content)
+        set = binding._getSet(set_id, None)
+        element = set.getElement(element_id)
+
+        annotations = getToolByName(ob, 'portal_annotations')
+        metadata = annotations.getAnnotations(ob, MetadataNamespace)
+        saved_data = metadata.get(set.metadata_uri)
+        # if it's saved, we're done
+        if saved_data is not None:
+            return saved_data[element_id]
+        # if not, check whether we acquire it, if so, we're done
+        if e.isAcquireable():
+            aqelname = encodeElement(set_id, element_id)
+            try:
+                return getattr(ob, aqelname)
+            except AttributeError:
+                pass
+        # if not acquired, fall back on default
+        return element.getDefault(content=content)
+        
     #################################
     # misc
 

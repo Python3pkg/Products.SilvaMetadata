@@ -121,7 +121,7 @@ else:
 if Configuration.UsingCMF:
     index_expression_template = "python: object.portal_metadata.getMetdatata(object)['%s']['%s']"
 else:
-    index_expression_template = "python: object.service_metadata.getMetadata(object)['%s']['%s']"
+    index_expression_template = "python: object.service_metadata.getMetadataValue(object, '%s', '%s')"
     
 #################################
 ### Misc    
