@@ -144,7 +144,7 @@ class ObjectMetadataExporter:
                 # is no longer part of the metadata set, so we filter it out.
                 if not check(k):
                     continue
-                print >> out, '      <%s:%s>%s</%s:%s>'%(prefix, k, escape(v), sid, k)
+                print >> out, '      <%s:%s>%s</%s:%s>'%(prefix, k, escape(unicode(v)), sid, k)
 
         print >> out, '</metadata>'
 
