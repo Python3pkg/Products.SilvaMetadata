@@ -215,6 +215,10 @@ class MetadataElement(SimpleItem):
     def get_form_encoding(self):
         return encoding
 
+    # fields are not in unicode mode, unfortunately
+    def get_unicode_mode(self):
+        return 0
+    
     ## formulator sends on change messages when internal field
     ## values are changed, we catch the required message in
     ## order to maintain our invariant that an element can not
