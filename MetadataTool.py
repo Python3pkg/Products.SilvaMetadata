@@ -11,7 +11,8 @@ from Products.Formulator import Form
 from Access import invokeAccessHandler
 import Configuration
 from ZopeImports import *
-from Binding import MetadataNamespace, encodeElement
+from Namespace import MetadataNamespace, BindingRunTime
+from Binding import ObjectDelegate, encodeElement
 from Exceptions import BindingError
 from Compatibility import IActionProvider, IPortalMetadata, ActionProviderBase
 from Compatibility import getContentType, getContentTypeNames
@@ -155,6 +156,14 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         set = self.collection.getMetadataSet(set_id)
         element = set.getElement(element_id)
         annotations = getattr(aq_base(content), '_portal_annotations_', None)
+
+        bind_data = annotations and annotations[MetadataNamespace].get(BindingRunTime)
+        if bind_data:
+            delegate = bind_data.get(ObjectDelegate)
+            if delegate:
+                content = getattr(content,delegate)()
+                annotations = getattr(aq_base(content), '_portal_annotations_', None)
+
         try:
             saved_data = annotations[MetadataNamespace].get(set.metadata_uri)
         except (TypeError, KeyError):
