@@ -22,15 +22,17 @@ def listFields():
 #################################
 ### We are the monkies 
 
-def generate_field_key(self):
+def generate_field_key(self, validation=0):
     if self.field_record is None:
         return 'field_%s'%self.id
-    return '%s.%s:record'%(self.id, self.field_record)
+    elif validation:
+        return self.id
+    return '%s.%s:record'%(self.field_record, self.id)
 
-def generate_subfield_key(self, id):
-    if self.field_record is None:
+def generate_subfield_key(self, id, validation=0):
+    if self.field_record is None or validation:
         return 'subfield_%s_%s'%(self.id, id)
-    return 'subfield_%s_%s.%s:record'%(self.id, id, self.field_record)
+    return '%s.subfield_%s_%s:record'%(self.field_record, self.id, id)
 
 def render(self, value=None, REQUEST=None):
     """ """
@@ -52,12 +54,12 @@ def render_sub_field_from_request(self, id, REQUEST):
 
 def validate(self, REQUEST):
     """ """
-    return self._validate_helper( self.generate_field_key(), REQUEST)
+    return self._validate_helper( self.generate_field_key(validation=1), REQUEST)
         
 def validate_sub_field(self, id, REQUEST):
     """ """
     return self.sub_form.get_field(id)._validate_helper(
-        self.generate_subfield_key(id), REQUEST)
+        self.generate_subfield_key(id, validation=1), REQUEST)
     
 Field.field_record = None
 Field.generate_field_key = generate_field_key
