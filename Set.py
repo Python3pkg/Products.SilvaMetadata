@@ -1,6 +1,5 @@
 """
 author: kapil thangavelu <k_vertigo@objectrealms.net>
-$Id: Set.py,v 1.2 2003/04/22 17:58:48 hazmat Exp $
 """
 from __future__ import nested_scopes
 

@@ -2,7 +2,6 @@
 Misc. Utility Functions and classes
 
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
-$Id: utils.py,v 1.2 2003/04/22 17:58:48 hazmat Exp $
 """
 
 class StringBuffer:

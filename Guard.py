@@ -17,7 +17,6 @@ Changes to file as per ZPL
 - 4/11/03 - change expression context creation
 - 4/11/03 - misc import cleanups
 
-$Id: Guard.py,v 1.2 2003/04/22 17:58:48 hazmat Exp $
 """
 
 from string import split, strip, join

@@ -3,7 +3,6 @@ functions for installing and removing indexes for
 metadata elements in a zcatalog.
 
 author: kapil thangavelu <k_vertigo@objectrealms.net>
-$Id: Index.py,v 1.2 2003/04/22 17:58:48 hazmat Exp $
 """
 
 from Products.ProxyIndex import ProxyIndex

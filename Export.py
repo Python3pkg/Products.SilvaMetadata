@@ -1,3 +1,6 @@
+"""
+Author: kapil thangavelu <k_vertigo@objectrealms.net>
+"""
 from cgi import escape
 from types import IntType
 

@@ -2,7 +2,6 @@
 Provides for code compatiblity between silva and the cmf.
 
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
-$Id: Compatibility.py,v 1.1 2003/04/22 17:58:48 hazmat Exp $
 """
 
 import Configuration

@@ -1,16 +1,15 @@
+"""
+Marker Interfaces
+author: kapil thangavelu <k_vertigo@objectrealms.net>
+"""
 from Interface import Interface
-try:
-    from Products.CMFCore.interfaces.portal_metadata \
-         import portal_metadata as IPortalMetadata
-except ImportError:
-    class IPortalMetadata(Interface): pass
+from Compatiblity import IPortalMetadata
 
 #################################
 # Metadata Tool/Service Interface
 #################################
 class IMetadataTool(IPortalMetadata):
     pass
-    
 
 #################################
 # Base Building Blocks
