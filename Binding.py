@@ -143,7 +143,7 @@ class MetadataBindAdapter(Implicit):
         returns a dictionary of errors if any, or none otherwise
         """
         set = self.collection[set_id]
-        data = REQUEST.form.get(set.getId())
+        data = REQUEST.form.get(set.getId(), {})
         return self.setValues(set_id, data.copy(), reindex)
 
     #################################
@@ -535,7 +535,9 @@ class MetadataBindAdapter(Implicit):
 
         # reindex object
         if reindex:
-            reindex_elements = [e for e in elements if e.getId() in keys]
+            reindex_elements = [
+                e for e in elements 
+                if (e.getId() in keys) and e.index_p]            
             idx_names = getIndexNamesFor(reindex_elements)
             catalog = getToolByName(ob, 'portal_catalog')
             # cmf compatibility hack
