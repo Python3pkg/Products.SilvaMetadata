@@ -10,6 +10,7 @@ from Binding import MetadataNamespace, encodeElement
 from Exceptions import BindingError
 from Compatibility import IActionProvider, IPortalMetadata, ActionProviderBase
 from Compatibility import getContentType, getContentTypeNames
+from Acquisition import aq_base
 
 class MetadataTool(UniqueObject, Folder, ActionProviderBase):
 
@@ -136,18 +137,19 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
     def getMetadataValue(self, content, set_id, element_id):
         """Get a metadata value right away. This can avoid
         building up the binding over and over while indexing.
+
+        This really goes to the low-level to speed this up to the maximum.
+        It's only going to work for Silva, not CMF.
         """
         # XXX how does this interact with security issues?
-        # get binding, unfortunately can't avoid creating it
-        binding = invokeAccessHandler(self, content)
-        if binding is None:
-            return None
-        set = binding._getSet(set_id, None)
+        set = self.collection.getMetadataSet(set_id)
         element = set.getElement(element_id)
-
-        annotations = getToolByName(content, 'portal_annotations')
-        metadata = annotations.getAnnotations(content, MetadataNamespace)
-        saved_data = metadata.get(set.metadata_uri)
+        
+        annotations = getattr(aq_base(content), '_portal_annotations_', None)
+        try:
+            saved_data = annotations[MetadataNamespace].get(set.metadata_uri)
+        except (TypeError, KeyError):
+            saved_data = None
         # if it's saved, we're done
         if saved_data is not None and saved_data.has_key(element_id):
             return saved_data[element_id]
