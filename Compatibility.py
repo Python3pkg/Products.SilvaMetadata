@@ -105,9 +105,9 @@ else:
 #################################
 ### Catalog Expressions for ProxyIndex
 if Configuration.UsingCMF:
-    index_expression_template = "context.portal_metadata.getMetdatata(content)['%s']['%s']"
+    index_expression_template = "python: here.portal_metadata.getMetdatata(content)['%s']['%s']"
 else:
-    index_expression_template = "context.service_metadata.getMetadata(content)['%s']['%s']"
+    index_expression_template = "python: here.service_metadata.getMetadata(content)['%s']['%s']"
     
 #################################
 ### Misc    

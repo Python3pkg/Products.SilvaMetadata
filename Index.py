@@ -6,7 +6,8 @@ author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
 from Products.ProxyIndex import ProxyIndex
-from Compatibility import index_expression_template
+from Compatibility import index_expression_template, getToolByName
+from UserDict import UserDict
 
 def createIndexes(catalog, elements):
 
@@ -19,7 +20,7 @@ def createIndexes(catalog, elements):
         if idx_id in all_indexes:
             continue
         
-        catalog.addIndex(idx_id, ProxyIndex.meta_type, extra)
+        catalog.addIndex(idx_id, ProxyIndex.ProxyIndex.meta_type, extra)
         all_indexes.append(idx_id)
 
     return None
@@ -44,17 +45,16 @@ def createIndexId(element):
     return "%s%s"%(ms.metadata_prefix, element.getId())
 
 def createIndexArguements(element):
-
     d = {}
-    class IndexArgs: pass
-    
-    d['index_type'] = element.index_type
+    d['idx_type'] = element.index_type
     d['value_expr'] = createIndexExpression(element)
 
-    args = IndexArgs()
-    args.__dict__.update(d)
+    # we setup the idx context manually ourselves..
+    # proxyindex needs to find the zcatalog in the containement
+    # hierarchy to introspect the pluggable indexes.
+    d['idx_context'] = getToolByName(element, 'portal_catalog')
 
-    return args
+    return d
 
 def createIndexExpression(element):
     return index_expression_template%(
