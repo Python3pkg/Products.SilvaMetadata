@@ -82,7 +82,8 @@ class MetadataBindAdapter(Implicit):
     def renderElementView(self, set_id, element_id):
         element = self.getElement(set_id, element_id)
         data = self._getData(set_id)
-        return element.renderView(data.get(element_id, None))
+        value = data.get(element_id, None)
+        return element.renderView(value)
 
     security.declarePublic('renderElementEdit')
     def renderElementEdit(self, set_id, element_id):
@@ -444,8 +445,8 @@ class MetadataBindAdapter(Implicit):
             pass
         elif saved_data is None:
             # use the sets defaults
-            data.update(set.getDefaults(content=ob))
-
+            defaultvalues = set.getDefaults(content=ob)
+            data.update(defaultvalues)
             # record which elements we used default values for
             using_defaults = element_ids
         else:
@@ -458,7 +459,8 @@ class MetadataBindAdapter(Implicit):
                 for eid in element_ids:
                     if data.has_key(eid):
                         continue
-                    data[eid] = set.getElement(eid).getDefault(content=ob)
+                    defaultvalue = set.getElement(eid).getDefault(content=ob)
+                    data[eid] = defaultvalue
                     using_defaults.append(eid)
 
         # cache metadata
