@@ -140,6 +140,8 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         # XXX how does this interact with security issues?
         # get binding, unfortunately can't avoid creating it
         binding = invokeAccessHandler(self, content)
+        if binding is None:
+            return None
         set = binding._getSet(set_id, None)
         element = set.getElement(element_id)
 
