@@ -191,9 +191,11 @@ class MetadataBindAdapter(Implicit):
         set = self.collection[set_id]
         
         if mode is not None:
-            return set.getElementsFor(self.content, mode=mode)
+            elements = set.getElementsFor(self.content, mode=mode)
         else:
-            return [e.getId() for e in set.getElements()]
+            element = set.getElements()
+
+        return [e.getId() for e in elements]
 
     security.declarePublic('isViewable')
     def isViewable(self, set_id, element_id):
@@ -216,6 +218,7 @@ class MetadataBindAdapter(Implicit):
     #################################
     ### Data Accessor Interface
 
+    security.declarePublic('get')
     def get(self, set_id, element_id=None, acquire=1):
         data = self._getData(set_id=set_id, acquire=acquire)
         if element_id is not None:
