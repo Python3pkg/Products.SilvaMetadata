@@ -193,7 +193,7 @@ class MetadataBindAdapter(Implicit):
         if mode is not None:
             elements = set.getElementsFor(self.content, mode=mode)
         else:
-            element = set.getElements()
+            elements = set.getElements()
 
         return [e.getId() for e in elements]
 
