@@ -158,13 +158,13 @@ class MetadataElement(SimpleItem):
         """
         return self.write_guard.check(getSecurityManager(), self, content)
 
-    def renderView(self, value):
+    def renderView(self, value=None):
         """
         render the element given a particular element value
         """
         return self.field.render_view(value)
 
-    def renderEdit(self, value):
+    def renderEdit(self, value=None):
         """
         render the element as a form field given a particular value
         """
