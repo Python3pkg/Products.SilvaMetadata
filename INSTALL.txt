@@ -3,10 +3,10 @@ See also LICENSE.txt
 
 Meta::
 
-  Valid for:  SilvaMetadata 0.7.2
+  Valid for:  SilvaMetadata 0.7.3
   Author:     Martijn Faassen
   Email:      faassen@infrae.com
-  CVS:        $Revision: 1.4 $
+  CVS:        $Revision: 1.5 $
 
 Installing SilvaMetadata
 

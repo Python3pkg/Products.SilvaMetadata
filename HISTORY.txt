@@ -1,17 +1,21 @@
 Copyright (c) 2003 Infrae. All rights reserved.
 See also LICENSE.txt
-$Revision: 1.6 $
+$Revision: 1.7 $
 
 SilvaMetadata changes
 
-   In development
+   0.7.3
 
      Features added
 
-       - Icon.
+        - icon for service_metadata.
 
-       - ROADMAP.txt document.
+     Bugs fixed
 
+        - XML import of complex lists for items now works.
+
+        - Indexing with XML import now works.
+       
    0.7.2
 
      Bugs fixed
