@@ -40,6 +40,12 @@ def removeIndexes(catalog, elements):
 
     return None
 
+def getIndexNamesFor( elements ):
+    res = []
+    for e in elements:
+        res.append( createIndexId(e) )
+    return res
+
 def createIndexId(element):
     ms = element.getMetadataSet()
     return "%s%s"%(ms.metadata_prefix, element.getId())
