@@ -1,32 +1,48 @@
 """
 Tests for the SilvaMetada.
 
-$Id: test_Metadata.py,v 1.15 2003/09/17 16:34:33 ryzaja Exp $
+$Id: test_Metadata.py,v 1.16 2005/04/03 11:22:06 clemens Exp $
 """
-import Zope
-Zope.startup()
 
-from unittest import TestCase, TestSuite, makeSuite, main
+from unittest import TestSuite, makeSuite, main
 
 from cStringIO import StringIO
+
+from Testing import ZopeTestCase
 
 from AccessControl.SecurityManagement import newSecurityManager
 from AccessControl.SecurityManagement import noSecurityManager
 from Products.Annotations.AnnotationTool import AnnotationTool
-from Products.CMFCore.CatalogTool import CatalogTool
-from Products.CMFCore.PortalFolder import PortalFolder
-from Products.CMFCore.tests.base.testcase import SecurityTest
-from Products.CMFCore.TypesTool import FactoryTypeInformation as FTI
-from Products.CMFCore.TypesTool import TypesTool
-from Products.CMFCore.utils import getToolByName
+
+# TODO: check if running the tests with CMF does still work
+try:
+    from Products.CMFCore.CatalogTool import CatalogTool
+    from Products.CMFCore.PortalFolder import PortalFolder
+    from Products.CMFCore.tests.base.testcase import SecurityTest
+    from Products.CMFCore.TypesTool import FactoryTypeInformation as FTI
+    from Products.CMFCore.TypesTool import TypesTool
+    from Products.CMFCore.utils import getToolByName
+    with_CMF=True
+except ImportError:
+    with_CMF=False
+    from Products.Silva.tests import SilvaTestCase
+    
 from Products.Formulator import StandardFields
 from Products.Formulator.TALESField import TALESMethod
 from Products.SilvaMetadata.MetadataTool import MetadataTool
+from Products.SilvaMetadata.Compatibility import getToolByName
 from stubs import SecurityPolicyStub, AnonymousUserStub
+
+if with_CMF:
+    # FIXME: what to install here
+    ZopeTestCase.installProduct('CMFCore')
+    TestBaseClass = ZopeTestCase.ZopeTestCase
+else:
+    TestBaseClass = SilvaTestCase.SilvaTestCase
 
 SET_ID = 'ut_md'
 
-def setupTools(root):
+def setupCMFTools(root):
     root._setObject('portal_types', TypesTool())
     root._setObject('portal_annotations', AnnotationTool())
     root._setObject('portal_metadata', MetadataTool())
@@ -42,7 +58,7 @@ def setupContentTypes(context):
                                         filter_content_types=0)
                              )
 
-def setupContentTree(container):
+def setupContentTreeCMF(container):
     ttool = getToolByName(container, 'portal_types')
     ttool.constructContent('Folder', container, 'zoo')
 
@@ -54,6 +70,13 @@ def setupContentTree(container):
     mammals = zoo._getOb('mammals')
     reptiles = zoo._getOb('reptiles')
 
+    return zoo
+
+def setupContentTreeSilva(self, container):
+
+    zoo = self.add_folder(container, 'zoo', "Zoo Folder")
+    self.add_folder(zoo, 'mammals', "Zoo Mammals")
+    zoo = self.add_folder(zoo, 'reptiles', "Zoo Reptiles")
     return zoo
 
 def setupCatalog(context):
@@ -110,27 +133,27 @@ def setupMetadataMapping(context):
     mtool = getToolByName(context, 'portal_metadata')
     mapping = mtool.getTypeMapping()
     mapping.setDefaultChain('ut_md')
+    if not with_CMF:
+        mtool.addTypesMapping(
+            ('Silva Folder', ), ('ut_md', 'silva-extra'))
 
 
-class MetadataTests(SecurityTest):
+class MetadataTests(TestBaseClass):
 
-    def setUp(self):
-        get_transaction().begin()
-        self.connection = Zope.DB.open()
-        self.root =  self.connection.root()['Application']
-        newSecurityManager(None, AnonymousUserStub().__of__(self.root))
-        setupTools(self.root)
-        setupCatalog(self.root)
-        setupContentTypes(self.root)
+    def afterSetUp(self):
+        if with_CMF:
+            self.root = self.app
+            setupCMFTools(self.root)
+            setupCatalog(self.root)
+            setupContentTypes(self.root)
+
         setupMetadataSet(self.root)
         setupMetadataMapping(self.root)
-        setupContentTree(self.root)
-        self.root.REQUEST = {}
+        if with_CMF:
+            setupContentTreeCMF(self.root)
+        else:
+            setupContentTreeSilva(self, self.root)
 
-    def tearDown(self):
-        get_transaction().abort()
-        self.connection.close()
-        noSecurityManager()
 
 class TestSetImportExport(MetadataTests):
 
@@ -210,17 +233,18 @@ class TestMetadataElement(MetadataTests):
                          "Tales Context Passing Failed")
 
     def testGetDefaultWithTalesDelegate(self):
-        pm = getToolByName(self.root, 'portal_metadata')
-        collection = pm.getCollection()
+        mtool = getToolByName(self.root, 'portal_metadata')
+        mtoolId = mtool.getId()
+        collection = mtool.getCollection()
         set = collection.getMetadataSet(SET_ID)
         zoo = self.root.zoo
         test_value = 'Rabbits4Ever'
-        binding = pm.getMetadata(zoo)
+        binding = mtool.getMetadata(zoo)
         binding.setValues(SET_ID, {'Title':test_value})
         element = set.getElement('Description')
         # yikes, narly tales expression
-        method = "python: content.portal_metadata.getMetadata(content).get(" \
-                 "'%s', 'Title', no_defaults=1)" % SET_ID
+        method = "python: content.%s.getMetadata(content).get(" \
+                 "'%s', 'Title', no_defaults=1)" % (mtoolId, SET_ID)
         element.field._edit_tales({'default': TALESMethod(method)})
         value = binding.get(SET_ID, 'Description')
         self.assertEqual(value, test_value,
