@@ -166,7 +166,8 @@ class MetadataElement(SimpleItem):
         """
         is this element editable for the content object
         """
-        return self.write_guard.check(getSecurityManager(), self, content)
+        if not self.read_only_p:
+            return self.write_guard.check(getSecurityManager(), self, content)
 
     def isAcquireable(self):
         """
