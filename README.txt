@@ -26,7 +26,7 @@ Advanced Metadata System
 
     Validate Values for Metadata
     
-    Restrict Displayable/Editable Metadata
+    Restrict Displayable/Editable Metadata 
 
     Delegate Metadata Element to a different Definition
 

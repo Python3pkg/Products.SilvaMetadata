@@ -69,19 +69,19 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
 
     def listAllowedSubjects( self, content=None):
         catalog = getToolByName(self, 'portal_catalog')
-        return catalog.uniqueValuesFor()
+        return catalog.uniqueValuesFor('Subject')
 
     def listAllowedFormats(self, content=None):
         catalog = getToolByName(self, 'portal_catalog')
-        return catalog.uniqueValuesFor()
+        return catalog.uniqueValuesFor('Format')
     
     def listAllowedLanguages(self, content=None):
         catalog = getToolByName(self, 'portal_catalog')
-        return catalog.uniqueValuesFor()
+        return catalog.uniqueValuesFor('Language')
 
     def listAllowedRights(self, content=None):
         catalog = getToolByName(self, 'portal_catalog')
-        return catalog.uniqueValuesFor()
+        return catalog.uniqueValuesFor('Rights')
 
     #################################
     ## validation hooks

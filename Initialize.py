@@ -13,7 +13,7 @@ from Compatibility import getContentType
 
 _typeInitHandlers = {}
 
-def registerHandler(content_type, handler):
+def registerInitHandler(content_type, handler):
     assert iscallable(handler)
     global _typeInitHandlers
     _typeInitHandlers[content_type]=handler
