@@ -337,7 +337,7 @@ class MetadataBindAdapter(Implicit):
         if set_id:
             return self.collection[set_id]
         elif namespace_key:
-            return self.getSetByKey(namespace_key)
+            return self._getSetByKey(namespace_key)
         else:
             raise NotFound("metadata set not found %s %s"%(set_id, namespace_key))
 
@@ -497,7 +497,7 @@ class MetadataBindAdapter(Implicit):
         
     
     def _getSetByKey(self, namespace_key):
-        for s in self.collection:
+        for s in self.collection.values():
             if s.metadata_uri == namespace_key:
                 return s
         raise NotFound(str(namespace_key))

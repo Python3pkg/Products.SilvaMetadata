@@ -208,7 +208,7 @@ class MetadataSet(OrderedContainer):
         if RESPONSE is not None:
             RESPONSE.setHeader('Content-Type', 'text/xml')
             RESPONSE.setHeader('Content-Disposition',
-                               'attachment; filename=%s' % self.getId() )
+                               'attachment; filename=%s.xml' % self.getId() )
         return exporter()
         
     def setNamespace(self, ns_uri, ns_prefix):

@@ -10,7 +10,7 @@ from cgi import escape
 from DateTime import DateTime
 from Exceptions import XMLMarshallError
 
-def serialize( value, indent):
+def serialize( value):
 
     if isinstance(value, types.IntType):
         return '<element type="integer">%s</element>'%unicode(value)
@@ -30,6 +30,9 @@ def serialize( value, indent):
     elif isinstance(value, types.ListType):
         return '<element_list type="list">%s</element_list>'%(''.join(map(serialize, value)))
 
+    elif isinstance(value, types.NoneType):
+        return '<element type="none">%s</element>'%unicode(value)
+
 def deserialize( node ):
     
     if not node.nodeName in ('element', 'element_list'):
@@ -39,16 +42,16 @@ def deserialize( node ):
 
     try:
         if node_type == 'integer':
-            return int(node.nodeValue)
+            return int(node.childNodes[0].nodeValue)
 
         elif node_type == 'float':
-            return float(node.nodeValue)
+            return float(node.childNodes[0].nodeValue)
 
         elif node_type == 'string':
-            return node.nodeValue
+            return node.childNodes[0].nodeValue
 
         elif node_type == 'date':
-            return DateTime(node.nodeValue)
+            return DateTime(node.childNodes[0].nodeValue)
 
         elif node_type == 'list':
             res = []

@@ -258,21 +258,27 @@ def import_metadata( content, content_node):
 
     metadata = {}
     binding = metadata_tool.getMetadata(content)
-    
-    for ns, uri_node in metadata_node.attributes.items():
-        if not ns[0] == XMLNS_NAMESPACE:
+
+    for node in metadata_node.attributes.values():
+        if not node.namespaceURI == XMLNS_NAMESPACE:
             continue
         # verify set exists
-        set = metadata_tool.getMetadataSetFor(uri_node.value)
-        metadata[uri_node.value]={}
+        set = metadata_tool.getMetadataSetFor(node.value)
+        metadata[node.value]={}
 
+    
     for node in metadata_node.childNodes:
         if not node.namespaceURI:
             continue
         metadata[node.namespaceURI][node.localName]= deserialize( node.firstChild )
-        
+
+    
     for k, v in metadata.items():
-        errors = binding.setValues(namespace_key=k, data=v)
+        errors = binding._setData(namespace_key=k,
+                                  data=v,
+                                  reindex=1)
+        errors = None
+        
         if errors:
             raise ValidationError( "%s %s"%(
                 str(content.getPhysicalPath()),

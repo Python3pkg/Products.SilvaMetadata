@@ -92,6 +92,37 @@ def setupMetadataSet(context):
     
     return set
 
+def setupExtendedMetadataSet(context):
+    # add some additional metadata fields
+    from Products.Formulator.TALESField import TALESMethod    
+    from Products.Formulator import StandardFields
+
+    pm = getToolByName(context, 'portal_metadata')
+    collection = pm.getCollection()
+    set = collection.getMetadataSet(SET_ID)
+
+    set.addMetadataElement('ModificationDate',
+                           StandardFields.DateTimeField.meta_type,
+                           'DateIndex',
+                           1
+                           )
+
+    element = set.getElement('ModificationDate')
+    element.field._edit_tales({'default': TALESMethod('content/bobobase_modification_time')})
+
+    element.field._edit({'required':0})
+
+    set.addMetadataElement('Languages',
+                           StandardFields.LinesField.meta_type,
+                           'KeywordIndex',
+                           1
+                           )
+    element = set.getElement('Languages')
+    element.field._edit({'required':0})
+
+    ######
+    set.initialize()
+    
 def setupMetadataMapping(context):
 
     mtool = getToolByName(context, 'portal_metadata')
@@ -130,6 +161,59 @@ class TestSetImportExport( MetadataTests ):
 
         assert xml == xml2, "Import/Export disjoint"
 
+class TestObjectImportExport( MetadataTests ):
+
+    def testImportExport(self):
+
+        from Products.ParsedXML.ParsedXML import createDOMDocument
+        from Products.SilvaMetadata.Import import import_metadata
+        from cStringIO import StringIO
+
+        pm = getToolByName(self.root, 'portal_metadata')
+
+        setupExtendedMetadataSet(self.root)
+
+        zoo = self.root.zoo
+        mammals = zoo.mammals
+
+
+        
+        binding = pm.getMetadata(zoo)
+        values = binding.get(SET_ID)
+
+        lines = """
+        english
+        hebrew
+        swahili
+        urdu
+        """
+        
+        values.update(
+            {'Title':'hello world',
+             'Description':'cruel place',
+             'Languages':lines }
+            )
+
+        binding.setValues( SET_ID, values)
+        xml = "<folder>%s</folder>"%binding.renderXML(SET_ID)
+
+        dom = createDOMDocument(xml)
+        import_metadata(mammals, dom.childNodes[0])
+
+        mammals_binding = pm.getMetadata(mammals)
+        mammal_values = binding.get(SET_ID)
+
+        for k in values.keys():
+            self.assertEqual(values[k], mammal_values[k],
+                             "Object Import/Export disjoint")
+        
+        xml2 = "<folder>%s</folder>"%mammals_binding.renderXML(SET_ID)
+        self.assertEqual(xml, xml2, "Object Import Export disjoint")
+
+        
+class TestCataloging( MetadataTests ):
+    pass
+        
 class TestMetadataElement( MetadataTests ):
 
     def testGetDefault(self):
@@ -171,7 +255,6 @@ class TestMetadataElement( MetadataTests ):
         try:
             element.field._edit( {'required':0})
             element.editElementPolicy(acquire_p = 1)
-            #import pdb; pdb.set_trace()
             element.field._edit( {'required':1})
         except ConfigurationError:
             pass

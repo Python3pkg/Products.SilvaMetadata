@@ -15,3 +15,4 @@ def install(self):
 
     print >> out, "Installation Complete"
     return out.getvalue()
+

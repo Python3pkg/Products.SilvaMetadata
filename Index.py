@@ -51,7 +51,6 @@ def createIndexId(element):
     return "%s%s"%(ms.metadata_prefix, element.getId())
 
 def createIndexArguements(element):
-    print element.index_constructor_args, type(element.index_constructor_args)
 
     d = ProxyIndex.RecordStyle()
 
