@@ -6,7 +6,7 @@ Meta:
   Valid for:  SilvaMetadata 0.7.x
   Author:     Martijn Faassen
   Email:      <faassen@infrae.com>
-  CVS:        $Revision: 1.1 $
+  CVS:        $Revision: 1.2 $
 
 ================
 Metadata roadmap
@@ -98,7 +98,7 @@ plug in other schema/form systems as well.
 Use Formulator XML serialization
 --------------------------------
 
-SilvaMetadat uses an incompatible home-grown serialization of
+SilvaMetadata uses an incompatible home-grown serialization of
 Formulator forms. This is bad from a maintainance point of view.
 Formulator's should be used and forms should be exported as a whole,
 not interviewed with the other information.
