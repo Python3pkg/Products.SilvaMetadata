@@ -14,6 +14,7 @@ raise an exception.
 
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
+
 from Binding import MetadataBindAdapter
 from Compatibility import getContentType
 from Exceptions import BindingError
@@ -51,6 +52,18 @@ def default_accessor(tool, content_type, content):
         raise BindingError("no metadata sets defined for %s" % content_type)
 
     return MetadataBindAdapter(content, metadata_sets).__of__(content)
+
+
+def cached_accessor(tool, content_type, content):
+    """
+    bindings that get cached
+    """
+    binding  = getattr(content, '_v_binding', None)
+
+    if binding is None:
+        binding = default_accessor( tool, content_type, content)
+        setattr(content, '_v_binding', binding)
+    return binding
 
 
 registerAccessHandler(None, default_accessor)
