@@ -1,7 +1,7 @@
 """
 Tests for the SilvaMetada.
 
-$Id: test_Metadata.py,v 1.14 2003/09/17 15:41:28 ryzaja Exp $
+$Id: test_Metadata.py,v 1.15 2003/09/17 16:34:33 ryzaja Exp $
 """
 import Zope
 Zope.startup()
@@ -296,7 +296,7 @@ class TestAdvancedMetadata(MetadataTests):
         acquired = z_binding.listAcquired()
         self.assertEqual(len(acquired), 0)
 
-    def dont_testObjectDelegation(self):
+    def testObjectDelegation(self):
         from Acquisition import Implicit
         class Delegator(Implicit):
             def __init__(self, name):
@@ -324,7 +324,7 @@ class TestAdvancedMetadata(MetadataTests):
         m_binding.clearObjectDelegator()
         assert m_binding[SET_ID]['Title'] != r_binding[SET_ID]['Title']
 
-    def dont_testMutationTriggerDelegation(self):
+    def testMutationTriggerDelegation(self):
         class MutationTrigger:
             def __init__(self):
                 self.called = 0
