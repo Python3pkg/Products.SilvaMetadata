@@ -3,10 +3,10 @@ See also LICENSE.txt
 
 Meta::
 
-  Valid for:  SilvaMetadata 0.7.3
+  Valid for:  SilvaMetadata 0.7.4
   Author:     Martijn Faassen
   Email:      faassen@infrae.com
-  CVS:        $Revision: 1.5 $
+  CVS:        $Revision: 1.6 $
 
 Installing SilvaMetadata
 
@@ -23,29 +23,17 @@ SilvaMetadata Requirements
 
       "Formulator":http://www.zope.org/Members/infrae/Formulator
 
-    or just download:
-
-      "Formulator-1.5.0.tgz":http://zope.org/Members/infrae/Formulator/Formulator-1.5.0/Formulator-1.5.0.tgz
-
-  Annotations (0.4.2)
+  Annotations (0.4.3)
 
     It can be found here:
 
       "Annotations":http://www.zope.org/Members/infrae/Annotations
 
-    or just download:
-
-      "Annotations-0.4.2.tgz":http://zope.org/Members/infrae/ProxyIndex/Annotations-0.4.2/Annotations-0.4.2.tgz
-
-  ProxyIndex (1.1.1)
+  ProxyIndex (1.1.2)
 
     It can be found here:
 
       "ProxyIndex":http://www.zope.org/Members/infrae/ProxyIndex
-
-    or just download:
-
-      "ProxyIndex-1.1.1.tgz":http://zope.org/Members/infrae/ProxyIndex/ProxyIndex-1.1.1/ProxyIndex-1.1.1.tgz
 
 Silva Installation
 
