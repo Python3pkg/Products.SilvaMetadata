@@ -33,10 +33,16 @@ class MetadataSetExporter:
             self.set.metadata_prefix
             )
 
-        out.write('<title>%s</title>\n' % (escape(self.set.getTitle(), 1)))
-        out.write('<description>%s</description>\n'
-                   % (escape(self.set.getDescription(), 1)))
-
+        title = escape(self.set.getTitle(), 1)
+        description = escape(self.set.getDescription(), 1)
+        minimalrole = escape(self.set.getMinimalRole(), 1)
+        category = escape(self.set.getCategory(), 1)
+            
+        out.write('<title>%s</title>\n' % (title))
+        out.write('<category>%s</category>\n' % (category))
+        out.write('<description>%s</description>\n' % (description))
+        out.write('<minimalrole>%s</minimalrole>\n' % (minimalrole))
+                   
         for e in self.set.getElements():
 
             print >> out, '  <metadata_element id="%s">' % e.getId()
@@ -102,11 +108,10 @@ class MetadataSetExporter:
 
             print >> out, '   <field_messages>'
             for message_key in f.get_error_names():
+                message_text = f.get_error_message(
+                    message_key, want_message_id=False)
                 out.write('     <message name="%s">%s</message>\n' % (
-                    escape(message_key, 1),
-                    escape(f.get_error_message(message_key), 1)
-                    )
-                )
+                    escape(message_key, 1), escape(message_text, 1)))
 
             print >> out, '   </field_messages>'
 

@@ -37,12 +37,12 @@ class MetaReader(ContentHandler):
 
     def startElement(self, element_name, attrs):
         name = element_name.lower()
-        if self.prefix: name = '%s%s' % (self.prefix, name.capitalize())
-        else: name = name.capitalize()
+        if self.prefix:
+            name = '%s%s' % (self.prefix, name.capitalize())
+        else: 
+            name = name.capitalize()
 
         method = getattr(self, 'start%s' % name, None)
-        #print name, method
-
         # get rid of unicode...
         d = {}
         for k, v in attrs.items():
@@ -54,14 +54,13 @@ class MetaReader(ContentHandler):
     def endElement(self, element_name):
         chars = str(''.join(self.buf)).strip()
         self.buf = []
-
         name = element_name.lower()
-
-        if self.prefix: name = '%s%s' % (self.prefix, name.capitalize())
-        else: name = name.capitalize()
+        if self.prefix: 
+            name = '%s%s' % (self.prefix, name.capitalize())
+        else:
+            name = name.capitalize()
+        
         method = getattr(self, 'end%s' % name, None)
-        #print 'end', name, method
-
         if method:
             apply(method, (chars,))
 
@@ -80,6 +79,12 @@ class MetadataSetReader(MetaReader):
     def endDescription(self, chars):
         self.set.description = chars
 
+    def endMinimalrole(self, chars):
+        self.set.minimalrole = chars
+        
+    def endCategory(self, chars):
+        self.set.category = chars
+        
     def startMetadata_set(self, attrs):
         self.set = s = DefinitionNode(attrs)
         s.setdefault('elements', [])
@@ -208,20 +213,20 @@ def make_set(container, set_node):
 
     # compatiblity.. ick
     if not set_node.has_key('title'):
-        set_node['title']=''
+        set_node['title'] = ''
     if not set_node.has_key('description'):
-        set_node['description']=''
+        set_node['description'] = ''
 
     pm = getToolByName(container, 'portal_metadata')
 
     collection = getattr(pm, Configuration.MetadataCollection)
-    collection.addMetadataSet(set_node.id,
-                              set_node.ns_prefix,
-                              set_node.ns_uri,
-                              set_node.title,
-                              set_node.description)
+    collection.addMetadataSet(
+        set_node.id, set_node.ns_prefix, set_node.ns_uri, set_node.title,
+        set_node.description)
 
     set = pm.getMetadataSet(set_node.id)
+    set.setCategory(set_node.get('category', ''))
+    set.setMinimalRole(set_node.get('minimalrole', ''))
 
     for e_node in set_node.elements:
 
@@ -240,12 +245,9 @@ def make_set(container, set_node):
             except ValueError:
                 e_node[p] = 0
 
-        set.addMetadataElement(e_node.id,
-                               e_node.field_type,
-                               e_node.index_type,
-                               e_node.index_p,
-                               e_node.acquire_p,
-                               e_node.read_only_p)
+        set.addMetadataElement(
+            e_node.id, e_node.field_type, e_node.index_type, e_node.index_p,
+            e_node.acquire_p, e_node.read_only_p)
 
         element = set.getElement(e_node.id)
 
