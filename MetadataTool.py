@@ -2,13 +2,15 @@
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
+
+from Access import invokeAccessHandler
 import Configuration
 from ZopeImports import *
 from Binding import MetadataBindAdapter
+from Exceptions import BindingError
 from Namespace import DublinCore
-
 from Compatibility import IActionProvider, IPortalMetadata, ActionProviderBase
-from Compatibility import getContentType
+from Compatibility import getContentType, getContentTypeNames
 
 class MetadataTool(UniqueObject, Folder, ActionProviderBase):
 
@@ -125,11 +127,12 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         introspecting metadata
         """
         ct = getContentType(content)
-        ctm = self._getOb(Configuration.TypeMapping)
-        metadata_sets = ctm.getMetadataSetsFor(getContentType(content))
         
-        if metadata_sets:
-            return MetadataBindAdapter(content, metadata_sets).__of__(content)
+        if not ct in getContentTypeNames(self):
+            raise BindingError(
+                "invalid content type %s for metadata system"%ct
+                )
+        return invokeAccessHandler(self, content)
 
     #################################
     # misc
