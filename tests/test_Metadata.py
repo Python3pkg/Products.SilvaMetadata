@@ -15,7 +15,7 @@ from Products.CMFCore.tests.base.security import OmnipotentUser
 
 from Products.CMFCore.TypesTool import TypesTool
 from Products.CMFCore.CatalogTool import CatalogTool
-from Products.PortalAnnotations.AnnotationTool import AnnotationTool
+from Products.Annotations.AnnotationTool import AnnotationTool
 from Products.SilvaMetadata.MetadataTool import MetadataTool
 
 from Products.CMFCore.TypesTool import FactoryTypeInformation as FTI

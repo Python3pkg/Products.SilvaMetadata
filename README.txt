@@ -119,7 +119,7 @@ Advanced Metadata System
 
       - Formulator 1.4+ 
 
-      - PortalAnnotations 0.4.0
+      - Annotations 0.4.0
 
       - ProxyIndex-1.0.0
 
