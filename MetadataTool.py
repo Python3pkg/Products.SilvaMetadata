@@ -124,9 +124,12 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         data, and policy behavior into an api for manipulating and
         introspecting metadata
         """
+        ct = getContentType(content)
         ctm = self._getOb(Configuration.TypeMapping)
         metadata_sets = ctm.getMetadataSetsFor(getContentType(content))
-        return MetadataBindAdapter(content, metadata_sets).__of__(content)
+        
+        if metadata_sets:
+            return MetadataBindAdapter(content, metadata_sets).__of__(content)
 
     #################################
     # misc
