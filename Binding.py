@@ -224,6 +224,24 @@ class MetadataBindAdapter(Implicit):
         set = self._getSet(set_id, namespace_key)
         return [e.getId() for e in set.getElements()]
 
+    security.declarePublic('isViewable')
+    def isViewable(self, set_id, element_id):
+        """
+        is the element viewable for the content object
+        """        
+        element = self.collection[set_id].getElement(element_id)
+        ob = self._getAnnotatableObject()
+        return element.isViewable(ob)
+
+    security.declarePublic('isEditable')
+    def isEditable(self, set_id, element_id):
+        """
+        is the element editable for the content object
+        """        
+        element = self.collection[set_id].getElement(element_id)
+        ob = self._getAnnotatableObject()
+        return element.isEditable(ob)
+        
     #################################
     ### Accessor Interface
     def __getitem__(self, key):

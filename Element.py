@@ -3,6 +3,7 @@ Metadata Elements
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
+from AccessControl import getSecurityManager
 from Exceptions import NoContext, ConfigurationError
 from FormulatorField import getFieldFactory
 from Guard import Guard
@@ -110,7 +111,8 @@ class MetadataElement(SimpleItem):
             self.field = factory( self.getId() )
             self.field.field_record = self.getMetadataSet().getId()
             self.field_type = field_type
-        
+            self.field.values['unicode']=1
+            
         if index_type is not None:
             if index_type in self.getMetadataSet().listIndexTypes():
                 self.index_type = index_type
@@ -131,10 +133,28 @@ class MetadataElement(SimpleItem):
     def title(self):
         return self.field.get_value('title')
 
+    def isViewable(self, content):
+        """
+        is this element viewable for the content object
+        """
+        return self.read_guard.check(getSecurityManager(), self, content)
+
+    def isEditable(self, content):
+        """
+        is this element editable for the content object
+        """
+        return self.write_guard.check(getSecurityManager(), self, content)
+
     def renderView(self, value):
+        """
+        render the element given a particular element value
+        """
         return self.field.render_view(value)
 
     def renderEdit(self, value):
+        """
+        render the element as a form field given a particular value
+        """
         return self.field.render(value)
 
     def isRequired(self):
