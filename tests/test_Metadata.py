@@ -1,7 +1,7 @@
 """
 Tests for the SilvaMetada.
 
-$Id: test_Metadata.py,v 1.16 2005/04/03 11:22:06 clemens Exp $
+$Id: test_Metadata.py,v 1.17 2005/04/03 12:05:21 clemens Exp $
 """
 
 from unittest import TestSuite, makeSuite, main
@@ -14,33 +14,41 @@ from AccessControl.SecurityManagement import newSecurityManager
 from AccessControl.SecurityManagement import noSecurityManager
 from Products.Annotations.AnnotationTool import AnnotationTool
 
-# TODO: check if running the tests with CMF does still work
-try:
+from Products.SilvaMetadata.Configuration import UsingCMF
+
+if UsingCMF:
     from Products.CMFCore.CatalogTool import CatalogTool
     from Products.CMFCore.PortalFolder import PortalFolder
     from Products.CMFCore.tests.base.testcase import SecurityTest
     from Products.CMFCore.TypesTool import FactoryTypeInformation as FTI
     from Products.CMFCore.TypesTool import TypesTool
     from Products.CMFCore.utils import getToolByName
-    with_CMF=True
-except ImportError:
-    with_CMF=False
+else:
     from Products.Silva.tests import SilvaTestCase
     
 from Products.Formulator import StandardFields
 from Products.Formulator.TALESField import TALESMethod
 from Products.SilvaMetadata.MetadataTool import MetadataTool
 from Products.SilvaMetadata.Compatibility import getToolByName
-from stubs import SecurityPolicyStub, AnonymousUserStub
 
-if with_CMF:
-    # FIXME: what to install here
+if UsingCMF:
+    ZopeTestCase.installProduct('Annotations')
+    ZopeTestCase.installProduct('ProxyIndex')
+    ZopeTestCase.installProduct('Formulator')
     ZopeTestCase.installProduct('CMFCore')
     TestBaseClass = ZopeTestCase.ZopeTestCase
 else:
     TestBaseClass = SilvaTestCase.SilvaTestCase
 
 SET_ID = 'ut_md'
+
+
+def setupFakePermissions(root):
+    # copy & paste from SilvaTestCase :-/
+    uf = root.acl_users
+    uf._doAddUser( '_test_user', 'secret', ['Manager'], [])
+    user = uf.getUserById('_test_user').__of__(uf)
+    newSecurityManager(None, user)
 
 def setupCMFTools(root):
     root._setObject('portal_types', TypesTool())
@@ -133,7 +141,7 @@ def setupMetadataMapping(context):
     mtool = getToolByName(context, 'portal_metadata')
     mapping = mtool.getTypeMapping()
     mapping.setDefaultChain('ut_md')
-    if not with_CMF:
+    if not UsingCMF:
         mtool.addTypesMapping(
             ('Silva Folder', ), ('ut_md', 'silva-extra'))
 
@@ -141,15 +149,16 @@ def setupMetadataMapping(context):
 class MetadataTests(TestBaseClass):
 
     def afterSetUp(self):
-        if with_CMF:
+        if UsingCMF:
             self.root = self.app
+            setupFakePermissions(self.root)
             setupCMFTools(self.root)
             setupCatalog(self.root)
             setupContentTypes(self.root)
 
         setupMetadataSet(self.root)
         setupMetadataMapping(self.root)
-        if with_CMF:
+        if UsingCMF:
             setupContentTreeCMF(self.root)
         else:
             setupContentTreeSilva(self, self.root)
