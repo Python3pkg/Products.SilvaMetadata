@@ -174,7 +174,7 @@ class TestAdvancedMetadata( MetadataTests ):
         assert len(acquired) == 1
         assert acquired[0][1] == 'Description'
         
-    def XXtestObjectDelegation(self):
+    def testObjectDelegation(self):
 
         from Acquisition import Implicit
         
@@ -210,9 +210,10 @@ class TestAdvancedMetadata( MetadataTests ):
 
         m_binding.clearObjectDelegator()
         assert m_binding[SET_ID]['Title'] != r_binding[SET_ID]['Title']
-
         
-    def XXtestMutationTriggerDelegation(self):
+
+    def testMutationTriggerDelegation(self):
+
 
         class MutationTrigger:
 
@@ -231,8 +232,10 @@ class TestAdvancedMetadata( MetadataTests ):
         zoo.trigger = trigger
 
         m_binding.setMutationTrigger(SET_ID, 'Title', 'trigger')
+
+        m_binding.setValues(SET_ID, {'Title':'surfin betty',
+                                     'Description':'morning pizza'} )
         
-        m_binding.setValues(SET_ID, {'Title':'surfin betty'} )
         self.assertEqual(trigger.called, 1)
 
         m_binding.setValues(SET_ID, {'Description':'midnight raid'} )

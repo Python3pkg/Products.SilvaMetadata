@@ -319,6 +319,9 @@ class MetadataBindAdapter(Implicit):
             del bind_data[ObjectDelegate]
         except KeyError:
             pass
+        # invalidate cache
+        self.cached_values = {}
+        
         return None
 
     security.declarePublic('setMutationTrigger')
@@ -328,7 +331,7 @@ class MetadataBindAdapter(Implicit):
         invocation. major use case.. cache invalidation on
         metadata setting.
         """
-        assert getattr(self.content, method_name), "invalid mutation trigger %s"%method_name        
+        assert getattr(self._getAnnotatableObject(), method_name), "invalid mutation trigger %s"%method_name        
 
         bind_data = self._getBindData()
         bind_data.setdefault(MutationTrigger, {}).setdefault(set_id, {})[element_id]=method_name
@@ -383,7 +386,7 @@ class MetadataBindAdapter(Implicit):
 
     def _getMutationTriggers(self, set_id):
         bind_data = self._getBindData()
-        return bind_data.get(MutationTrigger, {})
+        return bind_data.get(MutationTrigger, {}).get(set_id, [])
     
     def _getAnnotatableObject(self):
         # check for object delegation
@@ -481,12 +484,14 @@ class MetadataBindAdapter(Implicit):
 
         # fire mutation triggers
         triggers = self._getMutationTriggers(set_id)
-        for k in keys:
-            if triggers.has_key(k):
-                try:
-                    getattr(triggers[k])()
-                except: # gulp
-                    pass
+
+        if triggers:
+            for k in keys:
+                if triggers.has_key(k):
+                    try: # hmm.. get the trigger from the ob or the delegated ob?
+                        getattr(ob, triggers[k])()
+                    except: # gulp
+                        pass
 
         # update acquireable metadata
         bind_data = self._getBindData()
