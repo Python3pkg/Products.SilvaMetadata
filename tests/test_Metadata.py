@@ -1,7 +1,7 @@
 """
 Tests for the SilvaMetada.
 
-$Id: test_Metadata.py,v 1.18 2005/04/03 12:11:38 clemens Exp $
+$Id: test_Metadata.py,v 1.19 2005/04/03 21:57:12 clemens Exp $
 """
 
 from unittest import TestSuite, makeSuite, main
@@ -255,9 +255,12 @@ class TestMetadataElement(MetadataTests):
         value = binding.get(SET_ID, 'Description')
         self.assertEqual(value, test_value,
                          "Tales delegate for default didn't work")
-         # make sure the right cached value was stored.
+        # make sure the right cached value was stored.
         value = binding.get(SET_ID, 'Description')
         self.assertEqual(value, test_value, "Wrong Data Object Cached")
+        # test shortcut, too
+        self.assertEqual(value,
+                         mtool.getMetadataValue(zoo, SET_ID, 'Description'))
 
     def testAcquisitionInvariant(self):
         # invariant == can't be required and acquired
@@ -302,10 +305,13 @@ class TestAdvancedMetadata(MetadataTests):
         z_binding = getToolByName(zoo, 'portal_metadata').getMetadata(zoo)
         m_binding = getToolByName(mams, 'portal_metadata').getMetadata(mams)
         set_id = SET_ID
-        assert m_binding[set_id]['Description'] == \
-               z_binding[set_id]['Description']
-        assert m_binding.get(set_id, 'Description', acquire=0) != \
-               z_binding[set_id]['Description']
+        self.assertEqual(m_binding[set_id]['Description'],
+                         z_binding[set_id]['Description'])
+        # test shortcut, too
+        self.assertEqual(getToolByName(mams, 'portal_metadata').getMetadataValue(mams,set_id,'Description'),
+                         getToolByName(zoo, 'portal_metadata').getMetadataValue(zoo,set_id,'Description'))
+        self.assertNotEqual(m_binding.get(set_id, 'Description', acquire=0),
+                            z_binding[set_id]['Description'])
 
     def testContainmentAcquisitionList(self):
         self.setupAcquiredMetadata()
@@ -351,6 +357,10 @@ class TestAdvancedMetadata(MetadataTests):
             m_binding[SET_ID]['Title'],
             r_binding[SET_ID]['Title']
             )
+        # test shortcut, too
+        self.assertEqual('snake food',
+                         getToolByName(mams, 'portal_metadata').
+                              getMetadataValue(mams, SET_ID, 'Title'))        
         m_binding.clearObjectDelegator()
         assert m_binding[SET_ID]['Title'] != r_binding[SET_ID]['Title']
 
