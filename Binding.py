@@ -82,13 +82,13 @@ class MetadataBindAdapter(Implicit):
     def renderElementView(self, set_id, element_id):
         element = self.getElement(set_id, element_id)
         data = self._getData(set_id)
-        return element.renderView(data.get(element_id, ''))
+        return element.renderView(data.get(element_id, None))
 
     security.declarePublic('renderElementEdit')
     def renderElementEdit(self, set_id, element_id):
         element = self.getElement(set_id, element_id)
         data = self._getData(set_id, acquire=0)
-        return element.renderEdit(data.get(element_id, ''))        
+        return element.renderEdit(data.get(element_id, None))        
     
     #################################
     ### Validation
