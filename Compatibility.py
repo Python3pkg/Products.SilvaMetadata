@@ -81,7 +81,8 @@ else:
     _allowed_content_types = []
 
     def registerTypeForMetadata(type_name):
-        _allowed_content_types.append(type_name)
+        if type_name not in _allowed_content_types:
+            _allowed_content_types.append(type_name)
 
     def getContentTypeNames(ctx):
         return tuple(_allowed_content_types)
