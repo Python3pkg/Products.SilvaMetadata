@@ -139,19 +139,6 @@ class MetadataSet(Folder):
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
 
-##     def getView(self, object, mode='view'):
-
-##         if mode == 'edit': raise NotImplemented, "no view code yet"
-        
-##         elements = self.getElementsFor(object, 'write')
-
-##         annotations = getToolByName(self, 'portal_annotations')
-##         data = annotations.getAnnotations(object, self.namespace_uri)
-
-##         for e in elements:
-##             e.render( data.get(e.getId()) )
-
-        
     def getNamespace(self):
         return (self.metadata_prefix, self.metadata_uri)
 
@@ -185,7 +172,7 @@ class MetadataSet(Folder):
             if d:
                 res[e.getId()]=d
         return res
-    
+
     def listFieldTypes(self):
         return listFields()
 

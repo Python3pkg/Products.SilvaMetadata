@@ -1,10 +1,11 @@
 """
+Maps Metadata Sets onto Content Types
+
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
 from ZopeImports import *
-
-class ConfigurationError(Exception): pass
+from Exceptions import ConfigurationError
 
 DEFAULT_MAPPING_NAME = 'Default'
 

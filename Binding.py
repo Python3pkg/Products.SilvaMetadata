@@ -6,18 +6,19 @@ import types, copy
 
 from Acquisition import Implicit, aq_base
 from zExceptions import Unauthorized
-
+from Exceptinos import NotFound
+import Initialize as BindingInitialize
 from Namespace import MetadataNamespace, BindingRunTime
 from ZopeImports import Interface, ClassSecurityInfo, InitializeClass
-from Export import StringBuffer
-
-class NotFound(Exception): pass
+from utils import StringBuffer, make_lookup
 
 #################################
 # runtime bind data keys
 AcquireRuntime = 'acquire_runtime'
 ObjectDelegate = 'object_delegate'
 MutationTrigger = 'mutation_trigger'
+
+_marker = []
 
 class MetadataBindAdapter(Implicit):
 
@@ -114,7 +115,7 @@ class MetadataBindAdapter(Implicit):
 
         res = []
         for set in self.collection.values():
-            res.append( validateData(self, data, set) )
+            res.append( validateData(self, data, set, errors) )
         return res
 
     def validateFromRequest(self, REQUEST, errors=None, set_id=None, namespace_key=None):
@@ -175,6 +176,8 @@ class MetadataBindAdapter(Implicit):
         names.sort()
         return names
 
+    keys = getSetNames
+
     def getElementNames(self, set_id=None, namespace_key=None):
         """
         given a set identifier return the ids of the elements
@@ -186,7 +189,14 @@ class MetadataBindAdapter(Implicit):
         # for editing or viewing.
         set = self._getSet(set_id, namespace_key)
         return [e.getId() for e in set.getElements()]
-            
+
+    #################################
+    ### Accessor Interface
+    def __getitem__(self, key):
+        if key in self.collection.keys():
+            return self._getData(key)
+        raise KeyError(str(key))
+
     #################################
     ### RunTime Binding Methods
 
@@ -297,7 +307,10 @@ class MetadataBindAdapter(Implicit):
         bind_data   = metadata.get(BindingRunTime)
 
         if bind_data is None:
+            init_handler = BindingInitialize.getHandler(content)
             bind_data = metadata.setdefault(BindingRunTime, PersistentMapping())
+            if init_handler is not None:
+                init_handler(bind_data)
 
         return bind_data
 
@@ -370,11 +383,10 @@ class MetadataBindAdapter(Implicit):
         eids = [e.getId() for e in set.getElementsFor(ob, mode='edit')]
         
         #  todo, convert this to a hash lookup maybe..
-        for eid in eids:
-            keys = data.keys()
-            for k in keys:
-                if k not in eids:
-                    raise Unauthorized('Not Allowed to Edit %s in this context'%k)
+        keys = data.keys()
+        for k in keys:
+            if k not in eids:
+                raise Unauthorized('Not Allowed to Edit %s in this context'%k)
             
         annotations = getToolByName(ob, 'portal_annotations')
         metadata = annotations.getAnnotations(ob, MetadataNamespace)
@@ -388,27 +400,16 @@ class MetadataBindAdapter(Implicit):
 
 InitializeClass(MetadataBindAdapter)
 
-class StringBuffer:
 
-    def __init__(self):
-        self.buf = []
-    def write(self, data):
-        self.buf.append(data)
-    def getvalue(self):
-        return ''.join(buf)
-    
-def getForm(binding, set, framed=1, REQUEST=None):
-
+def getForm(binding, set, framed=1, REQUEST=None, errors=None):
     content = binding.content
-    
     elements = set.getElementsFor(content, mode='edit')
     annotations = getToolByName(content, 'portal_annotations')
     
-    if REQUEST is not None:
-        #REQUEST.form
-        pass
-    
-    data = binding._getData(set.getId(), acquire=0)
+    if REQUEST is not None and errors is not None:
+        data = REQUEST.form.get(set.getId())
+    else:
+        data = binding._getData(set.getId(), acquire=0)
 
     out = StringBuffer()
 
@@ -417,12 +418,17 @@ def getForm(binding, set, framed=1, REQUEST=None):
         print >> out, '<input type="hidden" name="mset_id" value="%s">'%set.getId()
 
     print >> out, '<h2 class="metadata_header">%s</h2>'%set.getTitle()
-    print >> out, '<table class="metadata_form">'
     
+    if errors is not None:
+        print >> out, '<table class="form_errors">'
+        for k,v in errors.items():
+            print >> out, '<tr><td>%s: %s</td</tr>'%(k,v)
+        print >> out, '</table>'
+        
+    print >> out, '<table class="metadata_form">'
     for e in elements:
-        print >> out, "<tr><td><b>%s</b></td>"%e.field.get_value('title')
-        print >> out, "<tr><td>%s</td>"%e.field._render_helper(
-            "%s.%s:record"%(set.getId(), e.getId()), data.get(e.getId()), None )
+        print >> out, "<tr><td><b>%s</b></td>"%e.title()
+        print >> out, "<tr><td>%s</td>"%e.renderEdit(data.get(e.getId(), None)
 
     if framed:
         print >> out, '''<tr><td colspan="2">
@@ -437,31 +443,41 @@ def getForm(binding, set, framed=1, REQUEST=None):
     return out.getvalue()
 
 def getView(binding, set, framed=1):
-
     content = binding.content
-
     elements = set.getElementsFor(content, mode='view')
     annotations = getToolByName(content, 'portal_annotations')
     data = annotations.getAnnotations(content, set.metadata_uri)
-
     out = StringBuffer()
 
     print >> out, '<table class="metadata_view">'
-    
+
     for e in elements:
-        print >> out, "<tr><td><b>%s</b></td>"%e.field.get_value('title')
+        print >> out, "<tr><td><b>%s</b></td>"%e.title()
+        print >> out, "<tr><td>%s</td></td>"%renderField(e, e.getId(), data.get(e.getId(),''))
         
-    
+    print >> out, '</table>'
+    return out.getvalue()
+
 def renderField(field, key, value):
-    view_method = getattr( field.widget, 'render_view', None)
+    # XXX formulator specific
+    view_method = getattr(field.widget, 'render_view', None)
     if view_method is not None:
         return view_method(field, key, value)
     else: #shizer
         return str(value)
 
-
-def validateData(binding, set, data):
-    pass
+def validateData(binding, set, data, errors_dict=None):
+    # XXX formulator specific
+    from Products.Formulator.Errors import ValidationError
+    for e in set.getElements():
+        try:
+            data[e.getId()] = e.validate(data)
+        except ValidationError, exception:
+            if errors_dict:
+                errors_dict[e.getId()]=exception.error_text
+            else:
+                raise
+    return data
 
 MetadataAqPrefix = 'metadataAq'
 MetadataAqVarPrefix = '_VarName_'

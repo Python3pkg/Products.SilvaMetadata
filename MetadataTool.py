@@ -28,22 +28,28 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
     #################################
     # Action Provider Interface
     def listActions(self, info=None):
+        actions = []
+        for set in self.collection.getMetadataSets():
+            if set.use_action_p is not None and set.action is not None:
+                actions.append(set.action)
         return self._actions
 
     #################################
     # Metadata interface
 
     ## site wide queries
-
-    # this is the wrong tool to be asking.
-    def getFullName(self, userid):
-        return userid 
     
-    def getPublisher(self):
-        pass
+    # this is the wrong tool to be asking.
+    #def getFullName(self, userid):
+    #    return userid 
+
+    # this is just lame, assumes global publisher for a site
+    #def getPublisher(self):
+    #    pass
     
     ## dublin core hardcodes :-(
     # we don't have vocabulary implementation yet.
+    
     def listAllowedSubjects( self, content=None):
         catalog = getToolByName(self, 'portal_catalog')
         return catalog.uniqueValuesFor()
@@ -62,11 +68,20 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
 
     ## validation hooks
     def setInitialMetadata(self, content):
-        pass
+        binding = self.getMetadata(content)
+        sets = binding.getSetNames()
+        # getting the set metadata will cause its
+        # initialization if nots already initialized
+        for s in sets:
+            binding[s]
 
     def validateMetadata(self, content):
-        pass
-
+        binding = self.getMetadata(content)
+        sets = binding.getSetNames()
+        for s in sets:
+            data = binding[s]
+            binding.validate(data, set_id=s)
+            
     #################################
     # new interface 
 
@@ -74,7 +89,11 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         return self.collection._getOb(set_id)
 
     def getMetadataSetFor(self, metadata_namespace):
-        pass
+        for set in self.collection.getMetadataSets():
+            if set.metadata_uri == metadata_namespace:
+                return set
+            
+        raise NotFound("No Metadata Set Matching %s"%str(metadata_namespace))
 
     def getMetadata(self, content):
         ctm = self._getOb(Configuration.TypeMapping)

@@ -6,6 +6,7 @@ author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
 from Products.ProxyIndex import ProxyIndex
+from Compatiblity import index_expression_template
 
 def createIndexes(catalog, elements):
 
@@ -56,7 +57,7 @@ def createIndexArguements(element):
     return args
 
 def createIndexExpression(element):
-    return "content.portal_metadata.getMetadata(content)['%s']['%s']"%(
+    return index_expression_template%(
         element.getMetadataSet().getId(),
         element.getId()
         )

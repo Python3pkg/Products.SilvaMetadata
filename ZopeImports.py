@@ -1,3 +1,8 @@
+"""
+Common Zope Imports
+
+author: kapil thangavelu <k_vertigo@objectrealms.net>
+"""
 from AccessControl import ClassSecurityInfo
 from ComputedAttribute import ComputedAttribute
 from OFS.SimpleItem import SimpleItem

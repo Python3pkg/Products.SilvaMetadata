@@ -4,12 +4,12 @@ Provides for code compatiblity between silva and the cmf.
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
-import Configuration
 from Acquisition import aq_inner, aq_base, aq_get
 from OFS.ObjectManager import UNIQUE
 from ExtensionClass import Base
 
-class CompatiblityException(Exception): pass
+import Configuration
+from Exceptions import CompatilbilityException
 
 #################################
 ### Interface declarations/assertions
@@ -78,6 +78,14 @@ if Configuration.UsingCMF:
 else:
     def getContentTypeNames(ctx):
         return ctx.get_silva_addables_all()
+
+if Configuration.UsingCMF:
+    def getContentType(content):
+        return content.getPortalTypeName()
+
+else:
+    def getContentType(content):
+        return content.meta_type
         
 #################################
 ### Permissions
@@ -92,6 +100,13 @@ else:
     Configuration.pMetadataEdit = SilvaPermissions.ChangeSilvaContent
     Configuration.pMetadataManage = SilvaPermissions.ViewManagementScreens
 
+#################################
+### Catalog Expressions for ProxyIndex
+if Configuration.UsingCMF:
+    index_expression_template = "context.portal_metadata.getMetdatata(content)['%s']['%s']"
+else:
+    index_expression_template = "context.service_metadata.getMetadata(content)['%s']['%s']"
+    
 #################################
 ### Misc    
 if Configuration.UsingCMF:
@@ -116,3 +131,4 @@ else:
         """ Base class for objects which cannot be "overridden" / shadowed.
         """
         __replaceable__ = UNIQUE
+

@@ -3,18 +3,15 @@ Metadata Elements
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
-from ZopeImports import *
-from Interfaces import IMetadataElement
+from Exceptions import NoContext, ConfigurationError
 from FormulatorField import getFieldFactory
 from Guard import Guard
+from Interfaces import IMetadataElement
+from ZopeImports import *
 
 _marker = []
 
-class NoContext(Exception):
-    pass
-
-class ConfigurationError(Exception):
-    pass
+encoding = 'UTF-8'
 
 class MetadataElement(SimpleItem):
     """
@@ -111,6 +108,7 @@ class MetadataElement(SimpleItem):
             except KeyError:
                 raise ConfigurationError("invalid field type %s"%field_type)
             self.field = factory( self.getId() )
+            self.field.field_record = self.getMetadataSet().getId()
             self.field_type = field_type
         
         if index_type is not None:
@@ -127,23 +125,26 @@ class MetadataElement(SimpleItem):
         if RESPONSE is not None:
             return RESPONSE.redirect('manage_workspace')
     
-##     def getValidator(self, object=None):
-##         if object is None and self.validator_context_dependent:
-##             raise NoContext(self.getId())
-##         return getValidator(self.validator_type, object)
-        
-##     def getWidget(self, object=None):
-##         if object is None and self.widget_context_dependent:
-##             raise NoContext(self.getId())
-##         return getWidget(self.widget_type, object)
+    def validate(self, data):
+        return self.field.validate(data)
 
-##     def getVocabulary(self, object=None):
-##         if self.validator_vocabulary:
-##             return self.getValidator(object).getVocabulary()
-##         return self.vocabulary_values
+    def title(self):
+        return self.field.get_value('title')
 
+    def renderView(self, value):
+        return self.field.render_view(value)
+
+    def renderEdit(self, value):
+        return self.field.render(value)
+
+    def isRequired(self):
+        return self.field.is_required()
+           
+    ## little hack to get formulator fields to do unicode
+    def get_form_encoding(self):
+        return encoding
+       
 InitializeClass(MetadataElement)
-
 
 def ElementFactory(id, **kw):
 
