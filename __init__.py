@@ -13,6 +13,10 @@ import MetadataTool
 
 from Globals import ImageFile
 
+# Allow Errors to be imported TTW
+from Products.PythonScripts.Utility import allow_module
+allow_module('Products.SilvaMetadata.Exceptions')
+
 misc_ = {
     'up'     : ImageFile('www/up.gif', globals()),
     'down'   : ImageFile('www/down.gif', globals()),
