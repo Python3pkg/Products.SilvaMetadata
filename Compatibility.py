@@ -60,7 +60,6 @@ else:
             raise CompatibilityException(str(e))
 
         try:
-            print ctx, silva_name
             tool = aq_get(ctx, silva_name, default, 1)
         except AttributeError:
             if default is _marker:
@@ -79,8 +78,14 @@ if Configuration.UsingCMF:
         pt = getToolByName(ctx, 'portal_types')
         return pt.objectIds()
 else:
+    _allowed_content_types = []
+
+    def registerTypeForMetadata(type_name):
+        _allowed_content_types.append(type_name)
+
     def getContentTypeNames(ctx):
-        return ctx.get_silva_addables_all()
+        return tuple(_allowed_content_types)
+        #return ctx.get_silva_addables_all()
 
 if Configuration.UsingCMF:
     def getContentType(content):
