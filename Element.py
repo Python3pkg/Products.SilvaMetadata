@@ -63,8 +63,6 @@ class MetadataElement(SimpleItem):
     security.declareProtected(Configuration.pMetadataManage, 'manage_guard_form')    
     manage_guard_form = DTMLFile('ui/ElementGuardForm', globals())
 
-
-
     
     def __init__(self, id, **kw):
         self.id = id
@@ -142,8 +140,11 @@ class MetadataElement(SimpleItem):
     def validate(self, data):
         return self.field.validate(data)
 
-    def title(self):
+    def Title(self):
         return self.field.get_value('title')
+
+    def Description(self):
+        return self.field.get_value('description')
 
     def isViewable(self, content):
         """
