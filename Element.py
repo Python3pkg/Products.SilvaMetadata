@@ -103,7 +103,7 @@ class MetadataElement(SimpleItem):
 
         if acquire_p is not None:
             required_p = self.field.get_value('required')
-            if required_p:
+            if required_p and acquire_p:
                 raise ConfigurationError("Required Values may not be Acquired")
 
         field_type = field_type or self.field_type
