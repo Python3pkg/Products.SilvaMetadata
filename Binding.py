@@ -9,6 +9,7 @@ from Acquisition import Implicit, aq_base
 from zExceptions import Unauthorized
 from Exceptions import NotFound
 from Export import ObjectMetadataExporter
+from Index import getIndexNamesFor
 import Initialize as BindingInitialize
 from Namespace import MetadataNamespace, BindingRunTime
 import View 
@@ -58,54 +59,6 @@ class MetadataBindAdapter(Implicit):
 
     #################################
     ### Views
-    security.declarePublic('renderForm')
-    def renderForm(self, set_id=None, namespace_key=None, REQUEST=None, messages=None):
-        """
-        return a rendered form.
-
-        if set_id or namespace_key is specified the form will be returned
-        only for the specified metadata set. otherwise the returned form
-        will be for all metadata defined on the content object.
-
-        if request is specified it will be used for the values of the
-        metadata in the form. this is to allow for 'sticky' forms.
-
-        messages unimplemented.. error messages on fields
-
-        acquired metadata is not displayed in forms.. the fields for
-        acquired metadata will be presented empty.
-        """
-        
-        set = self._getSet(set_id, namespace_key)
-
-        if not set is None:
-            return View.getForm(self, set, REQUEST=REQUEST)
-
-        res = []
-
-        for set in self.collection.values():
-            res.append(View.getForm(self, set, REQUEST=REQUEST))
-            
-        return '<br />\n<br />\n'.join(res)
-
-    security.declarePublic('renderView')
-    def renderView(self, set_id=None, namespace_key=None):
-        """
-        render a view of a given metadata set corresponding
-        to set_id or namespace_key.
-        """
-        set = self._getSet(set_id, namespace_key)
-
-        if not set is None:
-            return View.getView(self, set)
-
-        res = []
-
-        for set in self.collection.values():
-            res.append(View.getView(self, set))
-
-        return '<br />\n<br />\n'.join(res)
-
     security.declarePublic('renderXML')
     def renderXML(self, set_id=None, namespace_key=None):
         """
@@ -119,38 +72,35 @@ class MetadataBindAdapter(Implicit):
 
         exporter = ObjectMetadataExporter(self, sets)
         return exporter()
-            
 
+    security.declarePublic('renderElementView')
+    def renderElementView(self, set_id, element_id):
+        element = self.getElement(set_id, element_id)
+        data = self._getData(set_id)
+        return element.renderView(data.get(element_id, ''))
+
+    security.declarePublic('renderElementEdit')
+    def renderElementEdit(self, set_id, element_id):
+        element = self.getElement(set_id, element_id)
+        data = self._getData(set_id, acquire=0)
+        return element.renderEdit(data.get(element_id, ''))        
+    
     #################################
     ### Validation
 
     security.declarePublic('validate')
-    def validate(self, data, errors=None, set_id=None, namespace_key=None):
+    def validate(self, set_id, data, errors=None):
         """
         validate the data. implicit transforms may be preformed.
         """
-        if set_id:
-            return validateData(self, data, self.collection[set_id])
-        if namespace_key:
-            return validateData(self, data, self._getSetByKey(namespace_key))
-
-        res = []
-        for set in self.collection.values():
-            res.append( validateData(self, data, set, errors) )
-        return res
+        return validateData(self, self.collection[set_id], data, errors)
 
     security.declarePublic('validateFromRequest')
-    def validateFromRequest(self, REQUEST, errors=None, set_id=None, namespace_key=None):
+    def validateFromRequest(self, set_id, REQUEST, errors=None):
         """
         validate from request
         """
-        assert set_id or namespace_key
-        if set_id:
-            data = REQUEST.form.get(set_id)
-        elif namespace_key:
-            data = REQUEST.form.get(
-                self._getSetByKey(namespace_key).getId()
-                )
+        data = REQUEST.form.get(set_id)
 
         if data is None:
             raise NotFound("Metadata for %s/%s not found"%(
@@ -158,39 +108,40 @@ class MetadataBindAdapter(Implicit):
                 str(namespace_key)
                 )
                 )
-        return self.validate(data, errors, set_id, namespace_key)
+        
+        return self.validate(set_id, data.copy(), errors)
 
     #################################
     ### Storage (invokes validation)
 
     security.declarePublic('setValues')
-    def setValues(self, data, set_id=None, namespace_key=None):
+    def setValues(self, set_id, data, reindex=0):
         """
+        data should be a mutable dictionary
+        
         returns a dictionary of errors if any, or none otherwise
         """
-        
         errors = {}
-        data = self.validate(data, errors, set_id, namespace_key)
+        data = self.validate(set_id, data, errors)
         
         if errors:
             return errors
 
-        set = self._getSet(set_id, namespace_key)
-        self._setData(data, set_id=set_id)
+        set = self.collection[set_id]
+        self._setData(data, set_id=set_id, reindex=reindex)
+        return None
 
     security.declarePublic('setValuesFromRequest')
-    def setValuesFromRequest(self, REQUEST, set_id=None, namespace_key=None): 
+    def setValuesFromRequest(self, set_id, REQUEST, reindex=0):
         """
         returns a dictionary of errors if any, or none otherwise
         """
-
-        set = self._getSet(set_id, namespace_key)
-        # some issues with classifying the errors by namespace
+        set = self.collection[set_id]
         data = REQUEST.form.get(set.getId())
-        return self.setValues(data, set_id=set.getId())
+        return self.setValues(set_id, data.copy(), reindex)
 
     #################################
-    ### Discovery Introspection
+    ### Discovery Introspection // Definition Accessor Interface
 
     security.declarePublic('getSetNameByURI')
     def getSetNameByURI(self, uri):
@@ -198,6 +149,19 @@ class MetadataBindAdapter(Implicit):
             if set.metadata_uri == uri:
                 return set.getId()
         raise NotFound(uri)
+
+    security.declarePublic('getSet')
+    def getSet(self, set_id):
+        """
+        to invoke methods on the set requires permissions on
+        the set not the content, whereas binding methods
+        merely require permissions on the content.
+        """
+        return self.collection[set_id]
+
+    security.declarePublic('getElement')
+    def getElement(self, set_id, element_id):
+        return self.getSet(set_id).getElement(element_id)
 
     security.declarePublic('getSetNames')
     def getSetNames(self):
@@ -213,17 +177,20 @@ class MetadataBindAdapter(Implicit):
     keys = getSetNames
 
     security.declarePublic('getElementNames')
-    def getElementNames(self, set_id=None, namespace_key=None):
+    def getElementNames(self, set_id, mode=None):
         """
         given a set identifier return the ids of the elements
         within the set.
         """
         # XXX
-        # this returns all elements of a set.
-        # not all elements visible here will be viewable
-        # for editing or viewing.
-        set = self._getSet(set_id, namespace_key)
-        return [e.getId() for e in set.getElements()]
+        # if mode is not specified this returns all elements of a set.
+        # not all elements visible will be viewable/editable
+        set = self.collection[set_id]
+        
+        if mode is not None:
+            return set.getElementsFor(self.content, mode=mode)
+        else:
+            return [e.getId() for e in set.getElements()]
 
     security.declarePublic('isViewable')
     def isViewable(self, set_id, element_id):
@@ -244,7 +211,14 @@ class MetadataBindAdapter(Implicit):
         return element.isEditable(ob)
         
     #################################
-    ### Accessor Interface
+    ### Data Accessor Interface
+
+    def get(self, set_id, element_id=None, acquire=1):
+        data = self._getData(set_id=set_id, acquire=acquire)
+        if element_id is not None:
+            return data.get(element_id) # hmm
+        return data
+    
     def __getitem__(self, key):
         if self.collection.has_key(key):
             return self._getData(key)
@@ -396,9 +370,15 @@ class MetadataBindAdapter(Implicit):
         """
 
         set = self._getSet(set_id, namespace_key)
+
+        # sanity check
+        try:
+            acquire = not not int(acquire)
+        except:
+            raise SyntaxError( "acquire flag must be an integer" )
         
         # cache lookup
-        data = self.cached_values.get(set.getId())
+        data = self.cached_values.get( (acquire, set.getId()) )
         if data is not None:
             return data
 
@@ -417,7 +397,7 @@ class MetadataBindAdapter(Implicit):
             # make a copy so we can modify with acq metadata
             data.update(saved_data)
             
-        self.cached_values[set_id]=data
+        self.cached_values[ (acquire, set_id) ]=data
 
         if not acquire:
             return data
@@ -431,30 +411,39 @@ class MetadataBindAdapter(Implicit):
                 continue
             aqelname = encodeElement(sid, eid)
             try:
-                val = getattr(self.content, aqelname)
+                val = getattr(ob, aqelname)
             except AttributeError:
                 continue
             data[eid]=val
 
         return data
 
-    def _setData(self, data, set_id=None, namespace_key=None):
+    def _setData(self, data, set_id=None, namespace_key=None, reindex=0):
 
         set = self._getSet(set_id, namespace_key)
+        set_id = set.getId()        
 
         # check for delegates
         ob = self._getAnnotatableObject()
 
         # filter based on write guard and whether field is readonly
-        eids = [e.getId() for e in set.getElementsFor(ob, mode='edit')]
+        all_elements = set.getElements()
+        all_eids = [e.getId() for e in all_elements]
+        elements = [e for e in set.getElementsFor(ob, mode='edit')]
+        eids = [e.getId() for e in elements]
         
         keys = data.keys()
+
         for k in keys:
-            if k not in eids:
+            if k in eids:
+                continue
+            elif k in all_eids:
                 raise Unauthorized('Not Allowed to Edit %s in this context'%k)
+            else:
+                del data[k]
 
         # fire mutation triggers
-        triggers = self._getMutationTriggers(set.getId())
+        triggers = self._getMutationTriggers(set_id)
         for k in keys:
             if triggers.has_key(k):
                 try:
@@ -464,7 +453,7 @@ class MetadataBindAdapter(Implicit):
 
         # update acquireable metadata
         bind_data = self._getBindData()
-        set_id = set.getId()
+
         update_list = [eid for sid, eid in  bind_data.get(AcquireRuntime, []) if sid==set_id and eid in keys]
         for eid in update_list:
             aqelname = encodeElement(sid, eid)
@@ -473,7 +462,26 @@ class MetadataBindAdapter(Implicit):
         # save in annotations
         annotations = getToolByName(ob, 'portal_annotations')
         metadata = annotations.getAnnotations(ob, MetadataNamespace)
-        metadata[set.metadata_uri].update(data)
+
+        if metadata.has_key(set.metadata_uri):
+            metadata[set.metadata_uri].update(data)
+        else:
+            metadata[set.metadata_uri] = PersistentMapping(data)
+
+        # invalidate the cache version of the set if any
+        # we do a check for cached acquired/non-acquired
+        if self.cached_values.has_key( (0, set_id) ):
+            del self.cached_values[ (0, set_id) ]
+        if self.cached_values.has_key( (1, set_id) ):
+            del self.cached_values[ (1, set_id) ]
+
+        # reindex object
+        if reindex:
+            reindex_elements = [e for e in elements if e.getId() in keys]
+            idx_names = getIndexNamesFor(reindex_elements)
+            catalog = getToolByName(ob, 'portal_catalog')
+            catalog.catalog_object(ob, idxs=idx_names)
+        
     
     def _getSetByKey(self, namespace_key):
         for s in self.collection:
@@ -485,12 +493,13 @@ InitializeClass(MetadataBindAdapter)
 
 def validateData(binding, set, data, errors_dict=None):
     # XXX formulator specific
+    
     from Products.Formulator.Errors import ValidationError
     for e in set.getElements():
         try:
             data[e.getId()] = e.validate(data)
         except ValidationError, exception:
-            if errors_dict:
+            if errors_dict is not None:
                 errors_dict[e.getId()]=exception.error_text
             else:
                 raise
