@@ -261,7 +261,9 @@ def make_set(container, set_node):
                 # XXX this is incomplete support for lists
                 # the originial version of formulator xml support
                 # did an eval here, which is not an option
-                v = filter(None, [vi.strip() for vi in v[1:-1].split(',')])
+                # XXX we'll make use of this option anyway
+                # metadata sets are edited on the filesystem after all
+                v = eval(v, {})
 
             field.values[k]=v
 
