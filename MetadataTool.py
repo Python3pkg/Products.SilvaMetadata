@@ -148,7 +148,7 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         metadata = annotations.getAnnotations(content, MetadataNamespace)
         saved_data = metadata.get(set.metadata_uri)
         # if it's saved, we're done
-        if saved_data is not None:
+        if saved_data is not None and element_id in saved_data.keys():
             return saved_data[element_id]
         # if not, check whether we acquire it, if so, we're done
         if element.isAcquireable():
