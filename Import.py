@@ -270,7 +270,7 @@ def make_set( container, set_node ):
         element.index_constructor_args = constructor_args
 
 
-def import_metadata( content, content_node):
+def import_metadata(content, content_node):
     """
 
     minimal import system for object metadata
@@ -288,26 +288,31 @@ def import_metadata( content, content_node):
     metadata = {}
     binding = metadata_tool.getMetadata(content)
 
-    for node in metadata_node.attributes.values():
-        if not node.namespaceURI == XMLNS_NAMESPACE:
+    for namespace_attr in metadata_node.attributes.values():
+        if not namespace_attr.namespaceURI == XMLNS_NAMESPACE:
             continue
         # verify set exists
-        set = metadata_tool.getMetadataSetFor(node.value)
-        metadata[node.value]={}
-
+        set = metadata_tool.getMetadataSetFor(namespace_attr.value)
+        metadata[namespace_attr.value] = {}
     
-    for node in metadata_node.childNodes:
-        if not node.namespaceURI:
+    for child in metadata_node.childNodes:
+        if not child.namespaceURI:
             continue
-        metadata[node.namespaceURI][node.localName]= deserialize( node.firstChild )
+        metadata[child.namespaceURI][child.localName] = deserialize(
+            child.firstChild)
 
-    
     for k, v in metadata.items():
+        # First delete 'read-only' elements from dictionary
+        set_name = binding.getSetNameByURI(k)
+        element_names = v.keys()
+        for element_name in element_names:
+            if not binding.isEditable(set_name, element_name):
+                del v[element_name]
+        
         errors = binding._setData(namespace_key=k,
                                   data=v,
                                   reindex=1)
-        errors = None
-        
+        errors = None        
         if errors:
             raise ValidationError( "%s %s"%(
                 str(content.getPhysicalPath()),

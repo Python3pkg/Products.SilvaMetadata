@@ -34,25 +34,28 @@ def serialize( value):
         return '<element type="none">%s</element>'%unicode(str(value))
 
 def deserialize( node ):
-    
     if not node.nodeName in ('element', 'element_list'):
         raise XMLMarshallError("invalid xml node type %s"%node.nodeName)
+    
+    node.normalize() # Join adjacent text nodes    
+    childs = node.childNodes    
+    if len(childs):
+        node_value = node.childNodes[0].nodeValue
+    else:
+        # There's no value set for this node
+        return None
 
     node_type = node.getAttribute('type')
 
     try:
-        if node_type == 'integer':
-            return int(node.childNodes[0].nodeValue)
-
+        if node_type == 'string':
+            return node_value
+        elif node_type == 'integer':
+            return int(node_value)
         elif node_type == 'float':
-            return float(node.childNodes[0].nodeValue)
-
-        elif node_type == 'string':
-            return node.childNodes[0].nodeValue
-
+            return float(node_value)
         elif node_type == 'date':
-            return DateTime(node.childNodes[0].nodeValue)
-
+            return DateTime(node_value)
         elif node_type == 'list':
             res = []
             for cn in node.childNodes:
@@ -62,12 +65,14 @@ def deserialize( node ):
             return res
             
     except Exception, e:
-        raise XMLMarshallError("error on marshalling %s  %s %s %s"%(
-            node.nodeName,
-            node_type,
-            node.getValue(),
-            str(e)
-            )
+        raise XMLMarshallError(
+            "error on marshalling %s %s, childnodes: %s (%s %s)"%(
+                node.nodeName,
+                node_type,
+                len(node.childNodes),
+                str(node),
+                str(e)
+                )
             )
 
     
