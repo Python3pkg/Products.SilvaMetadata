@@ -1,8 +1,17 @@
 Copyright (c) 2003 Infrae. All rights reserved.
 See also LICENSE.txt
-$Revision: 1.7 $
+$Revision: 1.8 $
 
 SilvaMetadata changes
+ 
+   under development
+
+     Bugs fixed
+
+        - XML import would fail with a NameError if a metadata set is
+          imported that is not registered. Now it fails with a more
+          informative error... What *should* be happening is that this
+          unrecognized metadata is skipped, instead.
 
    0.7.3
 
