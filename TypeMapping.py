@@ -77,10 +77,16 @@ class TypeMappingContainer(Folder):
             if tc == DEFAULT_MAPPING_NAME:
                 if self.getChainFor(t) != DEFAULT_MAPPING_NAME:
                     self._delObject(t)
+            elif tc == self.getChainFor(t):
+                continue
             else:
-                self._setObject(t, TypeMapping(t))
-                ctm = self._getOb(t)
-                ctm.setMetadataChain(tc)
+                tm = self.getTypeMappingFor(t)
+                if tm is None:
+                    self._setObject(t, TypeMapping(t))
+                    ctm = self._getOb(t)
+                    ctm.setMetadataChain(tc)
+                else:
+                    tm.setMetadataChain(tc)
 
         if RESPONSE is not None:
             return RESPONSE.redirect('manage_workspace')
