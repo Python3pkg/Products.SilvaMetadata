@@ -6,13 +6,14 @@ import types, copy
 from UserDict import UserDict
 
 from Acquisition import Implicit, aq_base, aq_parent
+from Products.ZCatalog.ZCatalog import ZCatalog
+
 from zExceptions import Unauthorized
 from Exceptions import NotFound, BindingError
 from Export import ObjectMetadataExporter
 from Index import getIndexNamesFor
 import Initialize as BindingInitialize
 from Namespace import MetadataNamespace, BindingRunTime
-import View 
 from ZopeImports import Interface, ClassSecurityInfo, InitializeClass, getToolByName
 from ZopeImports import PersistentMapping
 from utils import make_lookup
@@ -527,13 +528,18 @@ class MetadataBindAdapter(Implicit):
         if self.cached_values.has_key( (1, set_id) ):
             del self.cached_values[ (1, set_id) ]
 
+        # mark both the content and the annotatable object as changed so
+        # on txn commit bindings in other objectspaces get invalidated as well
+        ob._p_changed = 1
+        self.content._p_changed = 1
+
         # reindex object
         if reindex:
             reindex_elements = [e for e in elements if e.getId() in keys]
             idx_names = getIndexNamesFor(reindex_elements)
             catalog = getToolByName(ob, 'portal_catalog')
-            catalog.catalog_object(ob, idxs=idx_names)
-        
+            # cmf compatibility hack
+            ZCatalog.catalog_object(catalog, ob, idxs=idx_names)
     
     def _getSetByKey(self, namespace_key):
         for s in self.collection.values():
@@ -544,12 +550,31 @@ class MetadataBindAdapter(Implicit):
 InitializeClass(MetadataBindAdapter)
 
 def validateData(binding, set, data, errors_dict=None):
-    # XXX formulator specific
+    # XXX completely formulator specific
     from Products.Formulator.Errors import ValidationError
     
     # we only validate elements that exist in the data or for which the element
-    # is required (so we can get the required validation error)
-    for e in [e for e in set.getElements() if data.has_key(e.getId()) or e.isRequired()]:
+    # is required (so we can get the required validation error),
+    for e in set.getElements():
+
+        if hasattr(aq_base(e.field), 'sub_form'):
+            # xxx this is really a datetime hack..
+            # fields with subforms will might have only there marshalled subform ids 
+            # stored in the data dict, there really isn't a good way to discover which 
+            # fields are sub form providers, so we use just try to introspect one.
+            
+            # get one of the subform field ids, just try one.. unfortunately
+            # the presence of a subform has little todo with the fields request
+            # encoding. sigh.
+            sfid = e.field.sub_form.get_field_ids()[0]
+            
+            if not data.has_key(e.field.generate_subfield_key(sfid, validation=1)) \
+               and not e.isRequired():
+                continue
+        
+        elif not data.has_key( e.getId() ) and not e.isRequired():
+            continue
+
         try:
             data[e.getId()] = e.validate(data)
         except ValidationError, exception:
