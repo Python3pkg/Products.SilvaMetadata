@@ -148,6 +148,18 @@ class MetadataBindAdapter(Implicit):
             try:
                 form = ms.getMetadataForm(context, setname)
                 result = form.validate_all(request.form[setname])
+                
+                # Remove keys from the result that are supposed to be
+                # read-only only
+                set = self.getSet(setname)
+                elements = set.getElements()
+                for element in elements:
+                    if not element.isEditable(context):
+                        try:
+                            del result[element.id]
+                        except KeyError, e:
+                            pass
+                
             except FormValidationError, e:
                 all_errors[setname] = errors = {}
                 for error in e.errors:
