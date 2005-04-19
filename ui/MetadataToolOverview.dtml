@@ -1,8 +1,11 @@
 <dtml-var manage_page_header>
 <dtml-var manage_tabs>
 
-<h2> Advanced Metadata System </h2>
+<dtml-if expr="get_root()">
+<h4><a href="../manage_services">Silva Services</a></h4>
+</dtml-if>
 
+<h2> Advanced Metadata System </h2>
 
 <p class="form-help">
 
