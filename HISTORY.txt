@@ -1,6 +1,6 @@
 Copyright (c) 2003-2004 Infrae. All rights reserved.
 See also LICENSE.txt
-$Revision: 1.20 $
+$Revision: 1.21 $
 
 SilvaMetadata changes
 
@@ -15,6 +15,9 @@ SilvaMetadata changes
          imported to/from the XML metadata set definitions.
 
      Bugs fixed
+
+       - setValuesFromRequest now uses Formulator to validate
+         user input. This solves the infamous 'checkbox' problem.
 
        - MetadataTool.setMetadataValues() has been removed.
 
