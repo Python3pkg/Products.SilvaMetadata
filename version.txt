@@ -1,1 +1,1 @@
-SilvaMetadata 0.9 (CVS/UNRELEASED)
+SilvaMetadata 0.9
