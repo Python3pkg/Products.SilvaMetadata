@@ -1,7 +1,7 @@
 """
 Tests for the SilvaMetada.
 
-$Id: test_Metadata.py,v 1.19 2005/04/03 21:57:12 clemens Exp $
+$Id: test_Metadata.py,v 1.20 2005/09/01 10:28:43 guido Exp $
 """
 
 from unittest import TestSuite, makeSuite, main
@@ -167,7 +167,7 @@ class TestSetImportExport(MetadataTests):
         pm = getToolByName(self.root, 'portal_metadata')
         collection = pm.getCollection()
         set = collection.getMetadataSet(SET_ID)
-        xml = set.exportXML()
+        xml = set.exportXML().encode('ascii')
         xmlio = StringIO(xml)
         collection.manage_delObjects([SET_ID])
         collection.importSet(xmlio)
