@@ -3,10 +3,10 @@ See also LICENSE.txt
 
 Meta::
 
-  Valid for:  SilvaMetadata 0.7.x
+  Valid for:  SilvaMetadata 0.10.x
   Author:     Martijn Faassen
   Email:      faassen@infrae.com
-  CVS:        $Revision: 1.6 $
+  CVS:        $Revision: 1.7 $
 
 SilvaMetadata is developed by Infrae (http://www.infrae.com).
 
