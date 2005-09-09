@@ -1,8 +1,14 @@
 Copyright (c) 2003-2004 Infrae. All rights reserved.
 See also LICENSE.txt
-$Revision: 1.22 $
+$Revision: 1.23 $
 
 SilvaMetadata changes
+
+   0.10
+
+     - Bugs fixed
+
+       - Fixed unit tests (issue 1380).
 
    0.9
 
