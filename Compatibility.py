@@ -100,13 +100,13 @@ else:
 ### Permissions
 # only set if not overridden by user/developer
 if Configuration.UsingCMF:
-    from Products.CMFCore import CMFCorePermissions
+    from Products.CMFCore import permissions
     if Configuration.pMetadataView is None:
-        Configuration.pMetadataView = CMFCorePermissions.View
+        Configuration.pMetadataView = permissions.View
     if Configuration.pMetadataEdit is None:
-        Configuration.pMetadataEdit = CMFCorePermissions.ModifyPortalContent
+        Configuration.pMetadataEdit = permissions.ModifyPortalContent
     if Configuration.pMetadataManage is None:
-        Configuration.pMetadataManage = CMFCorePermissions.ManagePortal
+        Configuration.pMetadataManage = permissions.ManagePortal
 else:
     from Products.Silva import SilvaPermissions
     if Configuration.pMetadataView is None:
