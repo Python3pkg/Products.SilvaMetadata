@@ -1,7 +1,7 @@
 """
 Tests for the SilvaMetada.
 
-$Id: test_Metadata.py,v 1.20 2005/09/01 10:28:43 guido Exp $
+$Id: test_Metadata.py,v 1.21 2005/09/14 22:30:53 clemens Exp $
 """
 
 from unittest import TestSuite, makeSuite, main
@@ -32,6 +32,8 @@ if UsingCMF:
     ZopeTestCase.installProduct('ProxyIndex')
     ZopeTestCase.installProduct('Formulator')
     ZopeTestCase.installProduct('CMFCore')
+    # needed by more recent cmf, at east since 1.5.4
+    ZopeTestCase.installProduct('ZCTextIndex')
     TestBaseClass = ZopeTestCase.ZopeTestCase
 else:
     from Products.Silva.tests import SilvaTestCase
