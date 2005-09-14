@@ -3,9 +3,10 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
 #################################
-### Silva / CMF Compatiblity Flag
-# if using Silva set to 0
-UsingCMF = 0
+### Silva / CMF Compatibility Flag
+# if using Silva set to False
+# if it is set to True, Silva will be broken
+UsingCMF = False
 
 #################################
 # this module gets populated with
