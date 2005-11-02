@@ -165,7 +165,7 @@ class MetadataBindAdapter(Implicit):
                 for error in e.errors:
                     errors[error.field_id] = error.error_text
             else:
-                self._setData(result, setname)
+                self._setData(result, setname, reindex=reindex)
         return all_errors
 
     #################################
