@@ -13,11 +13,8 @@ class IAcquiredUpdater(Interface):
     do not provide any IAcquiredUpdater adapters. An extension to Silva
     may however register one.
     """
-    def update(acquired_indexes):
+    def update():
         """Perform the update.
-
-        acquired_indexes - those catalog indexes that index acquired metadata.
-                           They may need updating.
         """
         
 class IPortalMetadata(Interface):

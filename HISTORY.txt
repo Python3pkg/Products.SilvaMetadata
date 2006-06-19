@@ -9,10 +9,9 @@ SilvaMetadata changes
      Features added
 
        - If an extension to Silva provides IAcquiredUpdater adapters
-         for content objects, these will used (their update method is
-         called with the names of any indexes that index acquired
-         metadata). An IAcquiredUpdater adapter for an IContainer
-         could for instance reindex any sub-objects.
+         for content objects, these will used. An IAcquiredUpdater
+         adapter for an IContainer could for instance reindex any
+         sub-objects.
 
        - Use Zope 3 style interfaces. This means that Zope 2.8 is
          now required.

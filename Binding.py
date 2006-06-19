@@ -591,11 +591,10 @@ class MetadataBindAdapter(Implicit):
         # determine elements that need to be reindexed and are acquired
         elements = [element for element in reindex_elements if
                     element.getId() in acquired_names]
-        idx_names = getIndexNamesFor(elements)
-        if idx_names:
+        if elements:
             indexer = IAcquiredUpdater(ob, None)
             if indexer is not None:
-                indexer.update(idx_names)
+                indexer.update()
 
     def _getSetByKey(self, namespace_key):
         for s in self.collection.values():
