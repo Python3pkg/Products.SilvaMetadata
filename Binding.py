@@ -19,6 +19,8 @@ from Namespace import MetadataNamespace, BindingRunTime
 from ZopeImports import Interface, ClassSecurityInfo, InitializeClass
 from ZopeImports import PersistentMapping, getToolByName
 
+from interfaces import IAcquiredUpdater
+
 #################################
 ### runtime bind data keys
 AcquireRuntime = 'acquire_runtime'
@@ -580,6 +582,20 @@ class MetadataBindAdapter(Implicit):
             catalog = getToolByName(ob, 'portal_catalog')
             # cmf compatibility hack
             ZCatalog.catalog_object(catalog, ob, idxs=idx_names)
+            self.reindexHook(ob, reindex_elements, update_list)
+
+    def reindexHook(self, ob, reindex_elements, acquired_names):
+        """A hook that uses an adapter (ICatalogIndexer) to index children.
+
+        """
+        # determine elements that need to be reindexed and are acquired
+        elements = [element for element in reindex_elements if
+                    element.getId() in acquired_names]
+        idx_names = getIndexNamesFor(elements)
+        if idx_names:
+            indexer = IAcquiredUpdater(ob, None)
+            if indexer is not None:
+                indexer.update(idx_names)
 
     def _getSetByKey(self, namespace_key):
         for s in self.collection.values():

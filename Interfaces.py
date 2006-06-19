@@ -4,6 +4,22 @@ author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 from zope.interface import Interface
 
+class IAcquiredUpdater(Interface):
+    """
+    Do any (catalog) updates that may be necessary after setting acquired
+    metadata for an object.
+
+    This is a pure hook: SilvaMetadata and even the Silva core at present
+    do not provide any IAcquiredUpdater adapters. An extension to Silva
+    may however register one.
+    """
+    def update(acquired_indexes):
+        """Perform the update.
+
+        acquired_indexes - those catalog indexes that index acquired metadata.
+                           They may need updating.
+        """
+        
 class IPortalMetadata(Interface):
     pass
 
