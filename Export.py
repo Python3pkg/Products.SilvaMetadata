@@ -4,17 +4,18 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 from cgi import escape
 from types import IntType, FloatType, ListType
 
-from Interfaces import IMetadataSetExporter
+from interfaces import IMetadataSetExporter
 
 from Element import MetadataElement
 from XMLType import serialize
 from utils import StringBuffer, make_lookup
+from zope.interface import implements
 
 class MetadataSetExporter:
     """
     for exporting a metadata set definition
     """
-    __implements__ = IMetadataSetExporter
+    implements(IMetadataSetExporter)
 
     def __init__(self, set):
         self.set = set

@@ -8,9 +8,10 @@ import Configuration
 from Exceptions import ConfigurationError
 from FormulatorField import getFieldFactory
 from Guard import Guard
-from Interfaces import IMetadataElement
+from interfaces import IMetadataElement
 from ZopeImports import *
 from utils import normalize_kv_pairs
+from zope.interface import implements
 
 _marker = []
 
@@ -25,7 +26,7 @@ class MetadataElement(SimpleItem):
 
     meta_type = 'Metadata Element'
 
-    __implements__ = IMetadataElement
+    implements(IMetadataElement)
 
     #################################
     # default element policy properties

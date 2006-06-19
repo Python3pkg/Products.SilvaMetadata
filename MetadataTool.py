@@ -14,8 +14,10 @@ from ZopeImports import *
 from Namespace import MetadataNamespace, BindingRunTime
 from Binding import ObjectDelegate, encodeElement
 from Exceptions import BindingError
-from Compatibility import IActionProvider, IPortalMetadata, ActionProviderBase
+from interfaces import IPortalMetadata
+from Compatibility import ActionProviderBase
 from Compatibility import getContentType, getContentTypeNames
+from zope.interface import implements
 
 class MetadataTool(UniqueObject, Folder, ActionProviderBase):
 
@@ -34,7 +36,7 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
          'action':'%s/manage_workspace' % Configuration.TypeMapping},
         )
 
-    __implements__ = (IActionProvider, IPortalMetadata)
+    implements(IPortalMetadata)
 
     _actions = []
 

@@ -2,8 +2,10 @@
 Marker Interfaces
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
-from Interface import Interface
-from Compatibility import IPortalMetadata
+from zope.interface import Interface
+
+class IPortalMetadata(Interface):
+    pass
 
 #################################
 # Metadata Tool/Service Interface

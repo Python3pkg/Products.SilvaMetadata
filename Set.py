@@ -12,15 +12,16 @@ from Exceptions import NamespaceConflict, ConfigurationError
 from Export import MetadataSetExporter
 from FormulatorField import listFields
 from Index import createIndexes
-from Interfaces import IMetadataSet, IOrderedContainer
+from interfaces import IMetadataSet, IOrderedContainer
 from Namespace import DefaultNamespace, DefaultPrefix
 from ZopeImports import *
+from zope.interface import implements
 
 from Products.ProxyIndex.ProxyIndex import getIndexTypes
 
 class OrderedContainer(Folder):
 
-    __implements__ = IOrderedContainer
+    implements(IOrderedContainer)
 
     security = ClassSecurityInfo()
 
@@ -99,7 +100,7 @@ class MetadataSet(OrderedContainer):
     """
 
     meta_type = 'Metadata Set'
-    __implements__ = IMetadataSet
+    implements(IMetadataSet)
 
     security = ClassSecurityInfo()
 

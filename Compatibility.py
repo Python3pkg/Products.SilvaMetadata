@@ -13,16 +13,6 @@ import Configuration
 from Exceptions import CompatibilityException
 
 #################################
-### Interface declarations/assertions
-if Configuration.UsingCMF:
-    from Products.CMFCore.interfaces import portal_actions, portal_metadata
-    IActionProvider = portal_actions.ActionProvider
-    IPortalMetadata = portal_metadata.portal_metadata
-else:
-    class IActionProvider(Interface): pass
-    class IPortalMetadata(Interface): pass
-
-#################################
 ### Action Provider and Info
 if Configuration.UsingCMF:
     from Products.CMFCore.ActionInformation import ActionInformation

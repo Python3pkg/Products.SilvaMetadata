@@ -4,16 +4,17 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 
 from ZopeImports import *
 from Exceptions import NotFound
-from Interfaces import IMetadataCollection
+from interfaces import IMetadataCollection
 from Import import read_set, make_set
 from Set import MetadataSet
 from Configuration import pMetadataManage
+from zope.interface import implements
 
 class MetadataCollection(Folder):
 
     meta_type = 'Metadata Collection'
 
-    __implements__ = IMetadataCollection
+    implements(IMetadataCollection)
 
     security = ClassSecurityInfo()
 
