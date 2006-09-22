@@ -548,6 +548,7 @@ class MetadataBindAdapter(Implicit):
                 # annotatable object; this will get acquisition
                 # of the value working again.
                 try:
+                    del data[eid]
                     delattr(ob, aqelname)
                 except (KeyError, AttributeError), err:
                     pass
