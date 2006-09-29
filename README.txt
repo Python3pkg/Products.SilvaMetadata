@@ -3,7 +3,7 @@ See also LICENSE.txt
 
 Meta::
 
-  Valid for:  SilvaMetadata 0.10.x
+  Valid for:  SilvaMetadata 0.11.x
   Author:     Kapil Thangavelu
   Email:      <k_vertigo@objectrealms.net>
   CVS:        $Revision: 1.10 $
