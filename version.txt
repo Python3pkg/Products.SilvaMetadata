@@ -1,1 +1,1 @@
-SilvaMetadata 0.11
+SilvaMetadata 0.12

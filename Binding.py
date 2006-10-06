@@ -499,7 +499,6 @@ class MetadataBindAdapter(Implicit):
         return data
 
     def _setData(self, data, set_id=None, namespace_key=None, reindex=0):
-
         set = self._getSet(set_id, namespace_key)
         set_id = set.getId()
 
@@ -548,7 +547,6 @@ class MetadataBindAdapter(Implicit):
                 # annotatable object; this will get acquisition
                 # of the value working again.
                 try:
-                    del data[eid]
                     delattr(ob, aqelname)
                 except (KeyError, AttributeError), err:
                     pass
@@ -558,10 +556,18 @@ class MetadataBindAdapter(Implicit):
         metadata = annotations.getAnnotations(ob, MetadataNamespace)
 
         if metadata.has_key(set.metadata_uri):
-            metadata[set.metadata_uri].update(data)
+            for key, value in data.items():
+                if not (value == '' or value is None):
+                    metadata[set.metadata_uri][key] = value
+                elif metadata[set.metadata_uri].has_key(key):
+                    del metadata[set.metadata_uri][key]
         else:
-            metadata[set.metadata_uri] = PersistentMapping(data)
-
+            metadata[set.metadata_uri] = PersistentMapping({})
+            for key, value in data.items():
+                if not (value == '' or value is None):
+                    metadata[set.metadata_uri][key] = value
+                elif metadata[set.metadata_uri].has_key(key):
+                    del metadata[set.metadata_uri][key]
         # invalidate the cache version of the set if any
         # we do a check for cached acquired/non-acquired
         if self.cached_values.has_key((0, set_id)):
