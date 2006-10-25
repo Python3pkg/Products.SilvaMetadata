@@ -79,6 +79,9 @@ class MetadataSetReader(MetaReader):
     def endDescription(self, chars):
         self.set.description = chars
 
+    def endI18n_domain(self, chars):
+        self.set.i18n_domain = chars
+        
     def endMinimalrole(self, chars):
         self.set.minimalrole = chars
         
@@ -216,13 +219,15 @@ def make_set(container, set_node):
         set_node['title'] = ''
     if not set_node.has_key('description'):
         set_node['description'] = ''
+    if not set_node.has_key('i18n_domain'):
+        set_node['i18n_domain'] = ''
 
     pm = getToolByName(container, 'portal_metadata')
 
     collection = getattr(pm, Configuration.MetadataCollection)
     collection.addMetadataSet(
         set_node.id, set_node.ns_prefix, set_node.ns_uri, set_node.title,
-        set_node.description)
+        set_node.description, set_node.i18n_domain)
 
     set = pm.getMetadataSet(set_node.id)
     set.setCategory(set_node.get('category', ''))

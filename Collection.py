@@ -37,12 +37,13 @@ class MetadataCollection(Folder):
 
     security.declareProtected(pMetadataManage, 'addMetadataSet')
     def addMetadataSet(self, id, namespace_prefix, namespace_uri,
-                       title='', description='', RESPONSE=None):
+                       title='', description='', i18n_domain='', RESPONSE=None):
         " "
 
         set = MetadataSet(id=id,
                           title = title,
                           description = description,
+                          i18n_domain = i18n_domain,
                           metadata_prefix = namespace_prefix,
                           metadata_uri = namespace_uri,
                           )

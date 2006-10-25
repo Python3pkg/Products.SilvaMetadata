@@ -139,14 +139,15 @@ class MetadataSet(OrderedContainer):
     _category = ''
     _minimal_role = ''
 
-    def __init__(self, id, title='', description='',
+    def __init__(self, id, title='', description='', i18n_domain='',
                  metadata_prefix=DefaultPrefix, metadata_uri=DefaultNamespace):
 
         self.id = id
         self.initialized = None
         self.use_action_p = None
-        self.title = ''
-        self.description = ''
+        self.title = title
+        self.description = description
+        self.i18n_domain = i18n_domain
         self._minimal_role = ''
         self._category = ''
         
@@ -220,7 +221,7 @@ class MetadataSet(OrderedContainer):
             RESPONSE.redirect('manage_workspace')
 
     def editSettings(
-        self, title, description, ns_uri, ns_prefix, 
+        self, title, description, i18n_domain, ns_uri, ns_prefix, 
         minimal_role='', category=''):
         """ Edit Set Settings """
 
@@ -229,6 +230,7 @@ class MetadataSet(OrderedContainer):
 
         self.title = title
         self.description = description
+        self.i18n_domain = i18n_domain
             
         self.setNamespace(ns_uri, ns_prefix)
         self.setMinimalRole(minimal_role)
@@ -330,6 +332,11 @@ class MetadataSet(OrderedContainer):
         # verify our namespace
         self.setNamespace(self.metadata_uri, self.metadata_prefix)
 
+    def get_i18n_domain(self):
+        """Get i18n domain, if any.
+        """
+        return getattr(self, 'i18n_domain', '')
+        
 InitializeClass(MetadataSet)
 
 def verifyNamespace(ctx, uri, prefix):
