@@ -38,10 +38,12 @@ class MetadataSetExporter:
         description = escape(self.set.getDescription(), 1)
         minimalrole = escape(self.set.getMinimalRole(), 1)
         category = escape(self.set.getCategory(), 1)
+        i18n_domain = escape(self.set.get_i18n_domain(), 1)
             
         out.write('<title>%s</title>\n' % (title))
         out.write('<category>%s</category>\n' % (category))
         out.write('<description>%s</description>\n' % (description))
+        out.write('<i18n_domain>%s</i18n_domain>\n' % (i18n_domain))
         out.write('<minimalrole>%s</minimalrole>\n' % (minimalrole))
                    
         for e in self.set.getElements():
