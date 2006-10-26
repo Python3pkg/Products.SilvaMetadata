@@ -1,8 +1,6 @@
 <dtml-var manage_page_header>
 <dtml-var manage_tabs>
 
-<form action="editSettings" method="POST">
-
 <h2> Metadata Set Settings </h2>
 
 <br />
@@ -30,7 +28,7 @@
 
 <tr>
    <td> i18n Domain </td>
-   <td> <input name="title" type="text" size="60" value="<dtml-var get_i18n_domain>"></td>
+   <td> <input name="i18n_domain" type="text" size="60" value="<dtml-var get_i18n_domain>"></td>
 </tr>
 
 <tr>
