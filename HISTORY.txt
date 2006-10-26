@@ -4,6 +4,13 @@ $Revision: 1.24 $
 
 SilvaMetadata changes
 
+    0.12
+
+    Features added
+
+       - MetadataTool.getMetadataValue can now get just this objects 
+         metadata, not acquiring parent metadata
+
     0.11
 
      Features added

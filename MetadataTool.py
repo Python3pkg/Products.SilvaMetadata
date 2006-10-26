@@ -147,13 +147,15 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
                 )
         return invokeAccessHandler(self, content)
 
-    def getMetadataValue(self, content, set_id, element_id):
+    def getMetadataValue(self, content, set_id, element_id, acquire=1):
         """Get a metadata value right away. This can avoid
         building up the binding over and over while indexing.
 
         This really goes to the low-level to speed this up to the maximum.
         It's only going to work for Silva, not CMF.
         """
+        """Also, optionally turn off acquiring, in case you want to
+           get this objects metadata _only_"""
         # XXX how does this interact with security issues?
         set = self.collection.getMetadataSet(set_id)
         element = set.getElement(element_id)
@@ -179,7 +181,7 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         if saved_data is not None and saved_data.has_key(element_id):
             return saved_data[element_id]
         # if not, check whether we acquire it, if so, we're done
-        if element.isAcquireable():
+        if acquire and element.isAcquireable():
             aqelname = encodeElement(set_id, element_id)
             try:
                 #print 'acquiring?', repr(aqelname)
