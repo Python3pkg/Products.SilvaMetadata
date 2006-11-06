@@ -1,1 +1,1 @@
-SilvaMetadata 0.14 (SVN/UNRELEASED)
+SilvaMetadata 0.13
