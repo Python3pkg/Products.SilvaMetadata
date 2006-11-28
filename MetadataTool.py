@@ -178,8 +178,10 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         #print 'found it for:', repr((saved_data, content))
             
         # if it's saved, we're done
-        if saved_data is not None and saved_data.has_key(element_id):
-            return saved_data[element_id]
+        if saved_data:
+            if saved_data.get(element_id, None):
+                return saved_data[element_id]
+
         # if not, check whether we acquire it, if so, we're done
         if acquire and element.isAcquireable():
             aqelname = encodeElement(set_id, element_id)
