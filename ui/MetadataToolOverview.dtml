@@ -17,8 +17,6 @@
 
 </p>
 
-<br />
-<br />
 
 <p class="form-help">
  <a href="<dtml-var "getCollection().absolute_url()">/manage_workspace">
