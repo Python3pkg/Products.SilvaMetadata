@@ -34,7 +34,7 @@
   </tr>
 </dtml-in>
 
-<tr><td colspan="2"> <input type="submit" value="edit mappings" /> </td></tr>
+<tr><td colspan="2"> <input type="submit" value="save mappings" /> </td></tr>
 
 </table>
 
