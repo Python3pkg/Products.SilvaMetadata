@@ -1,4 +1,4 @@
-Copyright (c) 2003-2004 Infrae. All rights reserved.
+Copyright (c) 2003-2006 Infrae. All rights reserved.
 See also LICENSE.txt
 $Revision: 1.24 $
 
@@ -6,29 +6,36 @@ SilvaMetadata changes
 
     0.14
 
+      Features added
+
+        - Added 'Export Metadata Set as XML' button to set overview screen
+
+        - Changed the button value in Content Type Mappings from 'edit 
+          mappings' to 'save mappings'
+
       Bugs fixed
         
         - Bugfix for empty strings in aqcuirable metadata fields blocking
-        acquisition. Many thanks to Nico Grubert for the bug report and
-        proposed fix!
+          acquisition. Many thanks to Nico Grubert for the bug report and
+          proposed fix!
         
     0.13
 
       Features added
 
         - MetadataTool.getMetadataValue can now get just this objects
-        metadata, not acquiring parent metadata
+          metadata, not acquiring parent metadata
 
     0.11
 
       Features added
 
         - If an extension to Silva provides IAcquiredUpdater adapters for
-        content objects, these will used. An IAcquiredUpdater adapter for
-        an IContainer could for instance reindex any sub-objects.
+          content objects, these will used. An IAcquiredUpdater adapter for
+          an IContainer could for instance reindex any sub-objects.
 
         - Use Zope 3 style interfaces. This means that Zope 2.8 is now
-        required.
+          required.
 
       Bugs fixed
 
@@ -47,20 +54,20 @@ SilvaMetadata changes
       Features added
 
         - Metadata sets can have a 'category' property. This property can
-        be used to define special purpose metadata sets.
+          be used to define special purpose metadata sets.
 
         - The minimal_role and category properties are exported and
-        imported to/from the XML metadata set definitions.
+          imported to/from the XML metadata set definitions.
 
       Bugs fixed
 
         - setValuesFromRequest now uses Formulator to validate user input.
-        This solves the infamous 'checkbox' problem.
+          This solves the infamous 'checkbox' problem.
 
         - MetadataTool.setMetadataValues() has been removed.
 
         - XML export/import now works with latest Formulator release
-        (fixing issues with Formulator's i18n support).
+          (fixing issues with Formulator's i18n support).
 
         - unit test have been updated to run with Silva
 
@@ -71,24 +78,24 @@ SilvaMetadata changes
       Features added
 
         - Metadata Sets now have a Minimal Role property, that can be used
-        by Silva to restrict access to a Set.
+          by Silva to restrict access to a Set.
 
     0.7.6
   
       Bugs fixed
 
         - Make getMetadataValue shortcut a bit more robust. Also some
-        performance tweaks.
+          performance tweaks.
 
     0.7.5
 
       Bugs fixed
 
         - XML import with unrecognized metadata sets now skips these sets
-        silently.
+          silently.
 
         - XML export for integers and floats should now work properly when
-        Python 2.1 is used.
+          Python 2.1 is used.
 
         - Make SilvaMetadata field editing work with Formulator 1.6.0.
 
@@ -97,9 +104,9 @@ SilvaMetadata changes
       Bugs fixed
 
         - XML import would fail with a NameError if a metadata set is
-        imported that is not registered. Now it fails with a more
-        informative error... What *should* be happening is that this
-        unrecognized metadata is skipped, instead.
+          imported that is not registered. Now it fails with a more
+          informative error... What *should* be happening is that this
+          unrecognized metadata is skipped, instead.
 
     0.7.3
 
@@ -128,13 +135,10 @@ SilvaMetadata changes
       Bugs fixed
 
         - Avoid quadratic behavior while indexing. Previously, for n
-        elements that are indexed, for each element indexing the data for
-        the n indexes was accessed, resulting in quadratic behavior while
-        indexing (n * n values were accessed per object).
+          elements that are indexed, for each element indexing the data for
+          the n indexes was accessed, resulting in quadratic behavior while
+          indexing (n * n values were accessed per object).
 
     0.5
 
       Initial public release of SilvaMetadata.
-
-
-

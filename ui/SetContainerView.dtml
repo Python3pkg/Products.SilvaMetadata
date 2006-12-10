@@ -234,6 +234,10 @@ function toggleSelect() {
 </dtml-in>
 </table>
 
+<!-- Expose export set xml method to users -->
+<input class="form-element" style="float:right; margin-top:2px" type="submit"
+  name="exportXML:method" value="Export Metadata Set as XML" />
+
 <table cellspacing="0" cellpadding="2" border="0">
 <tr>
   <td align="left" valign="top" width="16"></td>
@@ -270,7 +274,6 @@ if (document.forms[0]) {
   </div>
   </td>
 </tr>
-
 
 </table>
 
