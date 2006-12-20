@@ -2,11 +2,14 @@
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 # Zope
+from zope.interface import implements
 from Acquisition import aq_base
 # Annotations
 from Products.Annotations.AnnotationTool import Annotations
 # Formulator
 from Products.Formulator import Form
+# Silva
+from Products.Silva.interfaces import IGhostFolder
 # SilvaMetadata
 from Access import invokeAccessHandler
 import Configuration
@@ -17,7 +20,6 @@ from Exceptions import BindingError
 from interfaces import IPortalMetadata
 from Compatibility import ActionProviderBase
 from Compatibility import getContentType, getContentTypeNames
-from zope.interface import implements
 
 class MetadataTool(UniqueObject, Folder, ActionProviderBase):
 
@@ -153,9 +155,27 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
 
         This really goes to the low-level to speed this up to the maximum.
         It's only going to work for Silva, not CMF.
-        """
-        """Also, optionally turn off acquiring, in case you want to
-           get this objects metadata _only_"""
+        Also, optionally turn off acquiring, in case you want to
+        get this objects metadata _only_"""
+        from Products.Silva.Ghost import GhostVersion
+        
+        # XXX Hackish, but bypassing the binding doesn't work for ghosts
+        if IGhostFolder.providedBy(content) or isinstance(content, GhostVersion):
+            metadataservice = content.aq_inner.service_metadata
+            # XXX nasty hack to get the editable metadata in case of preview
+            url = content.REQUEST['URL'].split('/')
+            binding = None
+            if 'preview_html' in url or 'tab_preview' in url:
+                sm = getSecurityManager()
+                if sm.checkPermission(ChangeSilvaContent, content):
+                    content = content.get_editable()
+            if content is None:
+                return None
+            else:
+                binding = metadataservice.getMetadata(content)
+            if binding is None:
+                return None
+            return binding.get(set_id, element_id)
         # XXX how does this interact with security issues?
         set = self.collection.getMetadataSet(set_id)
         element = set.getElement(element_id)
@@ -186,7 +206,6 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         if acquire and element.isAcquireable():
             aqelname = encodeElement(set_id, element_id)
             try:
-                #print 'acquiring?', repr(aqelname)
                 return getattr(content, aqelname)
             except AttributeError:
                 #print 'attr error on', repr(aqelname)
