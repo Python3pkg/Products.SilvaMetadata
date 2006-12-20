@@ -4,6 +4,13 @@ $Revision: 1.24 $
 
 SilvaMetadata changes
 
+    0.15
+
+      Bugs fixed    
+
+        - MetadataTool.getMetadataValue did not work correctly for Ghosts
+        and GhostFolders, it does now.
+
     0.14
 
       Features added
