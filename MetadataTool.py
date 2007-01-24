@@ -4,6 +4,7 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 # Zope
 from zope.interface import implements
 from Acquisition import aq_base
+from AccessControl import getSecurityManager
 # Annotations
 from Products.Annotations.AnnotationTool import Annotations
 # Formulator
