@@ -8,7 +8,7 @@ SilvaMetadata changes
 
       Bugs fixed    
 
-        - 2007-01-24: Added a missing import in MetadataTool.py.
+        - 2007-01-25: Added missing imports in MetadataTool.py.
 
     0.15
 
