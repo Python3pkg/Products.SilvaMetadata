@@ -11,6 +11,7 @@ from Products.Annotations.AnnotationTool import Annotations
 from Products.Formulator import Form
 # Silva
 from Products.Silva.interfaces import IGhostFolder
+from Products.Silva.SilvaPermissions import ChangeSilvaContent
 # SilvaMetadata
 from Access import invokeAccessHandler
 import Configuration
