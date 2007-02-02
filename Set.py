@@ -328,16 +328,17 @@ class MetadataSet(OrderedContainer):
     def listIndexTypes(self):
         return getIndexTypes(getToolByName(self, 'portal_catalog'))
 
-    def manage_afterAdd(self, item, container):
-        # verify our namespace
-        self.setNamespace(self.metadata_uri, self.metadata_prefix)
-
     def get_i18n_domain(self):
         """Get i18n domain, if any.
         """
         return getattr(self, 'i18n_domain', '')
         
 InitializeClass(MetadataSet)
+
+def metadataset_added(metadataset, event):
+    # verify our namespace
+    metadataset.setNamespace(
+        metadataset.metadata_uri, metadataset.metadata_prefix)
 
 def verifyNamespace(ctx, uri, prefix):
 

@@ -1,0 +1,28 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    xmlns:silva="http://infrae.com/ns/silvaconf"
+    >
+
+  <include package="Products.Silva" />
+
+  <!-- i18n -->
+  <!--  <i18n:registerTranslations directory="i18n" />-->
+
+ 
+  <!-- event handlers -->
+  
+  <subscriber
+    for=".interfaces.IMetadataSet
+      zope.app.container.interfaces.IObjectAddedEvent"
+    handler=".Set.metadataset_added" 
+  />
+
+  <subscriber
+    for=".interfaces.IPortalMetadata
+      zope.app.container.interfaces.IObjectAddedEvent"
+    handler=".MetadataTool.tool_added" 
+  />
+
+  
+</configure>
