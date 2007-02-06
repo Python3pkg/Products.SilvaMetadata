@@ -57,7 +57,7 @@ class IOrderedContainer(Interface):
         given an object id return its position in the ordered list
         """
 
-class IMetadataSet(IOrderedContainer):
+class IMetadataSet(Interface):
     pass
 
 class IMetadataElement(Interface):
