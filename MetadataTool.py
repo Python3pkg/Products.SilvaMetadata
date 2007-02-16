@@ -4,14 +4,16 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 # Zope
 from zope.interface import implements
 from Acquisition import aq_base
+from AccessControl import getSecurityManager
 # Annotations
 from Products.Annotations.AnnotationTool import Annotations
 # Formulator
 from Products.Formulator import Form
 # Silva
 from Products.Silva.interfaces import IGhostFolder
+from Products.Silva.SilvaPermissions import ChangeSilvaContent
 # SilvaMetadata
-from Access import invokeAccessHandler
+from Access import invokeAccessHandler, getAccessHandler
 import Configuration
 from ZopeImports import *
 from Namespace import MetadataNamespace, BindingRunTime
@@ -157,10 +159,11 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         It's only going to work for Silva, not CMF.
         Also, optionally turn off acquiring, in case you want to
         get this objects metadata _only_"""
-        from Products.Silva.Ghost import GhostVersion
         
-        # XXX Hackish, but bypassing the binding doesn't work for ghosts
-        if IGhostFolder.providedBy(content) or isinstance(content, GhostVersion):
+        # We explicitly test for registered handlers.
+        default_handler = getAccessHandler(None)
+        handler = getAccessHandler(getContentType(content))
+        if handler is not default_handler:
             metadataservice = content.aq_inner.service_metadata
             # XXX nasty hack to get the editable metadata in case of preview
             url = content.REQUEST['URL'].split('/')
