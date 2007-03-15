@@ -44,15 +44,14 @@ def invokeAccessHandler(tool, content):
         raise BindingError("no access handler found for %s" % ct)
     return handler(tool, ct, content)
 
-def default_accessor(tool, content_type, content):
+def default_accessor(tool, content_type, content, read_only=False):
     type_mapping = tool.getTypeMapping()
     metadata_sets = type_mapping.getMetadataSetsFor(content_type)
 
     if not metadata_sets:
         raise BindingError("no metadata sets defined for %s" % content_type)
 
-    return MetadataBindAdapter(content, metadata_sets).__of__(content)
-
+    return MetadataBindAdapter(content, metadata_sets, read_only).__of__(content)
 
 def cached_accessor(tool, content_type, content):
     """
@@ -64,6 +63,5 @@ def cached_accessor(tool, content_type, content):
         binding = default_accessor( tool, content_type, content)
         setattr(content, '_v_binding', binding)
     return binding
-
 
 registerAccessHandler(None, default_accessor)

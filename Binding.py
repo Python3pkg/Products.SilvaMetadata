@@ -49,12 +49,13 @@ class MetadataBindAdapter(Implicit):
     security = ClassSecurityInfo()
     security.declareObjectPublic()
 
-    def __init__(self, content, sets):
+    def __init__(self, content, sets, read_only=False):
         self.content = content
         self.collection = {}
         self.setnames = []
         self.category_to_setnames = {}
         self.cached_values = {}
+        self.read_only=read_only
         
         for set in sets:
             setid = set.getId()
@@ -499,6 +500,8 @@ class MetadataBindAdapter(Implicit):
         return data
 
     def _setData(self, data, set_id=None, namespace_key=None, reindex=0):
+        if self.read_only:
+            return
         set = self._getSet(set_id, namespace_key)
         set_id = set.getId()
 
