@@ -4,6 +4,15 @@ $Revision: 1.24 $
 
 SilvaMetadata changes
 
+    0.17
+
+      Features added 
+
+        - 2007-03-15: The default access handler and the
+          MetadataBindingAdapter now have a read_only parameter, False
+          by default, that if set to true will cause all write actions
+          to the binding to be silently ignored.
+
     0.16
 
       Bugs fixed    
