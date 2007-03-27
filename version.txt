@@ -1,0 +1,6 @@
+<<<<<<< .mine
+SilvaMetadata 0.17
+
+=======
+SilvaMetadata 0.17 (unreleased)
+>>>>>>> .r24030
