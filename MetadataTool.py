@@ -271,13 +271,13 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
     #################################
     # misc
 
-    def manage_afterAdd(self, item, container):
-        initializeTool(self)
-
     def update(self, RESPONSE):
         """ """
         RESPONSE.redirect('manage_workspace')
 
+def tool_added(tool, event):
+    initializeTool(tool)
+        
 def initializeTool(tool):
 
     from Collection import MetadataCollection
