@@ -4,7 +4,12 @@ $Revision: 1.24 $
 
 SilvaMetadata changes
 
-    0.17
+    1.0
+
+      Features added
+
+        - Made SilvaMetadata Zope-2.10 compliant, so that it works
+          with Silva 2.0.  0.17
 
       Features added 
 
@@ -23,8 +28,8 @@ SilvaMetadata changes
 
       Bugs fixed    
 
-        - MetadataTool.getMetadataValue did not work correctly for Ghosts
-        and GhostFolders, it does now.
+        - MetadataTool.getMetadataValue did not work correctly for
+          Ghosts and GhostFolders, it does now.
 
     0.14
 
