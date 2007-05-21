@@ -9,7 +9,9 @@ SilvaMetadata changes
       Features added
 
         - Made SilvaMetadata Zope-2.10 compliant, so that it works
-          with Silva 2.0.  0.17
+          with Silva 2.0.
+
+    0.17
 
       Features added 
 
