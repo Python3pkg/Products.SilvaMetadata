@@ -1,2 +1,3 @@
-SilvaMetadata 1.1 (unreleased)
+SilvaMetadata 1.0.1 (unreleased)
+
 

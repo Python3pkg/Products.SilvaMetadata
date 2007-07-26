@@ -285,6 +285,13 @@ def initializeTool(tool):
 
     collection = MetadataCollection(Configuration.MetadataCollection)
     collection.id = Configuration.MetadataCollection
+    # if we are being imported as a zexp, the collection will already
+    # be there. If we detect this, the setup has actually already been
+    # completed (this is being imported). We should not add the new
+    # collection object as it would fail with a duplicate id. We 
+    # should be able to bail out right away.
+    if hasattr(tool.aq_explicit, Configuration.MetadataCollection):
+        return
     tool._setObject(Configuration.MetadataCollection, collection)
 
     mapping = TypeMappingContainer(Configuration.TypeMapping)

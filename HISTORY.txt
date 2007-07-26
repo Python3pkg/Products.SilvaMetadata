@@ -3,6 +3,13 @@ See also LICENSE.txt
 $Revision: 1.24 $
 
 SilvaMetadata changes
+   
+    1.0.1 (unreleased)
+
+      Bugs fixed
+
+        - The Zope 2.10 event system was causing importing .zexp which
+          contained the metadata service to fail. Fixed this.
 
     1.0
 
