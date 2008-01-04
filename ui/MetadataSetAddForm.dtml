@@ -10,27 +10,26 @@ examples include DublinCore (www.dublincore.org), LOM, and SCORM.
 </p>
 
 <form action="addMetadataSet" method="POST">
-
   <table>
-
-   <tr><td><div class="form-label">Id</div></td>
-       <td><input type="text" name="id"></td>
-       </tr>
-
-   <tr><td><div class="form-label">XML Namespace Prefix</div></td>
-       <td><input type="text" name="namespace_prefix:ignore_empty" /></td>
-       </tr>
-
-   <tr><td><div class="form-label">XML Namespace URI</div></td>
-       <td><input type="text" name="namespace_uri:ignore_empty" /></td>
-       </tr>
-
-   <tr><td colspan="2">
-       <input type="submit" value="add metadata set" />
-       </td></tr>
-
+    <tr>
+      <td><div class="form-label">Id</div></td>
+       <td>
+         <p class="form-help"><input type="text" name="id">
+         Suggestion: 'institution-setname'</p>
+      </td>
+    </tr>
+    <tr>
+      <td><div class="form-label">XML Namespace Prefix</div></td>
+      <td><input type="text" name="namespace_prefix:ignore_empty" /></td>
+    </tr>    
+    <tr>
+      <td><div class="form-label">XML Namespace URI</div></td>
+      <td><input type="text" name="namespace_uri:ignore_empty" /></td>
+    </tr>
+    <tr>
+      <td colspan="2"><input type="submit" value="add metadata set" /></td>
+     </tr>
   </table>
-
 </form>
 
 <hr />
@@ -44,17 +43,15 @@ A Metadata Set can be exported and imported as an XML file.
 </p>
 
 <form action="importSet" method="POST" enctype="multipart/form-data">
-
   <table>
-
-  <tr><td><div class="form-label">Metadata Set XML File</div></td>
+    <tr>
+      <td><div class="form-label">Metadata Set XML File</div></td>
       <td><input type="file" name="xml_file"/></td>
-  </tr>
-
-  <tr><td colspan="2">
-      <input type="submit" value="import metadata set" />
-      </td></tr>
-
+    </tr>
+    <tr>
+      <td colspan="2"><input type="submit" value="import metadata set" /></td>
+    </tr>
+  </table>
 </form>
 
 <dtml-var manage_page_footer>
