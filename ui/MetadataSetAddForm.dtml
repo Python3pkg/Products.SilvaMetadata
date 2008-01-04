@@ -5,7 +5,7 @@
            )">
 
 <p class="form-help">
-A Metadata Set represents an aggregation of metadata fields. some
+A Metadata Set represents an aggregation of metadata fields. Some
 examples include DublinCore (www.dublincore.org), LOM, and SCORM.
 </p>
 
@@ -34,6 +34,14 @@ examples include DublinCore (www.dublincore.org), LOM, and SCORM.
 </form>
 
 <hr />
+
+<dtml-var "manage_form_title(this(), _,
+           form_title='Import Metadata Set',
+           )">
+
+<p class="form-help">
+A Metadata Set can be exported and imported as an XML file.  
+</p>
 
 <form action="importSet" method="POST" enctype="multipart/form-data">
 
