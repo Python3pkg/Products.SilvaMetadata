@@ -53,6 +53,7 @@
           <option value="Author">Author</option>
           <option value="Editor">Editor</option>
           <option value="ChiefEditor">Chief Editor</option>
+          <option value="Manager">Manager</option>
         </select>
         <small>(and higher)</small>
       </div>
