@@ -178,11 +178,11 @@ class MetadataSetReader(MetaReader):
     def endFieldMField_messages(self, chars):
         self.prefix = ''
 
-    def startFieldMmessage(self, attrs):
+    def startFieldMMessage(self, attrs):
         fm = DefinitionNode(attrs)
         self.getElement().field_messages.append(fm)
 
-    def endFieldMmessage(self, chars):
+    def endFieldMMessage(self, chars):
         self.getElement().field_messages[-1].text = chars
 
     def startIndex_args(self, attrs):
