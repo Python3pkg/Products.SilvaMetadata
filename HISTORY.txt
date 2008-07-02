@@ -10,6 +10,11 @@ SilvaMetadata changes
 
       - Add id suggestion for set naming convention to add ui
 
+    Bugs fixed
+      - Binding.setValuesFromRequest more cleanly 'fakes' a real
+	HTTPRequest when calling form.validate_all, so that
+	referencelookupwindows can be used as metadata fields.
+
   1.0.1
 
     Bugs fixed

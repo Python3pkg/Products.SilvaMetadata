@@ -21,6 +21,9 @@ from ZopeImports import PersistentMapping, getToolByName
 
 from interfaces import IAcquiredUpdater
 
+from zope.publisher.interfaces.http import IHTTPRequest
+from zope.interface import alsoProvides
+
 #################################
 ### runtime bind data keys
 AcquireRuntime = 'acquire_runtime'
@@ -150,7 +153,16 @@ class MetadataBindAdapter(Implicit):
                 continue
             try:
                 form = ms.getMetadataForm(context, setname)
-                result = form.validate_all(request.form[setname])
+                #validate_all expects an httprequest-list object
+                #we're giving it a dict, so declare that the dict
+                #implements IHTTPRequest. NOTE: this was added
+                #to that the referencelookupwindow field could
+                #be used as a metadata field...this type of
+                #lookupwindow requires an IHTTPRequest in order
+                #to validate using the path adapter
+                reqform = request.form[setname]
+                alsoProvides(reqform,IHTTPRequest)
+                result = form.validate_all(reqform)
                 
                 # Remove keys from the result that are supposed to be
                 # read-only only
