@@ -92,11 +92,20 @@ class MetadataBindAdapter(Implicit):
         return element.renderView(value)
 
     security.declarePublic('renderElementEdit')
-    def renderElementEdit(self, set_id, element_id):
+    def renderElementEdit(self, set_id, element_id, REQUEST=None):
         element = self.getElement(set_id, element_id)
-        data = self._getData(set_id, acquire=0)
-        return element.renderEdit(data.get(element_id, None))
-
+        if REQUEST:
+            #here we want to render the value from the request 
+            #(i.e. a save didn't pass validation and the form 
+            #needs to be preloaded with the previously supplied values)
+            #so the value for this element comes from the REQUEST
+            value = REQUEST.get(set_id).get(element_id)
+        else:
+            #if request is false, then we want to render the default/saved
+            # value
+            value = self._getData(set_id, acquire=0).get(element_id,None)
+        return element.renderEdit(value)
+            
     #################################
     ### Validation
 

@@ -4,6 +4,13 @@ $Revision: 1.24 $
 
 SilvaMetadata changes
 
+  since 1.1
+
+    Features added
+
+      - add support in Bindings for rendering the edit views of elements
+        with values from the request
+
   1.1
 
     Features added
