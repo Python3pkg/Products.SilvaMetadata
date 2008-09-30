@@ -1,198 +1,219 @@
-Copyright (c) 2003-2008 Infrae. All rights reserved.
-See also LICENSE.txt
-$Revision: 1.24 $
 
-SilvaMetadata changes
+Changes
+=======
 
-  since 1.1
+1.2 (2008/09/30)
+-----------------
 
-    Features added
+Features added:
 
-      - add support in Bindings for rendering the edit views of elements
-        with values from the request
+- Add support in Bindings for rendering the edit views of elements
+  with values from the request.
 
-  1.1
+- Rewrite documentation as a clean ReST.
 
-    Features added
+1.1
+---
 
-      - Add id suggestion for set naming convention to add ui
+Features added:
 
-    Bugs fixed
-      - Binding.setValuesFromRequest more cleanly 'fakes' a real
-	HTTPRequest when calling form.validate_all, so that
-	referencelookupwindows can be used as metadata fields.
+- Add id suggestion for set naming convention to add ui.
 
-  1.0.1
+Bugs fixed:
 
-    Bugs fixed
+- Binding.setValuesFromRequest more cleanly 'fakes' a real HTTPRequest
+  when calling ``form.validate_all``, so that referencelookupwindows
+  can be used as metadata fields.
 
-      - The Zope 2.10 event system was causing importing .zexp which
-        contained the metadata service to fail. Fixed this.
+1.0.1
+-----
 
-  1.0
+Bugs fixed:
 
-    Features added
+- The Zope 2.10 event system was causing importing .zexp which
+  contained the metadata service to fail. Fixed this.
 
-      - Made SilvaMetadata Zope-2.10 compliant, so that it works
-        with Silva 2.0.
+1.0
+---
 
-  0.17
+Features added:
 
-    Features added 
+- Made SilvaMetadata Zope-2.10 compliant, so that it works with Silva
+  2.0.
 
-      - 2007-03-15: The default access handler and the
-        MetadataBindingAdapter now have a read_only parameter, False
-        by default, that if set to true will cause all write actions
-        to the binding to be silently ignored.
+0.17
+----
 
-  0.16
+Features added :
 
-    Bugs fixed    
+- 2007-03-15: The default access handler and the
+  ``MetadataBindingAdapter`` now have a ``read_only`` parameter, False
+  by default, that if set to true will cause all write actions to the
+  binding to be silently ignored.
 
-      - 2007-01-25: Added missing imports in MetadataTool.py.
+0.16
+----
 
-  0.15
+Bugs fixed:
 
-    Bugs fixed    
+- 2007-01-25: Added missing imports in MetadataTool.py.
 
-      - MetadataTool.getMetadataValue did not work correctly for
-        Ghosts and GhostFolders, it does now.
+0.15
+----
 
-  0.14
+Bugs fixed:
 
-    Features added
+- MetadataTool.getMetadataValue did not work correctly for Ghosts and
+  GhostFolders, it does now.
 
-      - Added 'Export Metadata Set as XML' button to set overview screen
+0.14
+----
 
-      - Changed the button value in Content Type Mappings from 'edit 
-        mappings' to 'save mappings'
+Features added:
 
-    Bugs fixed
-      
-      - Bugfix for empty strings in aqcuirable metadata fields blocking
-        acquisition. Many thanks to Nico Grubert for the bug report and
-        proposed fix!
-      
-  0.13
+- Added 'Export Metadata Set as XML' button to set overview screen.
 
-    Features added
+- Changed the button value in Content Type Mappings from 'edit
+  mappings' to 'save mappings'.
 
-      - MetadataTool.getMetadataValue can now get just this objects
-        metadata, not acquiring parent metadata
+Bugs fixed:
 
-  0.11
+- Bugfix for empty strings in aqcuirable metadata fields blocking
+  acquisition. Many thanks to Nico Grubert for the bug report and
+  proposed fix!
+    
+0.13
+----
 
-    Features added
+Features added:
 
-      - If an extension to Silva provides IAcquiredUpdater adapters for
-        content objects, these will used. An IAcquiredUpdater adapter for
-        an IContainer could for instance reindex any sub-objects.
+- MetadataTool.getMetadataValue can now get just this objects
+  metadata, not acquiring parent metadata
 
-      - Use Zope 3 style interfaces. This means that Zope 2.8 is now
-        required.
+0.11
+----
 
-    Bugs fixed
+Features added:
 
-      - Stop using deprecated CMFCore.CMFCorePermissions module
+- If an extension to Silva provides IAcquiredUpdater adapters for
+  content objects, these will used. An IAcquiredUpdater adapter for
+  an IContainer could for instance reindex any sub-objects.
 
-      - Even more fixes to the unit tests (issue 1381).
+- Use Zope 3 style interfaces. This means that Zope 2.8 is now
+  required.
 
-  0.10
+Bugs fixed:
 
-    Bugs fixed
+- Stop using deprecated ``CMFCore.CMFCorePermissions`` module
 
-      - Fixed unit tests (issue 1380).
+- Even more fixes to the unit tests (issue 1381).
 
-  0.9
+0.10
+----
 
-    Features added
+Bugs fixed:
 
-      - Metadata sets can have a 'category' property. This property can
-        be used to define special purpose metadata sets.
+- Fixed unit tests (issue 1380).
 
-      - The minimal_role and category properties are exported and
-        imported to/from the XML metadata set definitions.
+0.9
+---
 
-    Bugs fixed
+Features added:
 
-      - setValuesFromRequest now uses Formulator to validate user input.
-        This solves the infamous 'checkbox' problem.
+- Metadata sets can have a 'category' property. This property can
+  be used to define special purpose metadata sets.
 
-      - MetadataTool.setMetadataValues() has been removed.
+- The ``minimal_role`` and category properties are exported and
+  imported to/from the XML metadata set definitions.
 
-      - XML export/import now works with latest Formulator release
-        (fixing issues with Formulator's i18n support).
+Bugs fixed:
 
-      - unit test have been updated to run with Silva
+- setValuesFromRequest now uses Formulator to validate user input.
+  This solves the infamous 'checkbox' problem.
 
-      - MetadataTool.getMetadataValue now supports object delegation.
+- ``MetadataTool.setMetadataValues()`` has been removed.
 
-  0.8
+- XML export/import now works with latest Formulator release
+  (fixing issues with Formulator's i18n support).
 
-    Features added
+- unit test have been updated to run with Silva.
 
-      - Metadata Sets now have a Minimal Role property, that can be used
-        by Silva to restrict access to a Set.
+- ``MetadataTool.getMetadataValue`` now supports object delegation.
 
-  0.7.6
+0.8
+---
 
-    Bugs fixed
+Features added
 
-      - Make getMetadataValue shortcut a bit more robust. Also some
-        performance tweaks.
+- Metadata Sets now have a Minimal Role property, that can be used
+  by Silva to restrict access to a Set.
 
-  0.7.5
+0.7.6
+-----
 
-    Bugs fixed
+Bugs fixed
 
-      - XML import with unrecognized metadata sets now skips these sets
-        silently.
+- Make getMetadataValue shortcut a bit more robust. Also some
+  performance tweaks.
 
-      - XML export for integers and floats should now work properly when
-        Python 2.1 is used.
+0.7.5
+-----
 
-      - Make SilvaMetadata field editing work with Formulator 1.6.0.
+Bugs fixed:
 
-  0.7.4 
+- XML import with unrecognized metadata sets now skips these sets
+  silently.
 
-    Bugs fixed
+- XML export for integers and floats should now work properly when
+  Python 2.1 is used.
 
-      - XML import would fail with a NameError if a metadata set is
-        imported that is not registered. Now it fails with a more
-        informative error... What *should* be happening is that this
-        unrecognized metadata is skipped, instead.
+- Make SilvaMetadata field editing work with Formulator 1.6.0.
 
-  0.7.3
+0.7.4 
+-----
 
-    Features added
+Bugs fixed:
 
-      - icon for service_metadata.
+- XML import would fail with a NameError if a metadata set is imported
+  that is not registered. Now it fails with a more informative
+  error... What *should* be happening is that this unrecognized
+  metadata is skipped, instead.
 
-    Bugs fixed
+0.7.3
+-----
 
-      - XML import of complex lists for items now works.
+Features added:
 
-      - Indexing with XML import now works.
-     
-  0.7.2
+- icon for ``service_metadata``.
 
-    Bugs fixed
+Bugs fixed:
 
-      - getMetadataValue was buggy and didn't really work. Fixed.
+- XML import of complex lists for items now works.
 
-  0.7.1
+- Indexing with XML import now works.
+   
+0.7.2
+-----
 
-    Features added
+Bugs fixed:
 
-      - Added Infrae standard release documentation.
+- getMetadataValue was buggy and didn't really work. Fixed.
 
-    Bugs fixed
+0.7.1
+-----
 
-      - Avoid quadratic behavior while indexing. Previously, for n
-        elements that are indexed, for each element indexing the data for
-        the n indexes was accessed, resulting in quadratic behavior while
-        indexing (n * n values were accessed per object).
+Features added:
 
-  0.5
+- Added Infrae standard release documentation.
 
-    Initial public release of SilvaMetadata.
+Bugs fixed:
+
+- Avoid quadratic behavior while indexing. Previously, for n
+  elements that are indexed, for each element indexing the data for
+  the n indexes was accessed, resulting in quadratic behavior while
+  indexing (n * n values were accessed per object).
+
+0.5
+---
+
+-  Initial public release of SilvaMetadata.
