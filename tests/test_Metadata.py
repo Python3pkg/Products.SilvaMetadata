@@ -4,7 +4,7 @@ Tests for the SilvaMetada.
 $Id: test_Metadata.py,v 1.22 2005/09/14 23:10:16 clemens Exp $
 """
 
-from unittest import TestSuite, makeSuite, main
+from unittest import TestSuite, makeSuite
 
 from cStringIO import StringIO
 
@@ -12,7 +12,6 @@ from Testing import ZopeTestCase
 
 from AccessControl.SecurityManagement import newSecurityManager
 from AccessControl.SecurityManagement import noSecurityManager
-from Products.Annotations.AnnotationTool import AnnotationTool
 
 from Products.Formulator import StandardFields
 from Products.Formulator.TALESField import TALESMethod
@@ -344,7 +343,4 @@ def test_suite():
     suite.addTest(makeSuite(TestAdvancedMetadata))
     return suite
 
-
-if __name__ == '__main__':
-    main()
 
