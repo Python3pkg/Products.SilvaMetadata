@@ -8,18 +8,22 @@ from UserDict import UserDict
 from Acquisition import Implicit, aq_base, aq_parent
 from Products.ZCatalog.ZCatalog import ZCatalog
 
+from zope.annotation.interfaces import IAnnotations
+
 # Formulator
 from Products.Formulator.Errors import FormValidationError
 
 
 from zExceptions import Unauthorized
+from ZODB.PersistentMapping import PersistentMapping
+
 from Exceptions import NotFound
 from Export import ObjectMetadataExporter
 from Index import getIndexNamesFor
 import Initialize as BindingInitialize
-from Namespace import MetadataNamespace, BindingRunTime
-from ZopeImports import ClassSecurityInfo, InitializeClass
-from ZopeImports import PersistentMapping
+from Namespace import BindingRunTime
+from AccessControl import ClassSecurityInfo
+from Globals import InitializeClass
 from Compatibility import  getToolByName
 
 from interfaces import IAcquiredUpdater
@@ -416,8 +420,7 @@ class MetadataBindAdapter(Implicit):
                            % (set_id, namespace_key))
 
     def _getBindData(self):
-        annotations = getToolByName(self.content, 'portal_annotations')
-        metadata = annotations.getAnnotations(self.content, MetadataNamespace)
+        metadata = IAnnotations(self.content)
         bind_data = metadata.get(BindingRunTime)
 
         if bind_data is None:
@@ -471,8 +474,7 @@ class MetadataBindAdapter(Implicit):
         ob = self._getAnnotatableObject()
 
         # get the annotation data
-        annotations = getToolByName(ob, 'portal_annotations')
-        metadata = annotations.getAnnotations(ob, MetadataNamespace)
+        metadata = IAnnotations(ob)
 
         saved_data = metadata.get(set.metadata_uri)
         data = Data()
@@ -579,8 +581,7 @@ class MetadataBindAdapter(Implicit):
                     pass
 
         # save in annotations
-        annotations = getToolByName(ob, 'portal_annotations')
-        metadata = annotations.getAnnotations(ob, MetadataNamespace)
+        metadata = IAnnotations(ob)
 
         if metadata.has_key(set.metadata_uri):
             for key, value in data.items():

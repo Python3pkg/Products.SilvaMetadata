@@ -7,7 +7,9 @@ from AccessControl import ClassSecurityInfo
 from OFS.SimpleItem import SimpleItem
 from Globals import DTMLFile, InitializeClass
 from AccessControl import getSecurityManager
-import Configuration
+
+from Products.Silva import SilvaPermissions
+
 from Exceptions import ConfigurationError
 from FormulatorField import getFieldFactory
 from Guard import Guard
@@ -63,11 +65,12 @@ class MetadataElement(SimpleItem):
 
     security = ClassSecurityInfo()
 
-    security.declareProtected(Configuration.pMetadataManage, 'manage_settings')
+    security.declareProtected(
+        SilvaPermissions.ViewManagementScreens, 'manage_settings')
     manage_settings = DTMLFile('ui/ElementPolicyForm', globals())
 
-    security.declareProtected(Configuration.pMetadataManage,
-                              'manage_guard_form')
+    security.declareProtected(
+        SilvaPermissions.ViewManagementScreens, 'manage_guard_form')
     manage_guard_form = DTMLFile('ui/ElementGuardForm', globals())
 
 

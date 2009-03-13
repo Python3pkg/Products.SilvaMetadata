@@ -1,17 +1,22 @@
 """
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
+
+# Python
+from StringIO import StringIO
 from cgi import escape
 from types import IntType, FloatType, ListType
 
-from interfaces import IMetadataSetExporter
-
-from Element import MetadataElement
-from XMLType import serialize
-from utils import StringBuffer, make_lookup
+# Zope
 from zope.interface import implements
 
-class MetadataSetExporter:
+
+from interfaces import IMetadataSetExporter
+from Element import MetadataElement
+from XMLType import serialize
+from utils import make_lookup
+
+class MetadataSetExporter(object):
     """
     for exporting a metadata set definition
     """
@@ -25,7 +30,7 @@ class MetadataSetExporter:
         ext_out = 1
         if out is None:
             ext_out = 0
-            out = StringBuffer()
+            out = StringIO()
 
         print >> out, '<?xml version="1.0"?>\n\n'
         print >> out, '<metadata_set id="%s" ns_uri="%s" ns_prefix="%s">' % (
@@ -39,13 +44,13 @@ class MetadataSetExporter:
         minimalrole = escape(self.set.getMinimalRole(), 1)
         category = escape(self.set.getCategory(), 1)
         i18n_domain = escape(self.set.get_i18n_domain(), 1)
-            
+
         out.write('<title>%s</title>\n' % (title))
         out.write('<category>%s</category>\n' % (category))
         out.write('<description>%s</description>\n' % (description))
         out.write('<i18n_domain>%s</i18n_domain>\n' % (i18n_domain))
         out.write('<minimalrole>%s</minimalrole>\n' % (minimalrole))
-                   
+
         for e in self.set.getElements():
 
             print >> out, '  <metadata_element id="%s">' % e.getId()
@@ -135,7 +140,7 @@ class MetadataSetExporter:
 
         return out.getvalue()
 
-class ObjectMetadataExporter:
+class ObjectMetadataExporter(object):
     """
     for exporting the metadata of an object, returns
     an xml fragement.
@@ -153,7 +158,7 @@ class ObjectMetadataExporter:
         external_out = not not out
 
         if out is None:
-            out = StringBuffer()
+            out = StringIO()
 
         out.write('<metadata \n')
 

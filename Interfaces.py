@@ -2,6 +2,8 @@
 Marker Interfaces
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
+
+from Products.Silva.interfaces.service import ISilvaService
 from zope.interface import Interface
 
 class IAcquiredUpdater(Interface):
@@ -16,22 +18,15 @@ class IAcquiredUpdater(Interface):
     def update():
         """Perform the update.
         """
-        
-class IPortalMetadata(Interface):
+
+
+class IMetadataService(ISilvaService):
     pass
 
-#################################
-# Metadata Tool/Service Interface
-#################################
-class IMetadataTool(IPortalMetadata):
-    pass
-
-#################################
-# Base Building Blocks
-#################################
 
 class IMetadataCollection(Interface):
     pass
+
 
 class IOrderedContainer(Interface):
 
@@ -57,25 +52,29 @@ class IOrderedContainer(Interface):
         given an object id return its position in the ordered list
         """
 
+
 class IMetadataSet(Interface):
     pass
+
 
 class IMetadataElement(Interface):
     pass
 
-#################################
+
 # Adapter Provided Functionality
-#################################
-# all of these operate on a set basis.
+
 
 class IMetadataSetExporter(Interface):
     pass
 
+
 class IMetadataForm(Interface):
     pass
 
+
 class IMetadataValidation(Interface):
     pass
+
 
 class IMetadataStorage(Interface):
     pass

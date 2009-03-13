@@ -4,18 +4,6 @@ Misc. Utility Functions and classes
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
-class StringBuffer:
-
-    def __init__(self):
-        self.buf =[]
-    def write(self, data):
-        self.buf.append(data)
-    def writeln(self, data):
-        self.buf.append(data)
-        self.buf.append('\n')
-    def getvalue(self):
-        return ''.join(self.buf)
-
 def make_lookup(seq):
     d = {}
     for s in seq:

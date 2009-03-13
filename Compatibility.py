@@ -20,7 +20,7 @@ SilvaToolMap = {
 def getToolByName(ctx, service_name, default=_marker):
     warnings.warn(
         'getToolByName is deprecated and will be removed in Silva 2.3',
-        DeprecationWarning, level=2)
+        DeprecationWarning)
     silva_name = SilvaToolMap[service_name]
 
     try:

@@ -13,7 +13,7 @@ from Globals import DTMLFile, InitializeClass
 from zope.interface import implements
 
 # SilvaMetadata
-import Configuration
+from Products.Silva import SilvaPermissions
 from Element import MetadataElement, ElementFactory
 from Exceptions import NamespaceConflict, ConfigurationError, NotFound
 from Compatibility import getToolByName
@@ -122,10 +122,12 @@ class MetadataSet(OrderedContainer):
          'action':'manage_settings'},
         )
 
-    security.declareProtected(Configuration.pMetadataManage, 'manage_settings')
+    security.declareProtected(
+        SilvaPermissions.ViewManagementScreens, 'manage_settings')
     manage_settings = DTMLFile('ui/SetSettingsForm', globals())
 
-    security.declareProtected(Configuration.pMetadataManage, 'addElementForm')
+    security.declareProtected(
+        SilvaPermissions.ViewManagementScreens, 'addElementForm')
     addElementForm  = DTMLFile('ui/ElementAddForm', globals())
 
     manage_main = DTMLFile('ui/SetContainerView', globals())
@@ -135,7 +137,7 @@ class MetadataSet(OrderedContainer):
     action = None
     title = ''
     description = ''
-    
+
     # for backwards compatibility...
     _category = ''
     _minimal_role = ''
@@ -151,7 +153,7 @@ class MetadataSet(OrderedContainer):
         self.i18n_domain = i18n_domain
         self._minimal_role = ''
         self._category = ''
-        
+
         # we can't do any verification till after we have a ctx
         self.metadata_uri = metadata_uri
         self.metadata_prefix = metadata_prefix
@@ -174,7 +176,7 @@ class MetadataSet(OrderedContainer):
 
     def setCategory(self, cat):
         self._category = cat
-        
+
     def addMetadataElement(self,
                            id,
                            field_type,
@@ -198,7 +200,7 @@ class MetadataSet(OrderedContainer):
             return RESPONSE.redirect('manage_main')
 
     def editSettings(
-        self, title, description, i18n_domain, ns_uri, ns_prefix, 
+        self, title, description, i18n_domain, ns_uri, ns_prefix,
         minimal_role='', category=''):
         """ Edit Set Settings """
 
@@ -208,11 +210,11 @@ class MetadataSet(OrderedContainer):
         self.title = title
         self.description = description
         self.i18n_domain = i18n_domain
-            
+
         self.setNamespace(ns_uri, ns_prefix)
         self.setMinimalRole(minimal_role)
         self.setCategory(category)
-            
+
         request = getattr(self, 'REQUEST', None)
         if request is not None:
             request.RESPONSE.redirect('manage_workspace')
@@ -309,7 +311,7 @@ class MetadataSet(OrderedContainer):
         """Get i18n domain, if any.
         """
         return getattr(self, 'i18n_domain', '')
-        
+
 InitializeClass(MetadataSet)
 
 def metadataset_added(metadataset, event):

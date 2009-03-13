@@ -9,7 +9,8 @@ from Exceptions import NotFound
 from interfaces import IMetadataCollection
 from Import import read_set, make_set
 from Set import MetadataSet
-from Configuration import pMetadataManage
+from Products.Silva import SilvaPermissions
+
 from zope.interface import implements
 
 class MetadataCollection(Folder):
@@ -34,10 +35,12 @@ class MetadataCollection(Folder):
          'action':'../manage_workspace'},
         )
 
-    security.declareProtected(pMetadataManage, 'addMetadataSetForm')
+    security.declareProtected(
+        SilvaPermissions.ViewManagementScreens, 'addMetadataSetForm')
     addMetadataSetForm = DTMLFile('ui/MetadataSetAddForm', globals())
 
-    security.declareProtected(pMetadataManage, 'addMetadataSet')
+    security.declareProtected(
+        SilvaPermissions.ViewManagementScreens, 'addMetadataSet')
     def addMetadataSet(self, id, namespace_prefix, namespace_uri,
                        title='', description='', i18n_domain='', RESPONSE=None):
         " "
@@ -71,7 +74,8 @@ class MetadataCollection(Folder):
 
         raise NotFound("No Metadata Set Matching %s" % str(metadata_uri))
 
-    security.declareProtected(pMetadataManage, 'importSet')
+    security.declareProtected(
+        SilvaPermissions.ViewManagementScreens, 'importSet')
     def importSet(self, xml_file, RESPONSE=None):
         """ import an xml definition of a metadata set"""
 

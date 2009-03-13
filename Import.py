@@ -210,7 +210,6 @@ def read_set(xml):
 
 def make_set(container, set_node):
 
-    import Configuration
     from Compatibility import getToolByName
     from Products.Formulator.TALESField import TALESMethod
 
@@ -224,7 +223,7 @@ def make_set(container, set_node):
 
     pm = getToolByName(container, 'portal_metadata')
 
-    collection = getattr(pm, Configuration.MetadataCollection)
+    collection = getattr(pm, 'collection')
     collection.addMetadataSet(
         set_node.id, set_node.ns_prefix, set_node.ns_uri, set_node.title,
         set_node.description, set_node.i18n_domain)

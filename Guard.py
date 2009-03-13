@@ -26,7 +26,7 @@ from AccessControl import ClassSecurityInfo
 from Acquisition import Explicit
 from Globals import Persistent, InitializeClass
 
-from Configuration import pMetadataManage
+from Products.Silva import SilvaPermissions
 from Expression import Expression, createExprContext
 
 class Guard (Persistent, Explicit):
@@ -35,7 +35,7 @@ class Guard (Persistent, Explicit):
     expr = None
 
     security = ClassSecurityInfo()
-    security.declareObjectProtected(pMetadataManage)
+    security.declareObjectProtected(SilvaPermissions.ViewManagementScreens)
 
     def check(self, sm, element, ob):
         '''
@@ -92,19 +92,22 @@ class Guard (Persistent, Explicit):
             self.expr = Expression(s)
         return res
 
-    security.declareProtected(pMetadataManage, 'getPermissionsText')
+    security.declareProtected(
+        SilvaPermissions.ViewManagementScreens, 'getPermissionsText')
     def getPermissionsText(self):
         if not self.permissions:
             return ''
         return join(self.permissions, '; ')
 
-    security.declareProtected(pMetadataManage, 'getRolesText')
+    security.declareProtected(
+        SilvaPermissions.ViewManagementScreens, 'getRolesText')
     def getRolesText(self):
         if not self.roles:
             return ''
         return join(self.roles, '; ')
 
-    security.declareProtected(pMetadataManage, 'getExprText')
+    security.declareProtected(
+        SilvaPermissions.ViewManagementScreens, 'getExprText')
     def getExprText(self):
         if not self.expr:
             return ''

@@ -5,20 +5,18 @@ near future in favor of some zpt views
 author: kapil thangavelu
 """
 
-from utils import StringBuffer
-from ZopeImports import getToolByName
+from StringIO import StringIO
 
 def getForm(binding, set, framed=1, REQUEST=None, errors=None):
     content = binding.content
     elements = set.getElementsFor(content, mode='edit')
-    annotations = getToolByName(content, 'portal_annotations')
 
     if REQUEST is not None and errors is not None:
         data = REQUEST.form.get(set.getId())
     else:
         data = binding._getData(set.getId(), acquire=0)
 
-    out = StringBuffer()
+    out = StringIO()
 
     if framed:
         print >> out, '<form method="POST" action="edit_metadata"' \
@@ -55,9 +53,8 @@ def getForm(binding, set, framed=1, REQUEST=None, errors=None):
 def getView(binding, set, framed=1):
     content = binding.content
     elements = set.getElementsFor(content, mode='view')
-    annotations = getToolByName(content, 'portal_annotations')
-    data = annotations.getAnnotations(content, set.metadata_uri)
-    out = StringBuffer()
+    data = IAnnotations(content)
+    out = StringIO()
 
     print >> out, '<table class="metadata_view">'
 

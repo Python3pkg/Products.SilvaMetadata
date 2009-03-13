@@ -7,22 +7,32 @@ from Acquisition import aq_base
 from AccessControl import getSecurityManager
 from AccessControl import ClassSecurityInfo
 from OFS.Folder import Folder
+from OFS.interfaces import IObjectWillBeRemovedEvent
 from Globals import DTMLFile
+
+from zope.app.container.interfaces import IObjectAddedEvent
+from zope.annotation.interfaces import IAnnotations
 
 # Formulator
 from Products.Formulator import Form
+
 # Silva
+from Products.Silva.BaseService import SilvaService
 from Products.Silva.SilvaPermissions import ChangeSilvaContent
+from Products.Silva.helpers import add_and_edit, \
+    register_service, unregister_service
+from silva.core import conf as silvaconf
+
 # SilvaMetadata
 from Access import invokeAccessHandler, getAccessHandler
-import Configuration
-from Namespace import MetadataNamespace, BindingRunTime
+from Namespace import BindingRunTime
 from Binding import ObjectDelegate, encodeElement
 from Exceptions import BindingError
-from interfaces import IPortalMetadata
+from interfaces import IMetadataService
 from Compatibility import getContentType, getContentTypeNames, getToolByName
 
-class MetadataTool(Folder):
+
+class MetadataTool(Folder, SilvaService):
 
     id = 'service_metadata'
     meta_type = 'Advanced Metadata Tool'
@@ -33,34 +43,21 @@ class MetadataTool(Folder):
          'action':'manage_main'},
 
         {'label':'Metadata Sets',
-         'action':'%s/manage_workspace' % Configuration.MetadataCollection},
+         'action':'collection/manage_workspace'},
 
         {'label':'Type Mapping',
-         'action':'%s/manage_workspace' % Configuration.TypeMapping},
+         'action':'ct_mapping/manage_workspace'},
         )
 
-    implements(IPortalMetadata)
+    implements(IMetadataService)
+    silvaconf.icon('metadata.png')
+    silvaconf.factory('manage_addMetadataTool')
 
     security = ClassSecurityInfo()
-    #security.declareProtected('metadata_overview', Configuration.pMetadataManage)
-    #metadata_overview = DTMLFile('ui/MetadataToolOverview', globals())
     manage_main = DTMLFile('ui/MetadataToolOverview', globals())
 
     #################################
     # Metadata interface
-
-    ## site wide queries
-
-    # this is the wrong tool to be asking.
-    #def getFullName(self, userid):
-    #    return userid
-
-    # this is just lame, assumes global publisher for a site
-    #def getPublisher(self):
-    #    pass
-
-    ## dublin core hardcodes :-(
-    # we don't have vocabulary implementation yet.
 
     def listAllowedSubjects(self, content=None):
         catalog = getToolByName(self, 'portal_catalog')
@@ -101,17 +98,17 @@ class MetadataTool(Folder):
     def getCollectionForCategory(self, category=''):
         """return a container containing all known metadata sets
         """
-        collections = self._getOb(Configuration.MetadataCollection)
+        collections = self._getOb('collection')
         return [coll for coll in collections if coll.getCategory() == category]
-    
+
     def getCollection(self):
         """return a container containing all known metadata sets
         """
-        return self._getOb(Configuration.MetadataCollection)
+        return self._getOb('collection')
 
     def getTypeMapping(self):
         """ return the mapping of content types to metadata sets """
-        return self._getOb(Configuration.TypeMapping)
+        return self._getOb('ct_mapping')
 
     def getMetadataSet(self, set_id):
         """ get a particular metadata set """
@@ -128,12 +125,10 @@ class MetadataTool(Folder):
         data, and policy behavior into an api for manipulating and
         introspecting metadata
         """
-        ct = getContentType(content)
+        ct = content.meta_type
 
         if not ct in getContentTypeNames(self):
-            raise BindingError(
-                "invalid content type %s for metadata system" % ct
-                )
+            return None
         return invokeAccessHandler(self, content)
 
     def getMetadataValue(self, content, set_id, element_id, acquire=1):
@@ -144,10 +139,10 @@ class MetadataTool(Folder):
         It's only going to work for Silva, not CMF.
         Also, optionally turn off acquiring, in case you want to
         get this objects metadata _only_"""
-        
+
         # We explicitly test for registered handlers.
         default_handler = getAccessHandler(None)
-        handler = getAccessHandler(getContentType(content))
+        handler = getAccessHandler(content.meta_type)
         if handler is not default_handler:
             metadataservice = content.aq_inner.service_metadata
             # XXX nasty hack to get the editable metadata in case of preview
@@ -167,24 +162,24 @@ class MetadataTool(Folder):
         # XXX how does this interact with security issues?
         set = self.collection.getMetadataSet(set_id)
         element = set.getElement(element_id)
-        annotations = getattr(aq_base(content), '_portal_annotations_', None)
+        annotations = IAnnotations(content)
 
         bind_data = None
         if annotations is not None:
-            bind_data = annotations[MetadataNamespace].get(BindingRunTime)
+            bind_data = annotations.get(BindingRunTime)
         if bind_data is not None:
             delegate = bind_data.get(ObjectDelegate)
             if delegate is not None:
                 content = getattr(content,delegate)()
-                annotations = getattr(aq_base(content), '_portal_annotations_', None)
+                annotations = IAnnotations(content)
 
         try:
-            saved_data = annotations[MetadataNamespace].get(set.metadata_uri)
+            saved_data = annotations.get(set.metadata_uri)
         except (TypeError, KeyError):
             saved_data = None
-            
+
         #print 'found it for:', repr((saved_data, content))
-            
+
         # if it's saved, we're done
         if saved_data:
             if saved_data.get(element_id, None):
@@ -204,26 +199,26 @@ class MetadataTool(Folder):
     def getMetadataForm(self, context, set_id):
         """Get a complete Formulator form for a metadata set. This helps
         validating user input.
-        """        
+        """
         set = self.collection.getMetadataSet(set_id)
         fields = [element.field for element in set.getElements()]
         form = Form.BasicForm().__of__(context)
         form.add_fields(fields)
         return form
-    
+
     # Convenience methods
-    
+
     def initializeMetadata(self):
         # initialize the sets if not already initialized
         collection = self.getCollection()
         for set in collection.getMetadataSets():
             if not set.isInitialized():
                 set.initialize()
-            
+
     def addTypesMapping(self, types, setids, default=''):
         for type in types:
             self.addTypeMapping(type, setids, default)
-            
+
     def addTypeMapping(self, type, setids, default=''):
         mapping = self.getTypeMapping()
         chain = mapping.getChainFor(type)
@@ -240,7 +235,7 @@ class MetadataTool(Folder):
     def removeTypesMapping(self, types, setids):
         for type in types:
             self.removeTypeMapping(type, setids)
-        
+
     def removeTypeMapping(self, type, setids):
         mapping = self.getTypeMapping()
         chain = mapping.getChainFor(type)
@@ -253,7 +248,7 @@ class MetadataTool(Folder):
         tm = {'type': type, 'chain': ','.join(chain)}
         default = mapping.getDefaultChain()
         mapping.editMappings(default, (tm, ))
-    
+
     #################################
     # misc
 
@@ -261,26 +256,43 @@ class MetadataTool(Folder):
         """ """
         RESPONSE.redirect('manage_workspace')
 
-def tool_added(tool, event):
-    initializeTool(tool)
-        
-def initializeTool(tool):
+
+def manage_addMetadataTool(self, id, REQUEST=None):
+    """Add a metadatatool.
+    """
+
+    service = MetadataTool(id)
+    register_service(self, id, service, IMetadataService)
+    add_and_edit(self, id, REQUEST)
+    return ''
+
+
+@silvaconf.subscribe(
+    IMetadataService, IObjectWillBeRemovedEvent)
+def unregisterMetadataTool(service, event):
+    unregister_service(service, IMetadataService)
+
+
+@silvaconf.subscribe(
+    IMetadataService, IObjectAddedEvent)
+def configureMetadataTool(tool, event):
 
     from Collection import MetadataCollection
     from TypeMapping import TypeMappingContainer
 
-    collection = MetadataCollection(Configuration.MetadataCollection)
-    collection.id = Configuration.MetadataCollection
     # if we are being imported as a zexp, the collection will already
     # be there. If we detect this, the setup has actually already been
     # completed (this is being imported). We should not add the new
-    # collection object as it would fail with a duplicate id. We 
+    # collection object as it would fail with a duplicate id. We
     # should be able to bail out right away.
-    if hasattr(tool.aq_explicit, Configuration.MetadataCollection):
+    if hasattr(tool.aq_explicit, 'collection'):
         return
-    tool._setObject(Configuration.MetadataCollection, collection)
 
-    mapping = TypeMappingContainer(Configuration.TypeMapping)
-    mapping.id = Configuration.TypeMapping
-    tool._setObject(Configuration.TypeMapping, mapping)
+    collection = MetadataCollection('collection')
+    collection.id = 'collection'
+    tool._setObject('collection', collection)
+
+    mapping = TypeMappingContainer('ct_mapping')
+    mapping.id = 'ct_mapping'
+    tool._setObject('ct_mapping', mapping)
 
