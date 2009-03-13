@@ -5,8 +5,10 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 from zope.interface import implements
 from Acquisition import aq_base
 from AccessControl import getSecurityManager
-# Annotations
-from Products.Annotations.AnnotationTool import Annotations
+from AccessControl import ClassSecurityInfo
+from OFS.Folder import Folder
+from Globals import DTMLFile
+
 # Formulator
 from Products.Formulator import Form
 # Silva
@@ -14,17 +16,15 @@ from Products.Silva.SilvaPermissions import ChangeSilvaContent
 # SilvaMetadata
 from Access import invokeAccessHandler, getAccessHandler
 import Configuration
-from ZopeImports import *
 from Namespace import MetadataNamespace, BindingRunTime
 from Binding import ObjectDelegate, encodeElement
 from Exceptions import BindingError
 from interfaces import IPortalMetadata
-from Compatibility import ActionProviderBase
-from Compatibility import getContentType, getContentTypeNames
+from Compatibility import getContentType, getContentTypeNames, getToolByName
 
-class MetadataTool(UniqueObject, Folder, ActionProviderBase):
+class MetadataTool(Folder):
 
-    id = 'portal_metadata'
+    id = 'service_metadata'
     meta_type = 'Advanced Metadata Tool'
     title =  meta_type
 
@@ -41,24 +41,10 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
 
     implements(IPortalMetadata)
 
-    _actions = []
-
     security = ClassSecurityInfo()
     #security.declareProtected('metadata_overview', Configuration.pMetadataManage)
     #metadata_overview = DTMLFile('ui/MetadataToolOverview', globals())
     manage_main = DTMLFile('ui/MetadataToolOverview', globals())
-
-    def __init__(self):
-        pass
-
-    #################################
-    # Action Provider Interface
-    def listActions(self, info=None):
-        actions = []
-        for set in self.getCollection().getMetadataSets():
-            if set.use_action_p is not None and set.action is not None:
-                actions.append(set.action)
-        return self._actions
 
     #################################
     # Metadata interface

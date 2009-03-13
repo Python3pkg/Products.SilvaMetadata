@@ -2,7 +2,9 @@
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
-from ZopeImports import *
+from AccessControl import ClassSecurityInfo
+from OFS.Folder import Folder
+from Globals import DTMLFile, InitializeClass
 from Exceptions import NotFound
 from interfaces import IMetadataCollection
 from Import import read_set, make_set

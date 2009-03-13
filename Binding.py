@@ -2,22 +2,25 @@
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 # Python
-import types, copy
 from UserDict import UserDict
+
 # Zope
 from Acquisition import Implicit, aq_base, aq_parent
 from Products.ZCatalog.ZCatalog import ZCatalog
+
 # Formulator
 from Products.Formulator.Errors import FormValidationError
-#
+
+
 from zExceptions import Unauthorized
-from Exceptions import NotFound, BindingError
+from Exceptions import NotFound
 from Export import ObjectMetadataExporter
 from Index import getIndexNamesFor
 import Initialize as BindingInitialize
 from Namespace import MetadataNamespace, BindingRunTime
-from ZopeImports import Interface, ClassSecurityInfo, InitializeClass
-from ZopeImports import PersistentMapping, getToolByName
+from ZopeImports import ClassSecurityInfo, InitializeClass
+from ZopeImports import PersistentMapping
+from Compatibility import  getToolByName
 
 from interfaces import IAcquiredUpdater
 
@@ -59,7 +62,7 @@ class MetadataBindAdapter(Implicit):
         self.category_to_setnames = {}
         self.cached_values = {}
         self.read_only=read_only
-        
+
         for set in sets:
             setid = set.getId()
             self.setnames.append(setid)
@@ -67,7 +70,7 @@ class MetadataBindAdapter(Implicit):
             category = set.getCategory()
             setnames = self.category_to_setnames.setdefault(category, [])
             setnames.append(setid)
-            
+
     #################################
     ### Views
     security.declarePublic('renderXML')
@@ -95,8 +98,8 @@ class MetadataBindAdapter(Implicit):
     def renderElementEdit(self, set_id, element_id, REQUEST=None):
         element = self.getElement(set_id, element_id)
         if REQUEST:
-            #here we want to render the value from the request 
-            #(i.e. a save didn't pass validation and the form 
+            #here we want to render the value from the request
+            #(i.e. a save didn't pass validation and the form
             #needs to be preloaded with the previously supplied values)
             #so the value for this element comes from the REQUEST
             value = REQUEST.get(set_id).get(element_id)
@@ -105,7 +108,7 @@ class MetadataBindAdapter(Implicit):
             # value
             value = self._getData(set_id, acquire=0).get(element_id,None)
         return element.renderEdit(value)
-            
+
     #################################
     ### Validation
 
@@ -124,8 +127,8 @@ class MetadataBindAdapter(Implicit):
         data = REQUEST.form.get(set_id)
 
         if data is None:
-            raise NotFound("Metadata for %s/%s not found" % (
-                str(set_id), str(namespace_key)))
+            raise NotFound("Metadata for %s not found" % (
+                    str(set_id)))
 
         return self.validate(set_id, data.copy(), errors)
 
@@ -172,7 +175,7 @@ class MetadataBindAdapter(Implicit):
                 reqform = request.form[setname]
                 alsoProvides(reqform,IHTTPRequest)
                 result = form.validate_all(reqform)
-                
+
                 # Remove keys from the result that are supposed to be
                 # read-only only
                 set = self.getSet(setname)
@@ -183,7 +186,7 @@ class MetadataBindAdapter(Implicit):
                             del result[element.id]
                         except KeyError, e:
                             pass
-                
+
             except FormValidationError, e:
                 all_errors[setname] = errors = {}
                 for error in e.errors:
@@ -197,7 +200,7 @@ class MetadataBindAdapter(Implicit):
 
     security.declarePublic('getSetNames')
     def getSetNames(self, category=None):
-        """Return the ids of the metadata sets available for this 
+        """Return the ids of the metadata sets available for this
         content type.
         """
         if category is None:
@@ -243,7 +246,7 @@ class MetadataBindAdapter(Implicit):
     security.declarePublic('getElement')
     def getElement(self, set_id, element_id):
         return self.getSet(set_id).getElement(element_id)
-    
+
     security.declarePublic('isViewable')
     def isViewable(self, set_id, element_id):
         """

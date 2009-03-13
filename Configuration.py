@@ -2,19 +2,12 @@
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
-#################################
-### Silva / CMF Compatibility Flag
-# if using Silva set to False
-# if it is set to True, Silva will be broken
-UsingCMF = False
+# Permissions
 
-#################################
-# this module gets populated with
-# permissions for these by the compatiblity
-# module.
-pMetadataView = None
-pMetadataEdit = None
-pMetadataManage = None
+from Products.Silva.SilvaPermissions import View as pMetadataView
+from Products.Silva.SilvaPermissions import ChangeSilvaContent as pMetadataEdit
+from Products.Silva.SilvaPermissions import ViewManagementScreens as pMetadataManage
+
 
 #################################
 ### internal names

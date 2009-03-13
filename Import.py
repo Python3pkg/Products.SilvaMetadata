@@ -6,7 +6,7 @@ from xml.sax import make_parser, ContentHandler
 from xml.dom import XMLNS_NAMESPACE
 from UserDict import UserDict
 from XMLType import deserialize
-from Exceptions import NotFound
+from Exceptions import NotFound, ValidationError
 
 _marker = []
 
@@ -357,7 +357,7 @@ def metadata_node_search(content_node):
 
 if __name__ == '__main__':
     # visual check
-    import sys, pprint
+    import sys
     set_node = read_set(sys.argv[1])
 
     for k,v in set_node.items():

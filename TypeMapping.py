@@ -4,7 +4,11 @@ Maps Metadata Sets onto Content Types
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
-from ZopeImports import *
+# Zope
+from OFS.Folder import Folder
+from Globals import DTMLFile
+
+# SilvaMetadata
 from Compatibility import getContentTypeNames, getToolByName
 from Exceptions import ConfigurationError
 

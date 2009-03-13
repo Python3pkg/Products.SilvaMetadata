@@ -3,19 +3,25 @@ author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 import sys
 
+# Zope
 from AccessControl import getSecurityManager, Permissions
+from AccessControl import ClassSecurityInfo
+from Acquisition import aq_inner, aq_parent
+from OFS.Folder import Folder
+from Globals import DTMLFile, InitializeClass
 
-from Compatibility import actionFactory
+from zope.interface import implements
+
+# SilvaMetadata
 import Configuration
 from Element import MetadataElement, ElementFactory
-from Exceptions import NamespaceConflict, ConfigurationError
+from Exceptions import NamespaceConflict, ConfigurationError, NotFound
+from Compatibility import getToolByName
 from Export import MetadataSetExporter
 from FormulatorField import listFields
 from Index import createIndexes
 from interfaces import IMetadataSet, IOrderedContainer
 from Namespace import DefaultNamespace, DefaultPrefix
-from ZopeImports import *
-from zope.interface import implements
 
 from Products.ProxyIndex.ProxyIndex import getIndexTypes
 
@@ -114,15 +120,10 @@ class MetadataSet(OrderedContainer):
          'action':'manage_main'},
         {'label':'Settings',
          'action':'manage_settings'},
-        {'label':'Action',
-         'action':'manage_action'},
         )
 
     security.declareProtected(Configuration.pMetadataManage, 'manage_settings')
     manage_settings = DTMLFile('ui/SetSettingsForm', globals())
-
-    security.declareProtected(Configuration.pMetadataManage, 'manage_action')
-    manage_action  = DTMLFile('ui/SetActionForm', globals())
 
     security.declareProtected(Configuration.pMetadataManage, 'addElementForm')
     addElementForm  = DTMLFile('ui/ElementAddForm', globals())
@@ -195,30 +196,6 @@ class MetadataSet(OrderedContainer):
 
         if RESPONSE is not None:
             return RESPONSE.redirect('manage_main')
-
-    def editAction(self,
-                   use_action_p,
-                   id,
-                   permission,
-                   action,
-                   condition,
-                   category,
-                   visible,
-                   RESPONSE=None):
-        """ CMF Action Provider Support """
-
-        self.use_action_p = not not use_action_p
-
-        self.action = actionFactory(id=id,
-                                    title=title,
-                                    permission=permission,
-                                    category=category,
-                                    action=action,
-                                    condition=condition,
-                                    visible=visible)
-
-        if RESPONSE is not None:
-            RESPONSE.redirect('manage_workspace')
 
     def editSettings(
         self, title, description, i18n_domain, ns_uri, ns_prefix, 

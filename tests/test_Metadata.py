@@ -18,26 +18,8 @@ from Products.Formulator import StandardFields
 from Products.Formulator.TALESField import TALESMethod
 from Products.SilvaMetadata.MetadataTool import MetadataTool
 from Products.SilvaMetadata.Compatibility import getToolByName
-from Products.SilvaMetadata.Configuration import UsingCMF
 
-if UsingCMF:
-    from Products.CMFCore.CatalogTool import CatalogTool
-    from Products.CMFCore.PortalFolder import PortalFolder
-    from Products.CMFCore.tests.base.testcase import SecurityTest
-    from Products.CMFCore.TypesTool import FactoryTypeInformation as FTI
-    from Products.CMFCore.TypesTool import TypesTool
-    from Products.CMFCore.utils import getToolByName
-
-    ZopeTestCase.installProduct('Annotations')
-    ZopeTestCase.installProduct('ProxyIndex')
-    ZopeTestCase.installProduct('Formulator')
-    ZopeTestCase.installProduct('CMFCore')
-    # needed by more recent cmf, at least since 1.5.4
-    ZopeTestCase.installProduct('ZCTextIndex')
-    TestBaseClass = ZopeTestCase.ZopeTestCase
-else:
-    from Products.Silva.tests import SilvaTestCase
-    TestBaseClass = SilvaTestCase.SilvaTestCase
+from Products.Silva.tests import SilvaTestCase
 
 SET_ID = 'ut_md'
 
@@ -49,35 +31,6 @@ def setupFakePermissions(root):
     user = uf.getUserById('_test_user').__of__(uf)
     newSecurityManager(None, user)
 
-def setupCMFTools(root):
-    root._setObject('portal_types', TypesTool())
-    root._setObject('portal_annotations', AnnotationTool())
-    root._setObject('portal_metadata', MetadataTool())
-    root._setObject('portal_catalog', CatalogTool())
-
-def setupContentTypes(context):
-    types_tool = getToolByName(context, 'portal_types')
-    types_tool._setObject('Folder', FTI(id='Folder',
-                                        title='Folder or Directory',
-                                        meta_type=PortalFolder.meta_type,
-                                        product='CMFCore',
-                                        factory='manage_addPortalFolder',
-                                        filter_content_types=0)
-                             )
-
-def setupContentTreeCMF(container):
-    ttool = getToolByName(container, 'portal_types')
-    ttool.constructContent('Folder', container, 'zoo')
-
-    zoo = container._getOb('zoo')
-
-    ttool.constructContent('Folder', zoo, 'mammals')
-    ttool.constructContent('Folder', zoo, 'reptiles')
-
-    mammals = zoo._getOb('mammals')
-    reptiles = zoo._getOb('reptiles')
-
-    return zoo
 
 def setupContentTreeSilva(self, container):
 
@@ -140,27 +93,16 @@ def setupMetadataMapping(context):
     mtool = getToolByName(context, 'portal_metadata')
     mapping = mtool.getTypeMapping()
     mapping.setDefaultChain('ut_md')
-    if not UsingCMF:
-        mtool.addTypesMapping(
-            ('Silva Folder', ), ('ut_md', 'silva-extra'))
+    mtool.addTypesMapping(
+        ('Silva Folder', ), ('ut_md', 'silva-extra'))
 
 
-class MetadataTests(TestBaseClass):
+class MetadataTests(SilvaTestCase.SilvaTestCase):
 
     def afterSetUp(self):
-        if UsingCMF:
-            self.root = self.app
-            setupFakePermissions(self.root)
-            setupCMFTools(self.root)
-            setupCatalog(self.root)
-            setupContentTypes(self.root)
-
         setupMetadataSet(self.root)
         setupMetadataMapping(self.root)
-        if UsingCMF:
-            setupContentTreeCMF(self.root)
-        else:
-            setupContentTreeSilva(self, self.root)
+        setupContentTreeSilva(self, self.root)
 
 
 class TestSetImportExport(MetadataTests):
@@ -362,7 +304,7 @@ class TestAdvancedMetadata(MetadataTests):
         # test shortcut, too
         self.assertEqual('snake food',
                          getToolByName(mams, 'portal_metadata').
-                              getMetadataValue(mams, SET_ID, 'Title'))        
+                              getMetadataValue(mams, SET_ID, 'Title'))
         m_binding.clearObjectDelegator()
         assert m_binding[SET_ID]['Title'] != r_binding[SET_ID]['Title']
 

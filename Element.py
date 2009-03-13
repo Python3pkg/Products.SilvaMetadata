@@ -3,13 +3,15 @@ Metadata Elements
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
+from AccessControl import ClassSecurityInfo
+from OFS.SimpleItem import SimpleItem
+from Globals import DTMLFile, InitializeClass
 from AccessControl import getSecurityManager
 import Configuration
 from Exceptions import ConfigurationError
 from FormulatorField import getFieldFactory
 from Guard import Guard
 from interfaces import IMetadataElement
-from ZopeImports import *
 from utils import normalize_kv_pairs
 from zope.interface import implements
 

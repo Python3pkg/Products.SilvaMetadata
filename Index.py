@@ -7,7 +7,6 @@ author: kapil thangavelu <k_vertigo@objectrealms.net>
 
 from Products.ProxyIndex import ProxyIndex
 from Compatibility import index_expression_template, getToolByName
-from UserDict import UserDict
 
 def createIndexes(catalog, elements):
 
