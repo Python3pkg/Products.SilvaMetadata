@@ -23,7 +23,7 @@ def registerInitHandler(content_type, handler):
         _typeInitHandlers[content_type]=handler
 
 def getHandler(content):
-    ct = content.content_type
+    ct = content.meta_type
 
     handler = _typeInitHandlers.get(ct)
 
