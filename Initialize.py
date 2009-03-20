@@ -9,8 +9,6 @@ def metadata_initialization(content, bind_data)
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
-from Compatibility import getContentType
-
 _default_initializer = None
 
 _typeInitHandlers = {}
@@ -25,7 +23,7 @@ def registerInitHandler(content_type, handler):
         _typeInitHandlers[content_type]=handler
 
 def getHandler(content):
-    ct = getContentType(content)
+    ct = content.content_type
 
     handler = _typeInitHandlers.get(ct)
 

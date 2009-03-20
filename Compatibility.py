@@ -45,9 +45,6 @@ def getContentTypeNames(ctx):
     return tuple(_allowed_content_types)
 #return ctx.get_silva_addables_all()
 
-def getContentType(content):
-    return content.meta_type
-
 
 tem = "python: object.service_metadata.getMetadataValue(object, '%s', '%s')"
 index_expression_template = tem

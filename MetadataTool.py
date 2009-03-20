@@ -29,7 +29,7 @@ from Namespace import BindingRunTime
 from Binding import ObjectDelegate, encodeElement
 from Exceptions import BindingError
 from interfaces import IMetadataService
-from Compatibility import getContentType, getContentTypeNames, getToolByName
+from Compatibility import getContentTypeNames, getToolByName
 
 
 class MetadataTool(Folder, SilvaService):

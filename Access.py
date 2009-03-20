@@ -16,7 +16,6 @@ author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
 from Binding import MetadataBindAdapter
-from Compatibility import getContentType
 from Exceptions import BindingError
 
 _default_accessor = None
@@ -38,7 +37,7 @@ def getAccessHandler(content_type):
     return handler
 
 def invokeAccessHandler(tool, content):
-    ct = getContentType(content)
+    ct = content.meta_type
     handler = getAccessHandler(ct)
     if handler is None:
         raise BindingError("no access handler found for %s" % ct)
@@ -53,15 +52,5 @@ def default_accessor(tool, content_type, content, read_only=False):
 
     return MetadataBindAdapter(content, metadata_sets, read_only).__of__(content)
 
-def cached_accessor(tool, content_type, content):
-    """
-    bindings that get cached
-    """
-    binding  = getattr(content, '_v_binding', None)
-
-    if binding is None:
-        binding = default_accessor( tool, content_type, content)
-        setattr(content, '_v_binding', binding)
-    return binding
 
 registerAccessHandler(None, default_accessor)
