@@ -5,8 +5,17 @@ metadata elements in a zcatalog.
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
+# Zope 3
+from zope.component import getUtility
+
+# Zope 2
 from Products.ProxyIndex import ProxyIndex
-from Compatibility import index_expression_template, getToolByName
+
+from interfaces import ICatalogService
+
+tem = "python: object.service_metadata.getMetadataValue(object, '%s', '%s')"
+index_expression_template = tem
+
 
 def createIndexes(catalog, elements):
 
@@ -63,7 +72,7 @@ def createIndexArguements(element):
     # we setup the idx context manually ourselves..
     # proxyindex needs to find the zcatalog in the containement
     # hierarchy to introspect the pluggable indexes.
-    d['idx_context'] = getToolByName(element, 'portal_catalog')
+    d['idx_context'] = getUtility(ICatalogService)
 
     return d
 

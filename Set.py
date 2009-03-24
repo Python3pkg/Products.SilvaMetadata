@@ -11,16 +11,16 @@ from OFS.Folder import Folder
 from Globals import DTMLFile, InitializeClass
 
 from zope.interface import implements
+from zope.component import getUtility
 
 # SilvaMetadata
 from Products.Silva import SilvaPermissions
 from Element import MetadataElement, ElementFactory
 from Exceptions import NamespaceConflict, ConfigurationError, NotFound
-from Compatibility import getToolByName
 from Export import MetadataSetExporter
 from FormulatorField import listFields
 from Index import createIndexes
-from interfaces import IMetadataSet, IOrderedContainer
+from interfaces import IMetadataSet, IOrderedContainer, ICatalogService
 from Namespace import DefaultNamespace, DefaultPrefix
 
 from Products.ProxyIndex.ProxyIndex import getIndexTypes
@@ -258,7 +258,7 @@ class MetadataSet(OrderedContainer):
 
         # install indexes
         indexables = [e for e in self.getElements() if e.index_p]
-        catalog = getToolByName(self, 'portal_catalog')
+        catalog = getUtility(ICatalogService)
         createIndexes(catalog, indexables)
 
         self.initialized = 1
@@ -305,7 +305,7 @@ class MetadataSet(OrderedContainer):
         return listFields()
 
     def listIndexTypes(self):
-        return getIndexTypes(getToolByName(self, 'portal_catalog'))
+        return getIndexTypes(getUtility(ICatalogService))
 
     def get_i18n_domain(self):
         """Get i18n domain, if any.

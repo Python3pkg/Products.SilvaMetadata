@@ -9,6 +9,9 @@ from Acquisition import Implicit, aq_base, aq_parent
 from Products.ZCatalog.ZCatalog import ZCatalog
 
 from zope.annotation.interfaces import IAnnotations
+from zope.component import getUtility
+from zope.interface import alsoProvides
+from zope.publisher.interfaces.http import IHTTPRequest
 
 # Formulator
 from Products.Formulator.Errors import FormValidationError
@@ -24,12 +27,9 @@ import Initialize as BindingInitialize
 from Namespace import BindingRunTime
 from AccessControl import ClassSecurityInfo
 from Globals import InitializeClass
-from Compatibility import  getToolByName
 
-from interfaces import IAcquiredUpdater
+from interfaces import IAcquiredUpdater, ICatalogService
 
-from zope.publisher.interfaces.http import IHTTPRequest
-from zope.interface import alsoProvides
 
 #################################
 ### runtime bind data keys
@@ -614,7 +614,7 @@ class MetadataBindAdapter(Implicit):
                 e for e in elements
                 if (e.getId() in keys) and e.index_p]
             idx_names = getIndexNamesFor(reindex_elements)
-            catalog = getToolByName(ob, 'portal_catalog')
+            catalog = getUtility(ICatalogService)
             # cmf compatibility hack
             ZCatalog.catalog_object(catalog, ob, idxs=idx_names)
             self.reindexHook(ob, reindex_elements, update_list)

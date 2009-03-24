@@ -18,6 +18,10 @@ from Products.SilvaMetadata.interfaces import ICatalogService
 
 
 class CatalogService(ZCatalog, SilvaService):
+    """The Service catalog.
+    """
+
+    meta_type = "Silva Service Catalog"
 
     implements(ICatalogService)
 

@@ -12,6 +12,7 @@ from Globals import DTMLFile
 
 from zope.app.container.interfaces import IObjectAddedEvent
 from zope.annotation.interfaces import IAnnotations
+from zope.component import getUtility
 
 # Formulator
 from Products.Formulator import Form
@@ -28,8 +29,8 @@ from Access import invokeAccessHandler, getAccessHandler
 from Namespace import BindingRunTime
 from Binding import ObjectDelegate, encodeElement
 from Exceptions import BindingError
-from interfaces import IMetadataService
-from Compatibility import getContentTypeNames, getToolByName
+from interfaces import IMetadataService, ICatalogService
+from Compatibility import getContentTypeNames
 
 
 class MetadataTool(Folder, SilvaService):
@@ -60,19 +61,19 @@ class MetadataTool(Folder, SilvaService):
     # Metadata interface
 
     def listAllowedSubjects(self, content=None):
-        catalog = getToolByName(self, 'portal_catalog')
+        catalog = getUtility(ICatalogService)
         return catalog.uniqueValuesFor('Subject')
 
     def listAllowedFormats(self, content=None):
-        catalog = getToolByName(self, 'portal_catalog')
+        catalog = getUtility(ICatalogService)
         return catalog.uniqueValuesFor('Format')
 
     def listAllowedLanguages(self, content=None):
-        catalog = getToolByName(self, 'portal_catalog')
+        catalog = getUtility(ICatalogService)
         return catalog.uniqueValuesFor('Language')
 
     def listAllowedRights(self, content=None):
-        catalog = getToolByName(self, 'portal_catalog')
+        catalog = getUtility(ICatalogService)
         return catalog.uniqueValuesFor('Rights')
 
     #################################

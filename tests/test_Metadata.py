@@ -5,10 +5,9 @@ $Id: test_Metadata.py,v 1.22 2005/09/14 23:10:16 clemens Exp $
 """
 
 from unittest import TestSuite, makeSuite
-
 from cStringIO import StringIO
 
-from Testing import ZopeTestCase
+from zope.component import getUtility
 
 from AccessControl.SecurityManagement import newSecurityManager
 from AccessControl.SecurityManagement import noSecurityManager
@@ -16,7 +15,7 @@ from AccessControl.SecurityManagement import noSecurityManager
 from Products.Formulator import StandardFields
 from Products.Formulator.TALESField import TALESMethod
 from Products.SilvaMetadata.MetadataTool import MetadataTool
-from Products.SilvaMetadata.Compatibility import getToolByName
+from Products.SilvaMetadata.interfaces import IMetadataService
 
 from Products.Silva.tests import SilvaTestCase
 
@@ -24,7 +23,6 @@ SET_ID = 'ut_md'
 
 
 def setupFakePermissions(root):
-    # copy & paste from ZopeTestCase :-/
     uf = root.acl_users
     uf.userFolderAddUser( '_test_user', 'secret', ['Manager'], [])
     user = uf.getUserById('_test_user').__of__(uf)
@@ -40,7 +38,7 @@ def setupContentTreeSilva(self, container):
 
 
 def setupMetadataSet(context):
-    mtool = getToolByName(context, 'portal_metadata')
+    mtool = getUtility(IMetadataService)
     collection = mtool.getCollection()
     collection.addMetadataSet(SET_ID,
                               'tmd',
@@ -63,7 +61,7 @@ def setupMetadataSet(context):
 
 def setupExtendedMetadataSet(context):
     # add some additional metadata fields
-    pm = getToolByName(context, 'portal_metadata')
+    pm = getUtility(IMetadataService)
     collection = pm.getCollection()
     set = collection.getMetadataSet(SET_ID)
     set.addMetadataElement('ModificationDate',
@@ -86,7 +84,7 @@ def setupExtendedMetadataSet(context):
     set.initialize()
 
 def setupMetadataMapping(context):
-    mtool = getToolByName(context, 'portal_metadata')
+    mtool = getUtility(IMetadataService)
     mapping = mtool.getTypeMapping()
     mapping.setDefaultChain('ut_md')
     mtool.addTypesMapping(
@@ -104,7 +102,7 @@ class MetadataTests(SilvaTestCase.SilvaTestCase):
 class TestSetImportExport(MetadataTests):
 
     def testImportExport(self):
-        pm = getToolByName(self.root, 'portal_metadata')
+        pm = getUtility(IMetadataService)
         collection = pm.getCollection()
         set = collection.getMetadataSet(SET_ID)
         xml = set.exportXML().encode('ascii')
@@ -122,7 +120,7 @@ class TestObjectImportExport(MetadataTests):
         from Products.ParsedXML.ParsedXML import createDOMDocument
         from Products.SilvaMetadata.Import import import_metadata
 
-        pm = getToolByName(self.root, 'portal_metadata')
+        pm = getUtility(IMetadataService)
         setupExtendedMetadataSet(self.root)
         zoo = self.root.zoo
         mammals = zoo.mammals
@@ -165,7 +163,7 @@ class TestCataloging(MetadataTests):
 class TestMetadataElement(MetadataTests):
 
     def testGetDefault(self):
-        pm = getToolByName(self.root, 'portal_metadata')
+        pm = getUtility(IMetadataService)
         collection = pm.getCollection()
         set = collection.getMetadataSet(SET_ID)
         element = set.getElement('Title')
@@ -179,7 +177,7 @@ class TestMetadataElement(MetadataTests):
                          "Tales Context Passing Failed")
 
     def testGetDefaultWithTalesDelegate(self):
-        mtool = getToolByName(self.root, 'portal_metadata')
+        mtool = getUtility(IMetadataService)
         mtoolId = mtool.getId()
         collection = mtool.getCollection()
         set = collection.getMetadataSet(SET_ID)
@@ -205,7 +203,7 @@ class TestMetadataElement(MetadataTests):
     def testAcquisitionInvariant(self):
         # invariant == can't be required and acquired
         from Products.SilvaMetadata.Exceptions import ConfigurationError
-        pm = getToolByName(self.root, 'portal_metadata')
+        pm = getUtility(IMetadataService)
         collection = pm.getCollection()
         set = collection.getMetadataSet(SET_ID)
         element = set.getElement('Description')
@@ -233,7 +231,7 @@ class TestAdvancedMetadata(MetadataTests):
 
     def setupAcquiredMetadata(self):
         zoo = self.root.zoo
-        binding = getToolByName(zoo, 'portal_metadata').getMetadata(zoo)
+        binding = getUtility(IMetadataService).getMetadata(zoo)
         set_id = SET_ID
         binding.setValues(set_id, {'Title':'hello world',
                                    'Description':'cruel place'})
@@ -242,14 +240,14 @@ class TestAdvancedMetadata(MetadataTests):
         self.setupAcquiredMetadata()
         zoo = self.root.zoo
         mams = zoo.mammals
-        z_binding = getToolByName(zoo, 'portal_metadata').getMetadata(zoo)
-        m_binding = getToolByName(mams, 'portal_metadata').getMetadata(mams)
+        z_binding = getUtility(IMetadataService).getMetadata(zoo)
+        m_binding = getUtility(IMetadataService).getMetadata(mams)
         set_id = SET_ID
         self.assertEqual(m_binding[set_id]['Description'],
                          z_binding[set_id]['Description'])
         # test shortcut, too
-        self.assertEqual(getToolByName(mams, 'portal_metadata').getMetadataValue(mams,set_id,'Description'),
-                         getToolByName(zoo, 'portal_metadata').getMetadataValue(zoo,set_id,'Description'))
+        self.assertEqual(getUtility(IMetadataService).getMetadataValue(mams,set_id,'Description'),
+                         getUtility(IMetadataService).getMetadataValue(zoo,set_id,'Description'))
         self.assertNotEqual(m_binding.get(set_id, 'Description', acquire=0),
                             z_binding[set_id]['Description'])
 
@@ -257,8 +255,8 @@ class TestAdvancedMetadata(MetadataTests):
         self.setupAcquiredMetadata()
         zoo = self.root.zoo
         mams = zoo.mammals
-        m_binding = getToolByName(mams, 'portal_metadata').getMetadata(mams)
-        z_binding = getToolByName(zoo, 'portal_metadata').getMetadata(zoo)
+        m_binding = getUtility(IMetadataService).getMetadata(mams)
+        z_binding = getUtility(IMetadataService).getMetadata(zoo)
         set_id = SET_ID
         acquired = m_binding.listAcquired()
         # test the contained's list acquired
@@ -286,8 +284,8 @@ class TestAdvancedMetadata(MetadataTests):
         zoo.delegate = delegate
         mams = zoo.mammals
         reps = zoo.reptiles
-        r_binding = getToolByName(reps, 'portal_metadata').getMetadata(reps)
-        m_binding = getToolByName(mams, 'portal_metadata').getMetadata(mams)
+        r_binding = getUtility(IMetadataService).getMetadata(reps)
+        m_binding = getUtility(IMetadataService).getMetadata(mams)
         r_binding.setValues(SET_ID,
                             {'Title':'snake food',
                              'Description':'yummy n the tummy'}
@@ -299,7 +297,7 @@ class TestAdvancedMetadata(MetadataTests):
             )
         # test shortcut, too
         self.assertEqual('snake food',
-                         getToolByName(mams, 'portal_metadata').
+                         getUtility(IMetadataService).
                               getMetadataValue(mams, SET_ID, 'Title'))
         m_binding.clearObjectDelegator()
         assert m_binding[SET_ID]['Title'] != r_binding[SET_ID]['Title']
@@ -313,7 +311,7 @@ class TestAdvancedMetadata(MetadataTests):
 
         zoo = self.root.zoo
         mams = zoo.mammals
-        m_binding = getToolByName(mams, 'portal_metadata').getMetadata(mams)
+        m_binding = getUtility(IMetadataService).getMetadata(mams)
         trigger = MutationTrigger()
         zoo.trigger = trigger
         m_binding.setMutationTrigger(SET_ID, 'Title', 'trigger')
