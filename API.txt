@@ -2,7 +2,7 @@
 Binding API Usage Examples
 
    # cmf accessor
-   metadata_system = getToolByName(content, 'portal_metadata')
+   metadata_system = getUtility(IMetadataService)
    # silva accessor
    metadata_system = content.service_metadata
 

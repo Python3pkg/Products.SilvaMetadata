@@ -38,9 +38,6 @@ def setupContentTreeSilva(self, container):
     zoo = self.add_folder(zoo, 'reptiles', "Zoo Reptiles")
     return zoo
 
-def setupCatalog(context):
-    catalog = getToolByName(context, 'portal_catalog')
-    pass
 
 def setupMetadataSet(context):
     mtool = getToolByName(context, 'portal_metadata')

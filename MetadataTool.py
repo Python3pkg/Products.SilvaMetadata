@@ -257,11 +257,13 @@ class MetadataTool(Folder, SilvaService):
         RESPONSE.redirect('manage_workspace')
 
 
-def manage_addMetadataTool(self, id, REQUEST=None):
+def manage_addMetadataTool(self, id, title=None, REQUEST=None):
     """Add a metadatatool.
     """
 
     service = MetadataTool(id)
+    if title is not None:
+        service.title = title
     register_service(self, id, service, IMetadataService)
     add_and_edit(self, id, REQUEST)
     return ''

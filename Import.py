@@ -2,11 +2,15 @@
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
+from zope.component import getUtility
+
 from xml.sax import make_parser, ContentHandler
 from xml.dom import XMLNS_NAMESPACE
+
 from UserDict import UserDict
 from XMLType import deserialize
 from Exceptions import NotFound, ValidationError
+from interfaces import IMetadataService
 
 _marker = []
 
@@ -39,7 +43,7 @@ class MetaReader(ContentHandler):
         name = element_name.lower()
         if self.prefix:
             name = '%s%s' % (self.prefix, name.capitalize())
-        else: 
+        else:
             name = name.capitalize()
 
         method = getattr(self, 'start%s' % name, None)
@@ -55,11 +59,11 @@ class MetaReader(ContentHandler):
         chars = str(''.join(self.buf)).strip()
         self.buf = []
         name = element_name.lower()
-        if self.prefix: 
+        if self.prefix:
             name = '%s%s' % (self.prefix, name.capitalize())
         else:
             name = name.capitalize()
-        
+
         method = getattr(self, 'end%s' % name, None)
         if method:
             apply(method, (chars,))
@@ -81,13 +85,13 @@ class MetadataSetReader(MetaReader):
 
     def endI18n_domain(self, chars):
         self.set.i18n_domain = chars
-        
+
     def endMinimalrole(self, chars):
         self.set.minimalrole = chars
-        
+
     def endCategory(self, chars):
         self.set.category = chars
-        
+
     def startMetadata_set(self, attrs):
         self.set = s = DefinitionNode(attrs)
         s.setdefault('elements', [])
@@ -210,7 +214,6 @@ def read_set(xml):
 
 def make_set(container, set_node):
 
-    from Compatibility import getToolByName
     from Products.Formulator.TALESField import TALESMethod
 
     # compatiblity.. ick
@@ -221,7 +224,7 @@ def make_set(container, set_node):
     if not set_node.has_key('i18n_domain'):
         set_node['i18n_domain'] = ''
 
-    pm = getToolByName(container, 'portal_metadata')
+    pm = getUtility(IMetadataService)
 
     collection = getattr(pm, 'collection')
     collection.addMetadataSet(
@@ -241,7 +244,7 @@ def make_set(container, set_node):
             e_node['read_only_p'] = 0
         if not e_node.has_key('index_p'):
             e_node['index_p'] = 0
-            
+
         # type possible is string, convert to 'boolean'
         for p in ['index_p', 'acquire_p', 'read_only_p']:
             try:
@@ -298,10 +301,9 @@ def import_metadata(content, content_node):
 
     """
 
-    from Compatibility import getToolByName
 
     metadata_node = metadata_node_search(content_node)
-    metadata_tool = getToolByName(content, 'portal_metadata')
+    metadata_tool = getUtility(IMetadataService)
 
     if not metadata_node:
         return

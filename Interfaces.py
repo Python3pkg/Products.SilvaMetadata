@@ -3,7 +3,7 @@ Marker Interfaces
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
-from Products.Silva.interfaces.service import ISilvaService
+from silva.core.interfaces.service import ISilvaService
 from zope.interface import Interface
 
 class IAcquiredUpdater(Interface):
@@ -21,7 +21,13 @@ class IAcquiredUpdater(Interface):
 
 
 class IMetadataService(ISilvaService):
-    pass
+    """Metadata Service.
+    """
+
+
+class ICatalogService(ISilvaService):
+    """Catalog Service.
+    """
 
 
 class IMetadataCollection(Interface):

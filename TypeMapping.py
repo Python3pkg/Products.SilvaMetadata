@@ -4,12 +4,15 @@ Maps Metadata Sets onto Content Types
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
+from zope.component import getUtility
+
 # Zope
 from OFS.Folder import Folder
 from Globals import DTMLFile
 
 # SilvaMetadata
-from Compatibility import getContentTypeNames, getToolByName
+from interfaces import IMetadataService
+from Compatibility import getContentTypeNames
 from Exceptions import ConfigurationError
 
 DEFAULT_MAPPING_NAME = 'Default'
@@ -119,8 +122,8 @@ class TypeMapping(Folder):
 
 def getMetadataSets(ctx, chain):
     sets = filter(None, [c.strip() for c in chain.split(',')])
-    tool = getToolByName(ctx, 'portal_metadata')
-    return map(tool.getMetadataSet, sets)
+    service = getUtility(IMetadataService)
+    return map(service.getMetadataSet, sets)
 
 def verifyChain(ctx, chain):
     try:
