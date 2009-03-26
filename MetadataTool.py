@@ -22,6 +22,7 @@ from Products.Silva.SilvaPermissions import ChangeSilvaContent
 from Products.Silva.helpers import add_and_edit, \
     register_service, unregister_service
 
+from silva.core.views.interfaces import IPreviewLayer
 from silva.core.views import views as silvaviews
 from silva.core import conf as silvaconf
 
@@ -145,21 +146,23 @@ class MetadataTool(Folder, SilvaService):
         default_handler = getAccessHandler(None)
         handler = getAccessHandler(content.meta_type)
         if handler is not default_handler:
-            metadataservice = content.aq_inner.service_metadata
-            # XXX nasty hack to get the editable metadata in case of preview
-            url = content.REQUEST['URL'].split('/')
-            binding = None
-            if 'preview_html' in url or 'tab_preview' in url:
+            version = None
+            # Hum, I don't like the content.REQUEST
+            if IPreviewLayer.providedBy(content.REQUEST):
                 sm = getSecurityManager()
                 if sm.checkPermission(ChangeSilvaContent, content):
-                    content = content.get_editable()
-            if content is None:
-                return None
-            else:
-                binding = metadataservice.getMetadata(content)
+                    version = content.get_editable()
+
+            if version is None:
+                version = content.get_viewable()
+                if version is None:
+                    return None
+
+            binding = self.getMetadata(version)
             if binding is None:
                 return None
             return binding.get(set_id, element_id)
+
         # XXX how does this interact with security issues?
         set = self.collection.getMetadataSet(set_id)
         element = set.getElement(element_id)
@@ -171,15 +174,13 @@ class MetadataTool(Folder, SilvaService):
         if bind_data is not None:
             delegate = bind_data.get(ObjectDelegate)
             if delegate is not None:
-                content = getattr(content,delegate)()
+                content = getattr(content, delegate)()
                 annotations = IAnnotations(content)
 
         try:
             saved_data = annotations.get(set.metadata_uri)
         except (TypeError, KeyError):
             saved_data = None
-
-        #print 'found it for:', repr((saved_data, content))
 
         # if it's saved, we're done
         if saved_data:
