@@ -8,7 +8,6 @@ from AccessControl import getSecurityManager
 from AccessControl import ClassSecurityInfo
 from OFS.Folder import Folder
 from OFS.interfaces import IObjectWillBeRemovedEvent
-from Globals import DTMLFile
 
 from zope.app.container.interfaces import IObjectAddedEvent
 from zope.annotation.interfaces import IAnnotations
@@ -22,6 +21,8 @@ from Products.Silva.BaseService import SilvaService
 from Products.Silva.SilvaPermissions import ChangeSilvaContent
 from Products.Silva.helpers import add_and_edit, \
     register_service, unregister_service
+
+from silva.core.views import views as silvaviews
 from silva.core import conf as silvaconf
 
 # SilvaMetadata
@@ -41,13 +42,13 @@ class MetadataTool(Folder, SilvaService):
 
     manage_options = (
         {'label':'Overview',
-         'action':'manage_main'},
+         'action':'manage_overview'},
 
         {'label':'Metadata Sets',
          'action':'collection/manage_workspace'},
 
         {'label':'Type Mapping',
-         'action':'ct_mapping/manage_workspace'},
+         'action':'manage_mapping'},
         )
 
     implements(IMetadataService)
@@ -55,7 +56,6 @@ class MetadataTool(Folder, SilvaService):
     silvaconf.factory('manage_addMetadataTool')
 
     security = ClassSecurityInfo()
-    manage_main = DTMLFile('ui/MetadataToolOverview', globals())
 
     #################################
     # Metadata interface
@@ -256,6 +256,22 @@ class MetadataTool(Folder, SilvaService):
     def update(self, RESPONSE):
         """ """
         RESPONSE.redirect('manage_workspace')
+
+
+class MetadataToolOverview(silvaviews.ZMIView):
+
+    silvaconf.name('manage_overview')
+
+
+class MetadataTypeMapping(silvaviews.ZMIView):
+
+    silvaconf.name('manage_mapping')
+
+    def update(self):
+        if 'save_mapping' in self.request.form:
+            self.context.ct_mapping.editMappings(
+                self.request.form['default_chain'],
+                self.request.form['type_chains'])
 
 
 def manage_addMetadataTool(self, id, title=None, REQUEST=None):

@@ -8,7 +8,6 @@ from zope.component import getUtility
 
 # Zope
 from OFS.Folder import Folder
-from Globals import DTMLFile
 
 # SilvaMetadata
 from interfaces import IMetadataService
@@ -21,19 +20,8 @@ class TypeMappingContainer(Folder):
 
     meta_type = 'Type Mapping Container'
 
-    manage_options = (
-
-        {'label':'Content Types',
-         'action':'manage_main'},
-
-        {'label':'Metadata Tool',
-         'action':'../manage_workspace'},
-        )
-
-    manage_main = DTMLFile('ui/TypeMappingContainerForm', globals())
-
     def __init__(self, id):
-        self.id = id
+        super(TypeMappingContainer, self).__init__(id)
         self.default_chain = ''
 
     def setDefaultChain(self, chain, RESPONSE=None):
@@ -73,8 +61,7 @@ class TypeMappingContainer(Folder):
             return None
         return ctm
 
-    def editMappings(self, default_chain, type_chains, RESPONSE=None):
-        """ """
+    def editMappings(self, default_chain, type_chains):
         self.setDefaultChain(default_chain)
 
         for tcr in type_chains:
@@ -95,18 +82,16 @@ class TypeMappingContainer(Folder):
                 else:
                     tm.setMetadataChain(tc)
 
-        if RESPONSE is not None:
-            return RESPONSE.redirect('manage_workspace')
-
     def getContentTypes(self):
         return getContentTypeNames(self)
+
 
 class TypeMapping(Folder):
 
     meta_type = 'Metadata Type Mapping'
 
     def __init__(self, id):
-        self.id = id
+        super(TypeMapping, self).__init__(id)
         self.chain = None
 
     def getMetadataChain(self):
@@ -120,10 +105,12 @@ class TypeMapping(Folder):
     def getMetadataSets(self):
         return getMetadataSets(self, self.chain)
 
+
 def getMetadataSets(ctx, chain):
     sets = filter(None, [c.strip() for c in chain.split(',')])
     service = getUtility(IMetadataService)
     return map(service.getMetadataSet, sets)
+
 
 def verifyChain(ctx, chain):
     try:

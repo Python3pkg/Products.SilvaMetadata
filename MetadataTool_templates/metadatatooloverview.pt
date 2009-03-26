@@ -1,0 +1,29 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      metal:use-macro="context/@@standard_macros/page">
+  <body>
+    <div metal:fill-slot="body">
+      <h2>Advanced Metadata System</h2>
+
+      <p class="form-help">
+        <a href="collection/manage_workspace">
+          Browse Metadata Sets
+        </a>
+      </p>
+
+      <p class="form-help">
+        <a href="collection?%3Amethod=addMetadataSetForm&submit=+Add+Metadata+Set">
+          Add/Import A Metadata Set
+        </a>
+      </p>
+
+      <p class="form-help">
+        <a href="manage_mapping">
+          Modify Metadata to Content Type Mapping
+        </a>
+      </p>
+    </div>
+  </body>
+</html>

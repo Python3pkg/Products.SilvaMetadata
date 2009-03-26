@@ -1,0 +1,47 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      metal:use-macro="context/@@standard_macros/page">
+  <body>
+    <div metal:fill-slot="body">
+
+      <h2>Content Type Metadata Mapping</h2>
+
+      <form action="#" method="POST"
+            tal:attributes="action request/URL">
+        <table tal:define="mapping context/ct_mapping">
+
+          <tr>
+            <td>Default</td>
+            <td>
+              <input name="default_chain" type="text" size="80" value="#"
+                     tal:attributes="value mapping/getDefaultChain">
+            </td>
+          </tr>
+
+          <tr tal:repeat="type mapping/getContentTypes">
+            <td tal:content="type">
+              Type
+            </td>
+            <td>
+              <input type="hidden" name="type_chains.type:records" value="#"
+                     tal:attributes="value type" />
+              <input name="type_chains.chain:records" type="text"
+                     size="80" value="#"
+                     tal:attributes="value python:mapping.getChainFor(type)"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td colspan="2">
+              <input type="submit" name="save_mapping" value="save mappings" />
+            </td>
+          </tr>
+
+        </table>
+      </form>
+
+    </div>
+  </body>
+</html>
