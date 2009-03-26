@@ -5,28 +5,17 @@ $Id: test_Metadata.py,v 1.22 2005/09/14 23:10:16 clemens Exp $
 """
 
 from unittest import TestSuite, makeSuite
-from cStringIO import StringIO
 
 from zope.component import getUtility
 
-from AccessControl.SecurityManagement import newSecurityManager
-from AccessControl.SecurityManagement import noSecurityManager
-
 from Products.Formulator import StandardFields
 from Products.Formulator.TALESField import TALESMethod
-from Products.SilvaMetadata.MetadataTool import MetadataTool
 from Products.SilvaMetadata.interfaces import IMetadataService
 
 from Products.Silva.tests import SilvaTestCase
 
+
 SET_ID = 'ut_md'
-
-
-def setupFakePermissions(root):
-    uf = root.acl_users
-    uf.userFolderAddUser( '_test_user', 'secret', ['Manager'], [])
-    user = uf.getUserById('_test_user').__of__(uf)
-    newSecurityManager(None, user)
 
 
 def setupContentTreeSilva(self, container):
@@ -47,41 +36,16 @@ def setupMetadataSet(context):
     set.addMetadataElement('Title',
                            StandardFields.StringField.meta_type,
                            'KeywordIndex',
-                           1
-                           )
+                           1)
     set.addMetadataElement('Description',
                            StandardFields.StringField.meta_type,
                            'KeywordIndex',
-                           1
-                           )
+                           1)
     element = set.getElement('Description')
     element.field._edit({'required':0})
     element.editElementPolicy(acquire_p = 1)
     return set
 
-def setupExtendedMetadataSet(context):
-    # add some additional metadata fields
-    pm = getUtility(IMetadataService)
-    collection = pm.getCollection()
-    set = collection.getMetadataSet(SET_ID)
-    set.addMetadataElement('ModificationDate',
-                           StandardFields.DateTimeField.meta_type,
-                           'DateIndex',
-                           1
-                           )
-    element = set.getElement('ModificationDate')
-    element.field._edit_tales({'default':
-                        TALESMethod('content/bobobase_modification_time')})
-    element.field._edit({'required':0})
-    set.addMetadataElement('Languages',
-                           StandardFields.LinesField.meta_type,
-                           'KeywordIndex',
-                           1
-                           )
-    element = set.getElement('Languages')
-    element.field._edit({'required':0})
-    ######
-    set.initialize()
 
 def setupMetadataMapping(context):
     mtool = getUtility(IMetadataService)
@@ -91,7 +55,7 @@ def setupMetadataMapping(context):
         ('Silva Folder', ), ('ut_md', 'silva-extra'))
 
 
-class MetadataTests(SilvaTestCase.SilvaTestCase):
+class MetadataTestCase(SilvaTestCase.SilvaTestCase):
 
     def afterSetUp(self):
         setupMetadataSet(self.root)
@@ -99,68 +63,7 @@ class MetadataTests(SilvaTestCase.SilvaTestCase):
         setupContentTreeSilva(self, self.root)
 
 
-class TestSetImportExport(MetadataTests):
-
-    def testImportExport(self):
-        pm = getUtility(IMetadataService)
-        collection = pm.getCollection()
-        set = collection.getMetadataSet(SET_ID)
-        xml = set.exportXML().encode('ascii')
-        xmlio = StringIO(xml)
-        collection.manage_delObjects([SET_ID])
-        collection.importSet(xmlio)
-        set = collection.getMetadataSet(SET_ID)
-        xml2 = set.exportXML()
-        assert xml == xml2, "Import/Export disjoint"
-
-
-class TestObjectImportExport(MetadataTests):
-
-    def testImportExport(self):
-        from Products.ParsedXML.ParsedXML import createDOMDocument
-        from Products.SilvaMetadata.Import import import_metadata
-
-        pm = getUtility(IMetadataService)
-        setupExtendedMetadataSet(self.root)
-        zoo = self.root.zoo
-        mammals = zoo.mammals
-        binding = pm.getMetadata(zoo)
-        values = binding.get(SET_ID)
-        lines = """
-        english
-        hebrew
-        swahili
-        urdu
-        """
-        values.update(
-            {'Title':'hello world',
-             'Description':'cruel place',
-             'Languages':lines }
-            )
-        binding.setValues(SET_ID, values)
-        xml = "<folder>%s</folder>" % binding.renderXML(SET_ID)
-        dom = createDOMDocument(xml)
-        import_metadata(mammals, dom.childNodes[0])
-        mammals_binding = pm.getMetadata(mammals)
-        mammal_values = binding.get(SET_ID)
-        for k in values.keys():
-            self.assertEqual(values[k], mammal_values[k],
-                             "Object Import/Export disjoint")
-
-        xml2 = "<folder>%s</folder>" % mammals_binding.renderXML(SET_ID)
-        xml_list = xml.splitlines()
-        xml2_list = xml2.splitlines()
-        for x in xml2_list:
-            self.assert_(x in xml_list, "Object Import Export disjoin")
-        for x in xml_list:
-            self.assert_(x in xml2_list, "Object Import Export disjoin")
-
-
-class TestCataloging(MetadataTests):
-    pass
-
-
-class TestMetadataElement(MetadataTests):
+class TestMetadataElement(MetadataTestCase):
 
     def testGetDefault(self):
         pm = getUtility(IMetadataService)
@@ -226,7 +129,7 @@ class TestMetadataElement(MetadataTests):
                                  " Invariant Failed 2")
 
 
-class TestAdvancedMetadata(MetadataTests):
+class TestAdvancedMetadata(MetadataTestCase):
     """Tests for runtime binding methods"""
 
     def setupAcquiredMetadata(self):
@@ -331,9 +234,6 @@ class TestAdvancedMetadata(MetadataTests):
 
 def test_suite():
     suite = TestSuite()
-    suite.addTest(makeSuite(TestSetImportExport))
-    suite.addTest(makeSuite(TestObjectImportExport))
-    suite.addTest(makeSuite(TestCataloging))
     suite.addTest(makeSuite(TestMetadataElement))
     suite.addTest(makeSuite(TestAdvancedMetadata))
     return suite
