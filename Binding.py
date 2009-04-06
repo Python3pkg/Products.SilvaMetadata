@@ -6,7 +6,6 @@ from UserDict import UserDict
 
 # Zope
 from Acquisition import Implicit, aq_base, aq_parent
-from Products.ZCatalog.ZCatalog import ZCatalog
 
 from zope.annotation.interfaces import IAnnotations
 from zope.component import getUtility
@@ -420,7 +419,7 @@ class MetadataBindAdapter(Implicit):
                            % (set_id, namespace_key))
 
     def _getBindData(self):
-        metadata = IAnnotations(self.content)
+        metadata = IAnnotations(aq_base(self.content))
         bind_data = metadata.get(BindingRunTime)
 
         if bind_data is None:
@@ -474,7 +473,7 @@ class MetadataBindAdapter(Implicit):
         ob = self._getAnnotatableObject()
 
         # get the annotation data
-        metadata = IAnnotations(ob)
+        metadata = IAnnotations(aq_base(ob))
 
         saved_data = metadata.get(set.metadata_uri)
         data = Data()
@@ -581,7 +580,7 @@ class MetadataBindAdapter(Implicit):
                     pass
 
         # save in annotations
-        metadata = IAnnotations(ob)
+        metadata = IAnnotations(aq_base(ob))
 
         if metadata.has_key(set.metadata_uri):
             for key, value in data.items():
@@ -616,7 +615,7 @@ class MetadataBindAdapter(Implicit):
             idx_names = getIndexNamesFor(reindex_elements)
             catalog = getUtility(ICatalogService)
             # cmf compatibility hack
-            ZCatalog.catalog_object(catalog, ob, idxs=idx_names)
+            catalog.catalog_object(ob, idxs=idx_names)
             self.reindexHook(ob, reindex_elements, update_list)
 
     def reindexHook(self, ob, reindex_elements, acquired_names):

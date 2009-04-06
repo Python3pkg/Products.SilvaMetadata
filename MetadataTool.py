@@ -166,7 +166,7 @@ class MetadataTool(Folder, SilvaService):
         # XXX how does this interact with security issues?
         set = self.collection.getMetadataSet(set_id)
         element = set.getElement(element_id)
-        annotations = IAnnotations(content)
+        annotations = IAnnotations(aq_base(content))
 
         bind_data = None
         if annotations is not None:
@@ -175,7 +175,7 @@ class MetadataTool(Folder, SilvaService):
             delegate = bind_data.get(ObjectDelegate)
             if delegate is not None:
                 content = getattr(content, delegate)()
-                annotations = IAnnotations(content)
+                annotations = IAnnotations(aq_base(content))
 
         try:
             saved_data = annotations.get(set.metadata_uri)
