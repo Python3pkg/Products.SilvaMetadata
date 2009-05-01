@@ -2,6 +2,14 @@
 Changes
 =======
 
+1.2.1 (unreleased)
+------------------
+
+Bugs Fixed:
+
+- when previewing content which has no published version (only editable)
+  metadata could not be retrieved.
+
 1.2 (2008/09/30)
 -----------------
 
