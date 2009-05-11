@@ -163,7 +163,6 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
         default_handler = getAccessHandler(None)
         handler = getAccessHandler(getContentType(content))
         if handler is not default_handler:
-            version = None
             metadataservice = content.aq_inner.service_metadata
             # XXX nasty hack to get the editable metadata in case of preview
             url = content.REQUEST['URL'].split('/')
@@ -171,12 +170,12 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
             if 'preview_html' in url or 'tab_preview' in url:
                 sm = getSecurityManager()
                 if sm.checkPermission(ChangeSilvaContent, content):
-                    version = content.get_editable()
-            if version is None:
-                version = content.get_viewable()
-                if version is None:
+                    content = content.get_editable()
+            if content is None:
+                content = content.get_viewable()
+                if content is None:
                     return None
-            binding = metadataservice.getMetadata(version)
+            binding = metadataservice.getMetadata(content)
             if binding is None:
                 return None
             return binding.get(set_id, element_id)
