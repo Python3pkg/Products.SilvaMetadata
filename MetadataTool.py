@@ -170,11 +170,11 @@ class MetadataTool(UniqueObject, Folder, ActionProviderBase):
             if 'preview_html' in url or 'tab_preview' in url:
                 sm = getSecurityManager()
                 if sm.checkPermission(ChangeSilvaContent, content):
-                    content = content.get_editable()
+                    editable = content.get_previewable()
+                    if editable:
+                        content = editable
             if content is None:
-                content = content.get_viewable()
-                if content is None:
-                    return None
+                return None
             binding = metadataservice.getMetadata(content)
             if binding is None:
                 return None
