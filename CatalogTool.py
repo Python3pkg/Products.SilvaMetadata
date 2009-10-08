@@ -9,9 +9,10 @@ from OFS.interfaces import IObjectWillBeRemovedEvent
 from Products.ZCatalog.ZCatalog import ZCatalog
 
 from Products.ProxyIndex.ProxyIndex import RecordStyle
-from Products.Silva.BaseService import SilvaService
 from Products.Silva.helpers import add_and_edit, \
     register_service, unregister_service
+
+from silva.core.services.base import SilvaService
 from silva.core import conf as silvaconf
 
 from Products.SilvaMetadata.interfaces import ICatalogService

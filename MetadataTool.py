@@ -17,11 +17,11 @@ from zope.component import getUtility
 from Products.Formulator import Form
 
 # Silva
-from Products.Silva.BaseService import SilvaService
 from Products.Silva.SilvaPermissions import ChangeSilvaContent
 from Products.Silva.helpers import add_and_edit, \
     register_service, unregister_service
 
+from silva.core.services.base import SilvaService
 from silva.core.views.interfaces import IPreviewLayer
 from silva.core.views import views as silvaviews
 from silva.core import conf as silvaconf
