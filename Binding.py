@@ -25,7 +25,10 @@ from Index import getIndexNamesFor
 import Initialize as BindingInitialize
 from Namespace import BindingRunTime
 from AccessControl import ClassSecurityInfo
-from Globals import InitializeClass
+try:
+    from App.class_init import InitializeClass # Zope 2.12
+except ImportError:
+    from Globals import InitializeClass # Zope < 2.12
 
 from interfaces import IAcquiredUpdater, ICatalogService
 
