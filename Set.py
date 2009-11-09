@@ -8,7 +8,8 @@ from AccessControl import getSecurityManager, Permissions
 from AccessControl import ClassSecurityInfo
 from Acquisition import aq_inner, aq_parent
 from OFS.Folder import Folder
-from Globals import DTMLFile, InitializeClass
+from App.special_dtml import DTMLFile
+from Globals import InitializeClass
 
 from zope.interface import implements
 from zope.component import getUtility

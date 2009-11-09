@@ -24,7 +24,8 @@ from string import split, strip, join
 
 from AccessControl import ClassSecurityInfo
 from Acquisition import Explicit
-from Globals import Persistent, InitializeClass
+from Persistence import Persistent
+from Globals import InitializeClass
 
 from Products.Silva import SilvaPermissions
 from Expression import Expression, createExprContext

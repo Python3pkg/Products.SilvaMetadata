@@ -4,7 +4,9 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 
 from AccessControl import ClassSecurityInfo
 from OFS.Folder import Folder
-from Globals import DTMLFile, InitializeClass
+from App.special_dtml import DTMLFile
+from Globals import InitializeClass
+
 from Exceptions import NotFound
 from interfaces import IMetadataCollection
 from Import import read_set, make_set

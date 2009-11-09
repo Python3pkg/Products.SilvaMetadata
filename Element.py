@@ -5,7 +5,9 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 
 from AccessControl import ClassSecurityInfo
 from OFS.SimpleItem import SimpleItem
-from Globals import DTMLFile, InitializeClass
+from App.special_dtml import DTMLFile
+from Globals import InitializeClass
+
 from AccessControl import getSecurityManager
 
 from Products.Silva import SilvaPermissions
