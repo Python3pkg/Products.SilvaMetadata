@@ -11,7 +11,7 @@ from zope.component import getUtility
 # Zope 2
 from Products.ProxyIndex import ProxyIndex
 
-from interfaces import ICatalogService
+from silva.core.services.interfaces import ICatalogService
 
 tem = "python: object.service_metadata.getMetadataValue(object, '%s', '%s')"
 index_expression_template = tem

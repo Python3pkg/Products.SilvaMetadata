@@ -30,7 +30,8 @@ try:
 except ImportError:
     from Globals import InitializeClass # Zope < 2.12
 
-from interfaces import IAcquiredUpdater, ICatalogService
+from interfaces import IAcquiredUpdater
+from silva.core.services.interfaces import ICatalogService
 
 
 #################################

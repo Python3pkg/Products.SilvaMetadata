@@ -21,7 +21,8 @@ from Exceptions import NamespaceConflict, ConfigurationError, NotFound
 from Export import MetadataSetExporter
 from FormulatorField import listFields
 from Index import createIndexes
-from interfaces import IMetadataSet, IOrderedContainer, ICatalogService
+from interfaces import IMetadataSet, IOrderedContainer
+from silva.core.services.interfaces import ICatalogService
 from Namespace import DefaultNamespace, DefaultPrefix
 
 from Products.ProxyIndex.ProxyIndex import getIndexTypes

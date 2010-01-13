@@ -25,11 +25,6 @@ class IMetadataService(ISilvaService):
     """
 
 
-class ICatalogService(ISilvaService):
-    """Catalog Service.
-    """
-
-
 class IMetadataCollection(Interface):
     pass
 
