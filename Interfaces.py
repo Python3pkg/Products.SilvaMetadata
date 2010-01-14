@@ -6,18 +6,18 @@ author: kapil thangavelu <k_vertigo@objectrealms.net>
 from silva.core.interfaces.service import ISilvaService
 from zope.interface import Interface
 
-class IAcquiredUpdater(Interface):
-    """
-    Do any (catalog) updates that may be necessary after setting acquired
-    metadata for an object.
+# class IAcquiredUpdater(Interface):
+#     """
+#     Do any (catalog) updates that may be necessary after setting acquired
+#     metadata for an object.
 
-    This is a pure hook: SilvaMetadata and even the Silva core at present
-    do not provide any IAcquiredUpdater adapters. An extension to Silva
-    may however register one.
-    """
-    def update():
-        """Perform the update.
-        """
+#     This is a pure hook: SilvaMetadata and even the Silva core at present
+#     do not provide any IAcquiredUpdater adapters. An extension to Silva
+#     may however register one.
+#     """
+#     def update():
+#         """Perform the update.
+#         """
 
 
 class IMetadataService(ISilvaService):

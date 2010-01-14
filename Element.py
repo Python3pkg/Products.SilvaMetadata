@@ -40,6 +40,7 @@ class MetadataElement(SimpleItem):
 
     read_only_p = False
     index_p = False
+    metadata_in_index_p = False
     acquire_p = False
     index_type = None
     field_type = None
@@ -96,6 +97,7 @@ class MetadataElement(SimpleItem):
                           field_type = None,
                           index_type = None,
                           index_p = None,
+                          metadata_in_index_p = False,
                           read_only_p = None,
                           extra = None,
                           acquire_p = None,
@@ -150,6 +152,7 @@ class MetadataElement(SimpleItem):
 
         # need to cascacde this so we can create indexes at the set level
         self.index_p = not not index_p
+        self.metadata_in_index_p = metadata_in_index_p
         self.read_only_p = not not read_only_p
         self.acquire_p = not not acquire_p
 
@@ -226,7 +229,7 @@ class MetadataElement(SimpleItem):
     # fields are not in unicode mode, unfortunately
     def get_unicode_mode(self):
         return 0
-    
+
     ## formulator sends on change messages when internal field
     ## values are changed, we catch the required message in
     ## order to maintain our invariant that an element can not

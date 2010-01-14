@@ -1,52 +1,50 @@
-"""
-functions for installing and removing indexes for
-metadata elements in a zcatalog.
 
-author: kapil thangavelu <k_vertigo@objectrealms.net>
-"""
+from five import grok
+from silva.core.services.catalog import RecordStyle
+from silva.core.services.interfaces import ICatalogingAttributes
+from zope import component
+from zope.interface import Interface
 
-# Zope 3
-from zope.component import getUtility
+from Products.SilvaMetadata.interfaces import IMetadataService
 
-# Zope 2
-from Products.ProxyIndex import ProxyIndex
 
-from silva.core.services.interfaces import ICatalogService
+class MetadataCatalogingAttributes(grok.Adapter):
+    """Access to attributes to catalog objects which have metadata.
+    """
+    grok.context(Interface)
+    grok.provides(ICatalogingAttributes)
+    grok.implements(ICatalogingAttributes)
 
-tem = "python: object.service_metadata.getMetadataValue(object, '%s', '%s')"
-index_expression_template = tem
+    def __init__(self, context):
+        super(MetadataCatalogingAttributes, self).__init__(context)
+        self.__metadata = component.getUtility(IMetadataService)
+
+    def __getattr__(self, name):
+        # We first look in SilvaMetadata if we have a match for this
+        # item. This code is not optimal, but we can't do better with
+        # SilvaMetadata.
+        for mid, mset in self.__metadata.collection.objectItems():
+            if name.startswith(mset.metadata_prefix):
+                for eid in mset.objectIds():
+                    if name == ''.join((mset.metadata_prefix, eid,)):
+                        # We have a match !
+                        return self.__metadata.getMetadataValue(
+                            self.context, mid, eid)
+        return getattr(self.context, name)
 
 
 def createIndexes(catalog, elements):
+    for element in elements:
+        index_id = createIndexId(element)
+        extra = createIndexArguements(element)
 
-    all_indexes = catalog.indexes()
+        if index_id not in catalog.indexes():
+            catalog.addIndex(index_id, element.index_type, extra)
 
-    for e in elements:
-        idx_id  = createIndexId(e)
-        extra   = createIndexArguements(e)
+        if element.metadata_in_index_p:
+            if index_id not in catalog.schema():
+                catalog.addColumn(index_id)
 
-        if idx_id in all_indexes:
-            continue
-
-        catalog.addIndex(idx_id, ProxyIndex.ProxyIndex.meta_type, extra)
-        all_indexes.append(idx_id)
-
-    return None
-
-def removeIndexes(catalog, elements):
-
-    all_indexes = catalog.indexes()
-
-    for e in elements:
-        idx_id = createIndexId(e)
-
-        if not idx_id in all_indexes:
-            continue
-
-        catalog.delIndex(idx_id)
-        all_indexes.remove(idx_id)
-
-    return None
 
 def getIndexNamesFor(elements):
     res = []
@@ -54,31 +52,16 @@ def getIndexNamesFor(elements):
         res.append(createIndexId(e))
     return res
 
+
 def createIndexId(element):
     ms = element.getMetadataSet()
     return "%s%s" % (ms.metadata_prefix, element.getId())
 
+
 def createIndexArguements(element):
-
-    d = ProxyIndex.RecordStyle()
-
     # try to get the element's index construction key/value pair
     if element.index_constructor_args is not None:
-        d.update(element.index_constructor_args)
+        return RecordStyle(**element.index_constructor_args)
+    return RecordStyle()
 
-    d['idx_type'] = element.index_type
-    d['value_expr'] = createIndexExpression(element)
-
-    # we setup the idx context manually ourselves..
-    # proxyindex needs to find the zcatalog in the containement
-    # hierarchy to introspect the pluggable indexes.
-    d['idx_context'] = getUtility(ICatalogService)
-
-    return d
-
-def createIndexExpression(element):
-    return index_expression_template % (
-        element.getMetadataSet().getId(),
-        element.getId()
-        )
 

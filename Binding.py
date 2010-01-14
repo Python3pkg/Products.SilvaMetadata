@@ -8,7 +8,6 @@ from UserDict import UserDict
 from Acquisition import Implicit, aq_base, aq_parent
 
 from zope.annotation.interfaces import IAnnotations
-from zope.component import getUtility
 from zope.interface import alsoProvides
 from zope.publisher.interfaces.http import IHTTPRequest
 
@@ -25,13 +24,9 @@ from Index import getIndexNamesFor
 import Initialize as BindingInitialize
 from Namespace import BindingRunTime
 from AccessControl import ClassSecurityInfo
-try:
-    from App.class_init import InitializeClass # Zope 2.12
-except ImportError:
-    from Globals import InitializeClass # Zope < 2.12
+from App.class_init import InitializeClass # Zope 2.12
 
-from interfaces import IAcquiredUpdater
-from silva.core.services.interfaces import ICatalogService
+from silva.core.services.interfaces import ICataloging
 
 
 #################################
@@ -616,23 +611,7 @@ class MetadataBindAdapter(Implicit):
             reindex_elements = [
                 e for e in elements
                 if (e.getId() in keys) and e.index_p]
-            idx_names = getIndexNamesFor(reindex_elements)
-            catalog = getUtility(ICatalogService)
-            # cmf compatibility hack
-            catalog.catalog_object(ob, idxs=idx_names)
-            self.reindexHook(ob, reindex_elements, update_list)
-
-    def reindexHook(self, ob, reindex_elements, acquired_names):
-        """A hook that uses an adapter (ICatalogIndexer) to index children.
-
-        """
-        # determine elements that need to be reindexed and are acquired
-        elements = [element for element in reindex_elements if
-                    element.getId() in acquired_names]
-        if elements:
-            indexer = IAcquiredUpdater(ob, None)
-            if indexer is not None:
-                indexer.update()
+            ICataloging(ob).reindex(indexes=getIndexNamesFor(reindex_elements))
 
     def _getSetByKey(self, namespace_key):
         for s in self.collection.values():
@@ -641,6 +620,7 @@ class MetadataBindAdapter(Implicit):
         raise NotFound(str(namespace_key))
 
 InitializeClass(MetadataBindAdapter)
+
 
 def validateData(binding, set, data, errors_dict=None):
     # XXX completely formulator specific

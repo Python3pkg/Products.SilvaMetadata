@@ -30,7 +30,6 @@ from silva.core import conf as silvaconf
 from Access import invokeAccessHandler, getAccessHandler
 from Namespace import BindingRunTime
 from Binding import ObjectDelegate, encodeElement
-from Exceptions import BindingError
 from interfaces import IMetadataService
 from silva.core.services.interfaces import ICatalogService
 from Compatibility import getContentTypeNames

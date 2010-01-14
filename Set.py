@@ -11,6 +11,8 @@ from OFS.Folder import Folder
 from App.special_dtml import DTMLFile
 from Globals import InitializeClass
 
+from Products.PluginIndexes.interfaces import IPluggableIndex
+
 from zope.interface import implements
 from zope.component import getUtility
 
@@ -25,7 +27,6 @@ from interfaces import IMetadataSet, IOrderedContainer
 from silva.core.services.interfaces import ICatalogService
 from Namespace import DefaultNamespace, DefaultPrefix
 
-from Products.ProxyIndex.ProxyIndex import getIndexTypes
 
 class OrderedContainer(Folder):
 
@@ -260,8 +261,7 @@ class MetadataSet(OrderedContainer):
 
         # install indexes
         indexables = [e for e in self.getElements() if e.index_p]
-        catalog = getUtility(ICatalogService)
-        createIndexes(catalog, indexables)
+        createIndexes(getUtility(ICatalogService), indexables)
 
         self.initialized = 1
 
@@ -307,7 +307,9 @@ class MetadataSet(OrderedContainer):
         return listFields()
 
     def listIndexTypes(self):
-        return getIndexTypes(getUtility(ICatalogService))
+        catalog = getUtility(ICatalogService)
+        return [i['name'] for i in catalog.all_meta_types(
+                interfaces=(IPluggableIndex,))]
 
     def get_i18n_domain(self):
         """Get i18n domain, if any.
