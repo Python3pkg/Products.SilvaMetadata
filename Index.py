@@ -28,8 +28,11 @@ class MetadataCatalogingAttributes(grok.Adapter):
                 for eid in mset.objectIds():
                     if name == ''.join((mset.metadata_prefix, eid,)):
                         # We have a match !
-                        return self.__metadata.getMetadataValue(
-                            self.context, mid, eid)
+                        try:
+                            return self.__metadata.getMetadataValue(
+                                self.context, mid, eid)
+                        except KeyError:
+                            pass
         return getattr(self.context, name)
 
 
