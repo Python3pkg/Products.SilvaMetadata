@@ -44,7 +44,7 @@ def createIndexes(catalog, elements):
         if index_id not in catalog.indexes():
             catalog.addIndex(index_id, element.index_type, extra)
 
-        if element.metadata_in_index_p:
+        if element.metadata_in_catalog_p:
             if index_id not in catalog.schema():
                 catalog.addColumn(index_id)
 

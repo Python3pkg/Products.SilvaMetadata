@@ -56,6 +56,7 @@ class MetadataSetExporter(object):
             print >> out, '  <metadata_element id="%s">' % e.getId()
             print >> out, '   <index_type>%s</index_type>' % e.index_type
             print >> out, '   <index_p>%d</index_p>' % e.index_p
+            print >> out, '   <metadata_in_catalog_p>%d</metadata_in_catalog_p>' % e.metadata_in_catalog_p
             print >> out, '   <field_type>%s</field_type>' % e.field_type
             print >> out, '   <acquire_p>%d</acquire_p>' % e.acquire_p
             print >> out, '   <read_only_p>%d</read_only_p>' % e.read_only_p

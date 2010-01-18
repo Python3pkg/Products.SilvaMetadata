@@ -187,6 +187,7 @@ class MetadataSet(OrderedContainer):
                            index_p=None,
                            acquire_p=None,
                            read_only_p=None,
+                           metadata_in_catalog_p=None,
                            RESPONSE=None):
         """ """
         element = ElementFactory(id)
@@ -197,6 +198,7 @@ class MetadataSet(OrderedContainer):
                                   index_type = index_type,
                                   index_p = index_p,
                                   read_only_p = read_only_p,
+                                  metadata_in_catalog_p = metadata_in_catalog_p,
                                   acquire_p = acquire_p)
 
         if RESPONSE is not None:

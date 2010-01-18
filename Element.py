@@ -40,20 +40,11 @@ class MetadataElement(SimpleItem):
 
     read_only_p = False
     index_p = False
-    metadata_in_index_p = False
+    metadata_in_catalog_p = False
     acquire_p = False
     index_type = None
     field_type = None
     field = None
-
-    ## defer to formulator for now
-    #use_default_p = True
-    #required_p = False
-    #default = None
-
-    ## out of scope for initial impl
-    #export_p = True
-    #enforce_vocabulary_p = True
 
     manage_options = (
         {'label':'Settings',
@@ -97,7 +88,7 @@ class MetadataElement(SimpleItem):
                           field_type = None,
                           index_type = None,
                           index_p = None,
-                          metadata_in_index_p = False,
+                          metadata_in_catalog_p = None,
                           read_only_p = None,
                           extra = None,
                           acquire_p = None,
@@ -152,7 +143,7 @@ class MetadataElement(SimpleItem):
 
         # need to cascacde this so we can create indexes at the set level
         self.index_p = not not index_p
-        self.metadata_in_index_p = metadata_in_index_p
+        self.metadata_in_catalog_p = not not metadata_in_catalog_p
         self.read_only_p = not not read_only_p
         self.acquire_p = not not acquire_p
 

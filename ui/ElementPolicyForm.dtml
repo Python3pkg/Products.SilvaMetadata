@@ -49,9 +49,9 @@ An Element : <dtml-var id>
 
    <tr><td class="form-help">Include metadata in service_catalog</td>
        <td>
-           <select name="metadata_in_index_p:int">
-           <option value="1" <dtml-if "metadata_in_index_p">selected</dtml-if>>Yes</option>
-           <option value="0" <dtml-if "not metadata_in_index_p">selected</dtml-if>>No</option>
+           <select name="metadata_in_catalog_p:int">
+           <option value="1" <dtml-if "metadata_in_catalog_p">selected</dtml-if>>Yes</option>
+           <option value="0" <dtml-if "not metadata_in_catalog_p">selected</dtml-if>>No</option>
            </select>
        </td>
        </tr>
