@@ -2,13 +2,24 @@
 Changes
 =======
 
-2.2 (unreleased)
+2.2 (2010-01-25)
 ----------------
 
 - Clean CMF compatibility code.
 
+- Remove the usage of Products.Annotations. We now use regular
+  zope.annotations.
 
-1.2 (2008/09/30)
+- Service Metadata is registered as an utility, and is a service
+  inheriting from silva.core.services.
+
+- Catalog service from silva.core.services is now used. It used
+  adapters instead of Products.ProxyIndex. This make possible to copy
+  a metadata value in the catalog, to access it from the brain object
+  without waking up the object itself.
+
+
+1.2 (2008-09-30)
 -----------------
 
 Features added:
@@ -87,7 +98,7 @@ Bugs fixed:
 - Bugfix for empty strings in aqcuirable metadata fields blocking
   acquisition. Many thanks to Nico Grubert for the bug report and
   proposed fix!
-    
+
 0.13
 ----
 
@@ -175,7 +186,7 @@ Bugs fixed:
 
 - Make SilvaMetadata field editing work with Formulator 1.6.0.
 
-0.7.4 
+0.7.4
 -----
 
 Bugs fixed:
@@ -197,7 +208,7 @@ Bugs fixed:
 - XML import of complex lists for items now works.
 
 - Indexing with XML import now works.
-   
+
 0.7.2
 -----
 
