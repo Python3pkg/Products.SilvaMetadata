@@ -1,3 +1,4 @@
+==============
 Silva Metadata
 ==============
 
@@ -29,7 +30,6 @@ Implemented Use Cases
 
 - Index/Search Metadata
 
-- Integrated Actions for Content Types (CMF Only)
 
 Todo Use Cases
 --------------
@@ -88,19 +88,6 @@ affect the runtime behavior of the binding. this capability is used
 to implement some of the advanced features of the metadata system
 such as metadata acquisition and mutation triggers, and can be
 extended as need arises.
-
-Indexing and Searching
-``````````````````````
-
-Because metadata is stored in an object annotation, and accessed
-through a binding object, direct indexing of an object's metadata
-using the normal zcatalog indexes is not possible. The
-ProxyIndex product was developed to address the issue, and
-allows for the use of a tales expression to retrieve values for
-indexing. the metadata system automatically constructs indexes
-for a metadata set upon set initialization, using tales
-expressions to retrieve a binding and an element's value for
-a content object.
 
 Hook Points
 ```````````
