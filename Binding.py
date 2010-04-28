@@ -169,9 +169,14 @@ class MetadataBindAdapter(Implicit):
                 #be used as a metadata field...this type of
                 #lookupwindow requires an IHTTPRequest in order
                 #to validate using the path adapter
-                reqform = request.form[setname]
-                alsoProvides(reqform,IHTTPRequest)
-                result = form.validate_all(reqform)
+                savedForm = request.form
+                try:
+                    request.form = request.form[setname]
+#                    alsoProvides(reqform,IHTTPRequest)
+                    result = form.validate_all(request)
+                finally:
+                    request.form = savedForm
+                    
                 
                 # Remove keys from the result that are supposed to be
                 # read-only only
