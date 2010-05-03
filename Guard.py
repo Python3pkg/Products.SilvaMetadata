@@ -24,11 +24,12 @@ from string import split, strip, join
 
 from AccessControl import ClassSecurityInfo
 from Acquisition import Explicit
+from App.class_init import InitializeClass
 from Persistence import Persistent
-from Globals import InitializeClass
 
 from Products.Silva import SilvaPermissions
-from Expression import Expression, createExprContext
+from Products.SilvaMetadata.Expression import Expression, createExprContext
+
 
 class Guard (Persistent, Explicit):
     permissions = ()

@@ -2,59 +2,48 @@
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 # Zope
-from zope.interface import implements
 from Acquisition import aq_base
 from AccessControl import getSecurityManager
 from AccessControl import ClassSecurityInfo
 from OFS.Folder import Folder
-from OFS.interfaces import IObjectWillBeRemovedEvent
 
-from zope.app.container.interfaces import IObjectAddedEvent
 from zope.annotation.interfaces import IAnnotations
+from zope.app.container.interfaces import IObjectAddedEvent
 from zope.component import getUtility
+from zope.interface import implements
 
 # Formulator
 from Products.Formulator import Form
 
 # Silva
-from Products.Silva.SilvaPermissions import ChangeSilvaContent
-from Products.Silva.helpers import add_and_edit, \
-    register_service, unregister_service
-
-from silva.core.services.base import SilvaService
-from silva.core.views.interfaces import IPreviewLayer
-from silva.core.views import views as silvaviews
 from silva.core import conf as silvaconf
+from silva.core.services.base import SilvaService
+from silva.core.services.interfaces import ICatalogService
+from silva.core.views import views as silvaviews
+from silva.core.views.interfaces import IPreviewLayer
 
 # SilvaMetadata
-from Access import invokeAccessHandler, getAccessHandler
-from Namespace import BindingRunTime
-from Binding import ObjectDelegate, encodeElement
-from interfaces import IMetadataService
-from silva.core.services.interfaces import ICatalogService
-from Compatibility import getContentTypeNames
+from Products.Silva.SilvaPermissions import ChangeSilvaContent
+from Products.SilvaMetadata.Access import invokeAccessHandler, getAccessHandler
+from Products.SilvaMetadata.Namespace import BindingRunTime
+from Products.SilvaMetadata.Binding import ObjectDelegate, encodeElement
+from Products.SilvaMetadata.interfaces import IMetadataService
+from Products.SilvaMetadata.Compatibility import getContentTypeNames
 
 
 class MetadataTool(Folder, SilvaService):
 
-    id = 'service_metadata'
+    default_service_identifier = 'service_metadata'
     meta_type = 'Advanced Metadata Tool'
-    title =  meta_type
 
     manage_options = (
-        {'label':'Overview',
-         'action':'manage_overview'},
-
-        {'label':'Metadata Sets',
-         'action':'collection/manage_workspace'},
-
-        {'label':'Type Mapping',
-         'action':'manage_mapping'},
+        {'label':'Overview', 'action':'manage_overview'},
+        {'label':'Metadata Sets', 'action':'collection/manage_workspace'},
+        {'label':'Type Mapping', 'action':'manage_mapping'},
         )
 
     implements(IMetadataService)
     silvaconf.icon('metadata.png')
-    silvaconf.factory('manage_addMetadataTool')
 
     security = ClassSecurityInfo()
 
@@ -273,24 +262,6 @@ class MetadataTypeMapping(silvaviews.ZMIView):
             self.context.ct_mapping.editMappings(
                 self.request.form['default_chain'],
                 self.request.form['type_chains'])
-
-
-def manage_addMetadataTool(self, id, title=None, REQUEST=None):
-    """Add a metadatatool.
-    """
-
-    service = MetadataTool(id)
-    if title is not None:
-        service.title = title
-    register_service(self, id, service, IMetadataService)
-    add_and_edit(self, id, REQUEST)
-    return ''
-
-
-@silvaconf.subscribe(
-    IMetadataService, IObjectWillBeRemovedEvent)
-def unregisterMetadataTool(service, event):
-    unregister_service(service, IMetadataService)
 
 
 @silvaconf.subscribe(

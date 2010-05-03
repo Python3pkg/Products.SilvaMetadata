@@ -4,20 +4,19 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
 from AccessControl import ClassSecurityInfo
-from OFS.SimpleItem import SimpleItem
-from App.special_dtml import DTMLFile
-from Globals import InitializeClass
-
 from AccessControl import getSecurityManager
+from App.class_init import InitializeClass
+from App.special_dtml import DTMLFile
+from OFS.SimpleItem import SimpleItem
+
+from zope.interface import implements
 
 from Products.Silva import SilvaPermissions
-
-from Exceptions import ConfigurationError
-from FormulatorField import getFieldFactory
-from Guard import Guard
-from interfaces import IMetadataElement
-from utils import normalize_kv_pairs
-from zope.interface import implements
+from Products.SilvaMetadata.Exceptions import ConfigurationError
+from Products.SilvaMetadata.FormulatorField import getFieldFactory
+from Products.SilvaMetadata.Guard import Guard
+from Products.SilvaMetadata.interfaces import IMetadataElement
+from Products.SilvaMetadata.utils import normalize_kv_pairs
 
 _marker = []
 

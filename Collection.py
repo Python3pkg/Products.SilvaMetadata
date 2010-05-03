@@ -3,17 +3,18 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
 from AccessControl import ClassSecurityInfo
-from OFS.Folder import Folder
+from App.class_init import InitializeClass
 from App.special_dtml import DTMLFile
-from Globals import InitializeClass
-
-from Exceptions import NotFound
-from interfaces import IMetadataCollection
-from Import import read_set, make_set
-from Set import MetadataSet
-from Products.Silva import SilvaPermissions
+from OFS.Folder import Folder
 
 from zope.interface import implements
+
+from Products.Silva import SilvaPermissions
+from Products.SilvaMetadata.Exceptions import NotFound
+from Products.SilvaMetadata.Import import read_set, make_set
+from Products.SilvaMetadata.Set import MetadataSet
+from Products.SilvaMetadata.interfaces import IMetadataCollection
+
 
 class MetadataCollection(Folder):
 

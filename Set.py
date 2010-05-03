@@ -4,12 +4,12 @@ author: kapil thangavelu <k_vertigo@objectrealms.net>
 import sys
 
 # Zope
-from AccessControl import getSecurityManager, Permissions
 from AccessControl import ClassSecurityInfo
+from AccessControl import getSecurityManager, Permissions
 from Acquisition import aq_inner, aq_parent
-from OFS.Folder import Folder
+from App.class_init import InitializeClass
 from App.special_dtml import DTMLFile
-from Globals import InitializeClass
+from OFS.Folder import Folder
 
 from Products.PluginIndexes.interfaces import IPluggableIndex
 
@@ -18,14 +18,16 @@ from zope.component import getUtility
 
 # SilvaMetadata
 from Products.Silva import SilvaPermissions
-from Element import MetadataElement, ElementFactory
-from Exceptions import NamespaceConflict, ConfigurationError, NotFound
-from Export import MetadataSetExporter
-from FormulatorField import listFields
-from Index import createIndexes
-from interfaces import IMetadataSet, IOrderedContainer
+from Products.SilvaMetadata.Element import MetadataElement, ElementFactory
+from Products.SilvaMetadata.Exceptions import (
+    NamespaceConflict, ConfigurationError, NotFound)
+from Products.SilvaMetadata.Export import MetadataSetExporter
+from Products.SilvaMetadata.FormulatorField import listFields
+from Products.SilvaMetadata.Index import createIndexes
+from Products.SilvaMetadata.interfaces import IMetadataSet, IOrderedContainer
+from Products.SilvaMetadata.Namespace import DefaultNamespace, DefaultPrefix
+
 from silva.core.services.interfaces import ICatalogService
-from Namespace import DefaultNamespace, DefaultPrefix
 
 
 class OrderedContainer(Folder):
