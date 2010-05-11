@@ -81,15 +81,21 @@ class Guard (Persistent, Explicit):
             res = 1
             p = map(strip, split(s, ';'))
             self.permissions = tuple(p)
+        else:
+            self.permissions = ()
         s = props.get('roles', None)
         if s:
             res = 1
             r = map(strip, split(s, ';'))
             self.roles = tuple(r)
+        else:
+            self.roles = ()
         s = props.get('expression', None)
         if s:
             res = 1
             self.expr = Expression(s)
+        else:
+            self.expr = None
         return res
 
     security.declareProtected(pMetadataManage, 'getPermissionsText')

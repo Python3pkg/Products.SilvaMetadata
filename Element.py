@@ -78,7 +78,7 @@ class MetadataElement(SimpleItem):
         self.editElementPolicy(**kw)
 
     def editElementGuards(self, read_guard, write_guard, RESPONSE=None):
-
+        """save element guards"""
         self.read_guard.changeFromProperties(read_guard)
         self.write_guard.changeFromProperties(write_guard)
 
