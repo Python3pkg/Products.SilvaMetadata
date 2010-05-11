@@ -10,6 +10,9 @@ Bugs Fixed:
 - when previewing content which has no published version (only editable)
   metadata could not be retrieved.
 
+- The Element guards screen did not work (and likely never has).  This screen is
+  now functional.
+
 1.2 (2008/09/30)
 -----------------
 
