@@ -557,7 +557,7 @@
    </index_args>
   </metadata_element>
   <metadata_element id="Source">
-   <index_type>TextIndex</index_type>
+   <index_type>ZCTextIndex</index_type>
    <index_p>1</index_p>
    <field_type>RawTextAreaField</field_type>
    <read_guard>
@@ -722,7 +722,7 @@
    </index_args>
   </metadata_element>
   <metadata_element id="Coverage">
-   <index_type>TextIndex</index_type>
+   <index_type>ZCTextIndex</index_type>
    <index_p>1</index_p>
    <field_type>RawTextAreaField</field_type>
    <read_guard>
@@ -777,7 +777,7 @@
    </index_args>
   </metadata_element>
   <metadata_element id="Rights">
-   <index_type>TextIndex</index_type>
+   <index_type>ZCTextIndex</index_type>
    <index_p>1</index_p>
    <field_type>TextAreaField</field_type>
    <read_guard>
