@@ -3,7 +3,7 @@ Silva Metadata
 ==============
 
 Implemented Use Cases
----------------------
+=====================
 
 - Define Metadata
 
@@ -31,31 +31,18 @@ Implemented Use Cases
 - Index/Search Metadata
 
 
-Todo Use Cases
---------------
-
-- Delegate Metadata Element to a different Definition.
-
-- Customize an Element of Metadata Set mapped onto a particular
-  Content Type.
-
-- Upgrade/ChangeSet Engine for updating metadata sets.
-
-- Canonical/Standards Based XML Generation and Import for
-  Metadata Sets.
-
 Design
-------
+======
 
 Storage/Annotations
-```````````````````
+-------------------
 
 Metadata storage is based on annotating content objects. Metadata
 storage itself is partioned by set namespaces, and also includes a
 partition for metadata configuration on a per object basis.
 
 Definitions
-```````````
+-----------
 
 Definitions of the metadata are conducted with the metadata tool zmi
 interface. These definitions are managed as sets composed of elements,
@@ -65,7 +52,7 @@ of the metadata. These definitions are then mapped onto content types
 that they will be available for.
 
 Tool API
-````````
+--------
 
 The metadata tool api is fairly simple, the core of it is simply
 one method. ``getMetadata`` which returns a binding object, below.
@@ -74,7 +61,7 @@ The additional methods are present to conform to the metadata tool
 api defined by the cmf interfaces.
 
 Binding/Adapter
-```````````````
+---------------
 
 Bindings functions as an adapter between the content object,
 the metadata definition, and the stored metdata values. It offers
@@ -90,7 +77,7 @@ such as metadata acquisition and mutation triggers, and can be
 extended as need arises.
 
 Hook Points
-```````````
+-----------
 
 To allow for flexibility and customization based on a
 requirements the metadata system offers two major hook points

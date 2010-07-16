@@ -1,13 +1,13 @@
-
 Changes
 =======
 
-2.2 (unreleased)
+2.3 (2010/07/16)
 ----------------
 
-- ...
+- Update code to be compatible with Zope 2.12, replace ZCTextIndex
+  with TextIndex.
 
-2.2b1 (2010-01-25)
+2.2b1 (2010/01/25)
 ------------------
 
 - Clean CMF compatibility code.
@@ -24,8 +24,8 @@ Changes
   without waking up the object itself.
 
 
-1.2 (2008-09-30)
------------------
+1.2 (2008/09/30)
+----------------
 
 Features added:
 
