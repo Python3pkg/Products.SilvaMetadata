@@ -8,7 +8,7 @@ from AccessControl import ClassSecurityInfo
 from OFS.Folder import Folder
 
 from zope.annotation.interfaces import IAnnotations
-from zope.app.container.interfaces import IObjectAddedEvent
+from zope.lifecycleevent.interfaces import IObjectAddedEvent
 from zope.component import getUtility
 from zope.interface import implements
 

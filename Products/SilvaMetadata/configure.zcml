@@ -3,17 +3,16 @@
     xmlns:grok="http://namespaces.zope.org/grok"
     xmlns:i18n="http://namespaces.zope.org/i18n">
 
+  <include package="five.grok" />
   <include package="silva.core.conf" />
 
   <grok:grok package="." />
 
   <!-- event handlers -->
-
   <subscriber
     for=".interfaces.IMetadataSet
-      zope.app.container.interfaces.IObjectAddedEvent"
-    handler=".Set.metadataset_added"
-  />
-
+         zope.lifecycleevent.interfaces.IObjectAddedEvent"
+     handler=".Set.metadataset_added"
+     />
 
 </configure>
