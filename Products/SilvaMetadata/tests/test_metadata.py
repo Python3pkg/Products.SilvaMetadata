@@ -4,66 +4,22 @@ Tests for the SilvaMetada.
 $Id: test_Metadata.py,v 1.22 2005/09/14 23:10:16 clemens Exp $
 """
 
-from unittest import TestSuite, makeSuite
+import unittest
 
 from zope.component import getUtility
 
-from Products.Formulator import StandardFields
 from Products.Formulator.TALESField import TALESMethod
 from Products.SilvaMetadata.interfaces import IMetadataService
-
-from Products.Silva.tests import SilvaTestCase
-
-
-SET_ID = 'ut_md'
+from Products.SilvaMetadata.tests import SET_ID, setUp
+from Products.Silva.testing import FunctionalLayer
 
 
-def setupContentTreeSilva(self, container):
+class TestMetadataElement(unittest.TestCase):
+    layer = FunctionalLayer
 
-    zoo = self.add_folder(container, 'zoo', "Zoo Folder")
-    self.add_folder(zoo, 'mammals', "Zoo Mammals")
-    zoo = self.add_folder(zoo, 'reptiles', "Zoo Reptiles")
-    return zoo
-
-
-def setupMetadataSet(context):
-    mtool = getUtility(IMetadataService)
-    collection = mtool.getCollection()
-    collection.addMetadataSet(SET_ID,
-                              'tmd',
-                              'http://www.example.com/xml/test_md')
-    set = collection.getMetadataSet(SET_ID)
-    set.addMetadataElement('Title',
-                           StandardFields.StringField.meta_type,
-                           'KeywordIndex',
-                           1)
-    set.addMetadataElement('Description',
-                           StandardFields.StringField.meta_type,
-                           'KeywordIndex',
-                           1)
-    element = set.getElement('Description')
-    element.field._edit({'required':0})
-    element.editElementPolicy(acquire_p = 1)
-    return set
-
-
-def setupMetadataMapping(context):
-    mtool = getUtility(IMetadataService)
-    mapping = mtool.getTypeMapping()
-    mapping.setDefaultChain('ut_md')
-    mtool.addTypesMapping(
-        ('Silva Folder', ), ('ut_md', 'silva-extra'))
-
-
-class MetadataTestCase(SilvaTestCase.SilvaTestCase):
-
-    def afterSetUp(self):
-        setupMetadataSet(self.root)
-        setupMetadataMapping(self.root)
-        setupContentTreeSilva(self, self.root)
-
-
-class TestMetadataElement(MetadataTestCase):
+    def setUp(self):
+        self.root = self.layer.get_application()
+        setUp(self.root)
 
     def testGetDefault(self):
         pm = getUtility(IMetadataService)
@@ -129,8 +85,12 @@ class TestMetadataElement(MetadataTestCase):
                                  " Invariant Failed 2")
 
 
-class TestAdvancedMetadata(MetadataTestCase):
-    """Tests for runtime binding methods"""
+class TestAdvancedMetadata(unittest.TestCase):
+    layer = FunctionalLayer
+
+    def setUp(self):
+        self.root = self.layer.get_application()
+        setUp(self.root)
 
     def setupAcquiredMetadata(self):
         zoo = self.root.zoo
@@ -233,9 +193,9 @@ class TestAdvancedMetadata(MetadataTestCase):
 
 
 def test_suite():
-    suite = TestSuite()
-    suite.addTest(makeSuite(TestMetadataElement))
-    suite.addTest(makeSuite(TestAdvancedMetadata))
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(TestMetadataElement))
+    suite.addTest(unittest.makeSuite(TestAdvancedMetadata))
     return suite
 
 

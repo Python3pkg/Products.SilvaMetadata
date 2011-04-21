@@ -1,4 +1,5 @@
-from unittest import TestSuite, makeSuite
+
+import unittest
 from cStringIO import StringIO
 
 from zope.component import getUtility
@@ -6,11 +7,8 @@ from zope.component import getUtility
 from Products.Formulator import StandardFields
 from Products.Formulator.TALESField import TALESMethod
 from Products.SilvaMetadata.interfaces import IMetadataService
-
-from test_metadata import MetadataTestCase
-
-
-SET_ID = 'ut_md'
+from Products.SilvaMetadata.tests import SET_ID, setUp
+from Products.Silva.testing import FunctionalLayer
 
 
 def setupExtendedMetadataSet(context):
@@ -35,7 +33,12 @@ def setupExtendedMetadataSet(context):
     set.initialize()
 
 
-class TestSetImportExport(MetadataTestCase):
+class TestSetImportExport(unittest.TestCase):
+    layer = FunctionalLayer
+
+    def setUp(self):
+        self.root = self.layer.get_application()
+        setUp(self.root)
 
     def testImportExport(self):
         pm = getUtility(IMetadataService)
@@ -50,52 +53,10 @@ class TestSetImportExport(MetadataTestCase):
         assert xml == xml2, "Import/Export disjoint"
 
 
-class TestObjectImportExport(MetadataTestCase):
-
-    def testImportExport(self):
-        from Products.ParsedXML.ParsedXML import createDOMDocument
-        from Products.SilvaMetadata.Import import import_metadata
-
-        pm = getUtility(IMetadataService)
-        setupExtendedMetadataSet(self.root)
-        zoo = self.root.zoo
-        mammals = zoo.mammals
-        binding = pm.getMetadata(zoo)
-        values = binding.get(SET_ID)
-        lines = """
-        english
-        hebrew
-        swahili
-        urdu
-        """
-        values.update(
-            {'Title':'hello world',
-             'Description':'cruel place',
-             'Languages':lines }
-            )
-        binding.setValues(SET_ID, values)
-        xml = "<folder>%s</folder>" % binding.renderXML(SET_ID)
-        dom = createDOMDocument(xml)
-        import_metadata(mammals, dom.childNodes[0])
-        mammals_binding = pm.getMetadata(mammals)
-        mammal_values = binding.get(SET_ID)
-        for k in values.keys():
-            self.assertEqual(values[k], mammal_values[k],
-                             "Object Import/Export disjoint")
-
-        xml2 = "<folder>%s</folder>" % mammals_binding.renderXML(SET_ID)
-        xml_list = xml.splitlines()
-        xml2_list = xml2.splitlines()
-        for x in xml2_list:
-            self.assert_(x in xml_list, "Object Import Export disjoin")
-        for x in xml_list:
-            self.assert_(x in xml2_list, "Object Import Export disjoin")
-
 
 def test_suite():
-    suite = TestSuite()
-    suite.addTest(makeSuite(TestSetImportExport))
-    suite.addTest(makeSuite(TestObjectImportExport))
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(TestSetImportExport))
     return suite
 
 
