@@ -6,6 +6,8 @@
   <include package="five.grok" />
   <include package="silva.core.conf" />
 
+  <include package="Products.Formulator" />
+
   <grok:grok package="." />
 
   <!-- event handlers -->
