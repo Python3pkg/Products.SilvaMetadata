@@ -215,7 +215,7 @@ def read_set(xml):
     return reader.getSet()
 
 
-def make_set(container, set_node):
+def make_set(collection, set_node):
 
     from Products.Formulator.TALESField import TALESMethod
 
@@ -227,14 +227,11 @@ def make_set(container, set_node):
     if not set_node.has_key('i18n_domain'):
         set_node['i18n_domain'] = ''
 
-    pm = getUtility(IMetadataService)
-
-    collection = getattr(pm, 'collection')
     collection.addMetadataSet(
         set_node.id, set_node.ns_prefix, set_node.ns_uri, set_node.title,
         set_node.description, set_node.i18n_domain)
 
-    set = pm.getMetadataSet(set_node.id)
+    set = collection._getOb(set_node.id)
     set.setCategory(set_node.get('category', ''))
     set.setMinimalRole(set_node.get('minimalrole', ''))
 

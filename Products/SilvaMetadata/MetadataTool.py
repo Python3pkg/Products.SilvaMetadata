@@ -1,6 +1,7 @@
 """
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
+
 # Zope
 from Acquisition import aq_base
 from AccessControl import getSecurityManager
@@ -8,9 +9,8 @@ from AccessControl import ClassSecurityInfo
 from OFS.Folder import Folder
 
 from zope.annotation.interfaces import IAnnotations
-from zope.lifecycleevent.interfaces import IObjectAddedEvent
 from zope.component import getUtility
-from zope.interface import implements
+from five import grok
 
 # Formulator
 from Products.Formulator import Form
@@ -31,9 +31,20 @@ from Products.SilvaMetadata.interfaces import IMetadataService
 from Products.SilvaMetadata.Compatibility import getContentTypeNames
 
 
-class MetadataTool(Folder, SilvaService):
+def configure_metadata(service):
+    from Collection import MetadataCollection
+    from TypeMapping import TypeMappingContainer
 
-    default_service_identifier = 'service_metadata'
+    collection = MetadataCollection('collection')
+    collection.id = 'collection'
+    service._setObject('collection', collection)
+
+    mapping = TypeMappingContainer('ct_mapping')
+    mapping.id = 'ct_mapping'
+    service._setObject('ct_mapping', mapping)
+
+
+class MetadataTool(SilvaService, Folder):
     meta_type = 'Advanced Metadata Tool'
 
     manage_options = (
@@ -42,7 +53,9 @@ class MetadataTool(Folder, SilvaService):
         {'label':'Type Mapping', 'action':'manage_mapping'},
         )
 
-    implements(IMetadataService)
+    grok.implements(IMetadataService)
+    grok.name('service_metadata')
+    silvaconf.default_service(setup=configure_metadata)
     silvaconf.icon('metadata.png')
 
     security = ClassSecurityInfo()
@@ -262,28 +275,4 @@ class MetadataTypeMapping(silvaviews.ZMIView):
             self.context.ct_mapping.editMappings(
                 self.request.form['default_chain'],
                 self.request.form['type_chains'])
-
-
-@silvaconf.subscribe(
-    IMetadataService, IObjectAddedEvent)
-def configureMetadataTool(tool, event):
-
-    from Collection import MetadataCollection
-    from TypeMapping import TypeMappingContainer
-
-    # if we are being imported as a zexp, the collection will already
-    # be there. If we detect this, the setup has actually already been
-    # completed (this is being imported). We should not add the new
-    # collection object as it would fail with a duplicate id. We
-    # should be able to bail out right away.
-    if hasattr(tool.aq_explicit, 'collection'):
-        return
-
-    collection = MetadataCollection('collection')
-    collection.id = 'collection'
-    tool._setObject('collection', collection)
-
-    mapping = TypeMappingContainer('ct_mapping')
-    mapping.id = 'ct_mapping'
-    tool._setObject('ct_mapping', mapping)
 
