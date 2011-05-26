@@ -4,7 +4,8 @@ Changes
 2.3.1 (unreleased)
 ------------------
 
-- ...
+- Binding.getSet now aq_ wraps the collection, 
+  so fields can have access to REQUEST and other things
 
 2.3 (2010/07/16)
 ----------------

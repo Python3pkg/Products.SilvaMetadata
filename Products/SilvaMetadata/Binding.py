@@ -243,7 +243,9 @@ class MetadataBindAdapter(Implicit):
         the set not the content, whereas binding methods
         merely require permissions on the content.
         """
-        return self.collection[set_id]
+        #make sure the collection is aq_ wrapped
+        # so fields can have access to REQUEST and other things
+        return self.collection[set_id].__of__(self)
 
     security.declarePublic('getElement')
     def getElement(self, set_id, element_id):
