@@ -148,24 +148,12 @@ class MetadataTool(SilvaService, Folder):
         default_handler = getAccessHandler(None)
         handler = getAccessHandler(content.meta_type)
         if handler is not default_handler:
-            version = None
-            # Hum, I don't like the content.REQUEST
-            if IPreviewLayer.providedBy(content.REQUEST):
-                sm = getSecurityManager()
-                if sm.checkPermission(ChangeSilvaContent, content):
-                    version = content.get_editable()
+            # If we have a custom handler, call it.
+            binding = handler(self, content.meta_type, content)
+            if binding is not None:
+                return binding.get(set_id, element_id, acquire=acquire)
+            return None
 
-            if version is None:
-                version = content.get_viewable()
-                if version is None:
-                    return None
-
-            binding = self.getMetadata(version)
-            if binding is None:
-                return None
-            return binding.get(set_id, element_id)
-
-        # XXX how does this interact with security issues?
         set = self.collection.getMetadataSet(set_id)
         element = set.getElement(element_id)
         annotations = IAnnotations(aq_base(content))
