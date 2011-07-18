@@ -107,9 +107,13 @@ class TypeMapping(Folder):
 
 
 def getMetadataSets(ctx, chain):
-    sets = filter(None, [c.strip() for c in chain.split(',')])
     service = getUtility(IMetadataService)
-    return map(service.getMetadataSet, sets)
+    for set_name in filter(None, [c.strip() for c in chain.split(',')]):
+        try:
+            yield service.getMetadataSet(set_name)
+        except AttributeError:
+            # Ignore broken sets.
+            pass
 
 
 def verifyChain(ctx, chain):
