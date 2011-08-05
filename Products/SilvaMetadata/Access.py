@@ -15,8 +15,8 @@ raise an exception.
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
-from Binding import MetadataBindAdapter
-from Exceptions import BindingError
+from Products.SilvaMetadata.Binding import MetadataBindAdapter
+from Products.SilvaMetadata.Exceptions import BindingError
 
 _default_accessor = None
 _typeAccessHandlers = {}

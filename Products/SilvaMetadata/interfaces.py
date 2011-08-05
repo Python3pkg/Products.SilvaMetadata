@@ -4,7 +4,23 @@ author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
 from silva.core.interfaces.service import ISilvaService
-from zope.interface import Interface
+from zope.component.interfaces import IObjectEvent, ObjectEvent
+from zope.interface import Interface, implements, Attribute
+
+
+class IMetadataModifiedEvent(IObjectEvent):
+    """Event to describe the fact that metadata changed.
+    """
+    changes = Attribute(u"dict describing the changed metadata")
+
+
+class MetadataModifiedEvent(ObjectEvent):
+    implements(IMetadataModifiedEvent)
+
+    def __init__(self, object, changes):
+        super(MetadataModifiedEvent, self).__init__(object)
+        self.changes = changes
+
 
 
 class IMetadataService(ISilvaService):
@@ -14,6 +30,7 @@ class IMetadataService(ISilvaService):
 
 class IMetadataCollection(Interface):
     pass
+
 
 
 class IOrderedContainer(Interface):
@@ -41,7 +58,7 @@ class IOrderedContainer(Interface):
         """
 
 
-class IMetadataSet(Interface):
+class IMetadataSet(IOrderedContainer):
     pass
 
 

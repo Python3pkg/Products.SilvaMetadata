@@ -4,7 +4,6 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 
 # Zope
 from Acquisition import aq_base
-from AccessControl import getSecurityManager
 from AccessControl import ClassSecurityInfo
 from OFS.Folder import Folder
 
@@ -20,10 +19,8 @@ from silva.core import conf as silvaconf
 from silva.core.services.base import SilvaService
 from silva.core.services.interfaces import ICatalogService
 from silva.core.views import views as silvaviews
-from silva.core.views.interfaces import IPreviewLayer
 
 # SilvaMetadata
-from Products.Silva.SilvaPermissions import ChangeSilvaContent
 from Products.SilvaMetadata.Access import invokeAccessHandler, getAccessHandler
 from Products.SilvaMetadata.Namespace import BindingRunTime
 from Products.SilvaMetadata.Binding import ObjectDelegate, encodeElement
@@ -250,13 +247,11 @@ class MetadataTool(SilvaService, Folder):
 
 
 class MetadataToolOverview(silvaviews.ZMIView):
-
-    silvaconf.name('manage_overview')
+    grok.name('manage_overview')
 
 
 class MetadataTypeMapping(silvaviews.ZMIView):
-
-    silvaconf.name('manage_mapping')
+    grok.name('manage_mapping')
 
     def update(self):
         if 'save_mapping' in self.request.form:

@@ -6,25 +6,26 @@ from UserDict import UserDict
 
 # Zope
 from Acquisition import Implicit, aq_base, aq_parent
+from AccessControl import ClassSecurityInfo
+from App.class_init import InitializeClass
 
 from zope.annotation.interfaces import IAnnotations
 from zope.interface import alsoProvides
+from zope.event import notify
 from zope.publisher.interfaces.http import IHTTPRequest
 
 # Formulator
 from Products.Formulator.Errors import FormValidationError
 
-
 from zExceptions import Unauthorized
 from ZODB.PersistentMapping import PersistentMapping
 
-from Exceptions import NotFound
-from Export import ObjectMetadataExporter
-from Index import getIndexNamesFor
-import Initialize as BindingInitialize
-from Namespace import BindingRunTime
-from AccessControl import ClassSecurityInfo
-from App.class_init import InitializeClass # Zope 2.12
+from Products.SilvaMetadata.Exceptions import NotFound
+from Products.SilvaMetadata.Export import ObjectMetadataExporter
+from Products.SilvaMetadata.Index import getIndexNamesFor
+from Products.SilvaMetadata import Initialize as BindingInitialize
+from Products.SilvaMetadata.Namespace import BindingRunTime
+from Products.SilvaMetadata.interfaces import MetadataModifiedEvent
 
 from silva.core.services.interfaces import ICataloging
 
@@ -150,7 +151,6 @@ class MetadataBindAdapter(Implicit):
         if errors:
             return errors
 
-        set = self.collection[set_id]
         self._setData(data, set_id=set_id, reindex=reindex)
         return None
 
@@ -612,12 +612,14 @@ class MetadataBindAdapter(Implicit):
                 e for e in elements
                 if (e.getId() in keys) and e.index_p]
             ICataloging(ob).reindex(indexes=getIndexNamesFor(reindex_elements))
+        notify(MetadataModifiedEvent(ob, data))
 
     def _getSetByKey(self, namespace_key):
         for s in self.collection.values():
             if s.metadata_uri == namespace_key:
                 return s
         raise NotFound(str(namespace_key))
+
 
 InitializeClass(MetadataBindAdapter)
 
