@@ -158,6 +158,9 @@ class MetadataBindAdapter(Implicit):
     def setValuesFromRequest(self, request, reindex=0):
         """Returns a dictionary of errors if any
         """
+        if self.read_only:
+            # We are in read-only, we don't set anything.
+            return {}
         all_errors = {}
         ms = self.service_metadata
         context = self._getAnnotatableObject()
@@ -263,6 +266,9 @@ class MetadataBindAdapter(Implicit):
         """
         is the element editable for the content object
         """
+        if self.read_only:
+            # If we are in read_only, nothing is editable
+            return False
         element = self.collection[set_id].getElement(element_id)
         ob = self._getAnnotatableObject()
         return element.isEditable(ob)
