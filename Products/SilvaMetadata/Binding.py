@@ -64,7 +64,7 @@ class MetadataBindAdapter(Implicit):
         self.setnames = []
         self.category_to_setnames = {}
         self.cached_values = {}
-        self.read_only=read_only
+        self.read_only = read_only
 
         for set in sets:
             setid = set.getId()
@@ -145,6 +145,8 @@ class MetadataBindAdapter(Implicit):
 
         returns a dictionary of errors if any, or none otherwise
         """
+        if self.read_only:
+            return None
         errors = {}
         data = self.validate(set_id, data, errors)
 
