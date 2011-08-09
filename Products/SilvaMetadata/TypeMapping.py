@@ -4,17 +4,22 @@ Maps Metadata Sets onto Content Types
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
-from zope.component import getUtility
+import operator
 
 # Zope
 from OFS.Folder import Folder
+from Acquisition import aq_base
 
 # SilvaMetadata
-from interfaces import IMetadataService
-from Compatibility import getContentTypeNames
-from Exceptions import ConfigurationError
+from Products.SilvaMetadata.Exceptions import ConfigurationError
+from Products.Silva.ExtensionRegistry import extensionRegistry
 
 DEFAULT_MAPPING_NAME = 'Default'
+
+
+def verifyChain(ctxt, chain):
+    pass
+
 
 class TypeMappingContainer(Folder):
 
@@ -25,7 +30,6 @@ class TypeMappingContainer(Folder):
         self.default_chain = ''
 
     def setDefaultChain(self, chain, RESPONSE=None):
-
         if not verifyChain(self, chain):
             raise ConfigurationError("invalid metadata set")
 
@@ -38,18 +42,17 @@ class TypeMappingContainer(Folder):
         return self.default_chain
 
     def getChainFor(self, content_type):
+        if content_type not in self.getContentTypes():
+            return ''
         try:
             ctm = self._getOb(content_type)
         except AttributeError:
-            return DEFAULT_MAPPING_NAME
+            return self.getDefaultChain()
         return ctm.getMetadataChain()
 
-    def getMetadataSetsFor(self, content_type):
-        try:
-            ctm = self._getOb(content_type) # will throw attr error
-        except AttributeError:
-            return getMetadataSets(self, self.default_chain)
-        return ctm.getMetadataSets()
+    def iterChainFor(self, content_type):
+        chain = self.getChainFor(content_type)
+        return filter(None, [c.strip() for c in chain.split(',')])
 
     def getTypeMappings(self):
         return self.objectValues(TypeMapping.meta_type)
@@ -83,11 +86,13 @@ class TypeMappingContainer(Folder):
                     tm.setMetadataChain(tc)
 
     def getContentTypes(self):
-        return getContentTypeNames(self)
+        if not hasattr(aq_base(self), '_v_content_types'):
+            self._v_content_types = map(
+                operator.itemgetter('name'), extensionRegistry.get_contents())
+        return self._v_content_types
 
 
 class TypeMapping(Folder):
-
     meta_type = 'Metadata Type Mapping'
 
     def __init__(self, id):
@@ -102,23 +107,3 @@ class TypeMapping(Folder):
             raise ConfigurationError("invalid metadata set")
         self.chain = chain
 
-    def getMetadataSets(self):
-        return getMetadataSets(self, self.chain)
-
-
-def getMetadataSets(ctx, chain):
-    service = getUtility(IMetadataService)
-    for set_name in filter(None, [c.strip() for c in chain.split(',')]):
-        try:
-            yield service.getMetadataSet(set_name)
-        except AttributeError:
-            # Ignore broken sets.
-            pass
-
-
-def verifyChain(ctx, chain):
-    try:
-        getMetadataSets(ctx, chain)
-    except AttributeError:
-        return 0
-    return 1

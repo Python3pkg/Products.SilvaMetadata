@@ -9,16 +9,16 @@ from Acquisition import Implicit, aq_base, aq_parent
 from AccessControl import ClassSecurityInfo
 from App.class_init import InitializeClass
 
+from five import grok
 from zope.annotation.interfaces import IAnnotations
-from zope.interface import alsoProvides
 from zope.event import notify
-from zope.publisher.interfaces.http import IHTTPRequest
 
 # Formulator
 from Products.Formulator.Errors import FormValidationError
 
 from zExceptions import Unauthorized
 from ZODB.PersistentMapping import PersistentMapping
+from OFS.interfaces import IZopeObject
 
 from Products.SilvaMetadata.Exceptions import NotFound
 from Products.SilvaMetadata.Export import ObjectMetadataExporter
@@ -26,6 +26,7 @@ from Products.SilvaMetadata.Index import getIndexNamesFor
 from Products.SilvaMetadata import Initialize as BindingInitialize
 from Products.SilvaMetadata.Namespace import BindingRunTime
 from Products.SilvaMetadata.interfaces import MetadataModifiedEvent
+from Products.SilvaMetadata.interfaces import IMetadataBindingFactory
 
 from silva.core.services.interfaces import ICataloging
 
@@ -44,6 +45,35 @@ MetadataAqVarPrefix = '_VarName_'
 _marker = []
 
 
+class DefaultMetadataBindingFactory(grok.Adapter):
+    grok.context(IZopeObject)
+    grok.implements(IMetadataBindingFactory)
+    grok.provides(IMetadataBindingFactory)
+    read_only = False
+
+    def get_content(self):
+        return self.context
+
+    def __call__(self, service):
+        content = self.get_content()
+        print self.context, content
+        if content is None:
+            return None
+
+        metadata_sets = []
+        mapping = service.getTypeMapping()
+        for set_name in mapping.iterChainFor(content.meta_type):
+            try:
+                metadata_sets.append(service.getMetadataSet(set_name))
+            except AttributeError:
+                pass
+        if not metadata_sets:
+            return None
+
+        binding = MetadataBindAdapter(content, metadata_sets, self.read_only)
+        return binding.__of__(content)
+
+
 class Data(UserDict):
     """
     We use this as to escape some vagaries with the zope security policy
@@ -54,11 +84,11 @@ class Data(UserDict):
 
 
 class MetadataBindAdapter(Implicit):
-
     security = ClassSecurityInfo()
     security.declareObjectPublic()
 
     def __init__(self, content, sets, read_only=False):
+        sets = list(sets)
         self.content = content
         self.collection = {}
         self.setnames = []
@@ -172,15 +202,7 @@ class MetadataBindAdapter(Implicit):
                 continue
             try:
                 form = ms.getMetadataForm(context, setname)
-                #validate_all expects an httprequest-list object
-                #we're giving it a dict, so declare that the dict
-                #implements IHTTPRequest. NOTE: this was added
-                #to that the referencelookupwindow field could
-                #be used as a metadata field...this type of
-                #lookupwindow requires an IHTTPRequest in order
-                #to validate using the path adapter
                 reqform = request.form[setname]
-                alsoProvides(reqform,IHTTPRequest)
                 result = form.validate_all(reqform)
 
                 # Remove keys from the result that are supposed to be

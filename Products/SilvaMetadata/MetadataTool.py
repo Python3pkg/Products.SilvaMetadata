@@ -21,11 +21,10 @@ from silva.core.services.interfaces import ICatalogService
 from silva.core.views import views as silvaviews
 
 # SilvaMetadata
-from Products.SilvaMetadata.Access import invokeAccessHandler, getAccessHandler
 from Products.SilvaMetadata.Namespace import BindingRunTime
 from Products.SilvaMetadata.Binding import ObjectDelegate, encodeElement
 from Products.SilvaMetadata.interfaces import IMetadataService
-from Products.SilvaMetadata.Compatibility import getContentTypeNames
+from Products.SilvaMetadata.interfaces import IMetadataBindingFactory
 
 
 def configure_metadata(service):
@@ -126,33 +125,25 @@ class MetadataTool(SilvaService, Folder):
         data, and policy behavior into an api for manipulating and
         introspecting metadata
         """
-        ct = content.meta_type
-
-        if not ct in getContentTypeNames(self):
-            return None
-        return invokeAccessHandler(self, content)
+        return IMetadataBindingFactory(content)(self)
 
     def getMetadataValue(self, content, set_id, element_id, acquire=1):
         """Get a metadata value right away. This can avoid
         building up the binding over and over while indexing.
 
         This really goes to the low-level to speed this up to the maximum.
-        It's only going to work for Silva, not CMF.
         Also, optionally turn off acquiring, in case you want to
         get this objects metadata _only_"""
 
-        # We explicitly test for registered handlers.
-        default_handler = getAccessHandler(None)
-        handler = getAccessHandler(content.meta_type)
-        if handler is not default_handler:
-            # If we have a custom handler, call it.
-            binding = handler(self, content.meta_type, content)
-            if binding is not None:
-                return binding.get(set_id, element_id, acquire=acquire)
+        content = IMetadataBindingFactory(content).get_content()
+        if content is None:
             return None
 
-        set = self.collection.getMetadataSet(set_id)
-        element = set.getElement(element_id)
+        try:
+            set = self.collection.getMetadataSet(set_id)
+            element = set.getElement(element_id)
+        except AttributeError:
+            return None
         annotations = IAnnotations(aq_base(content))
 
         bind_data = None
@@ -180,7 +171,6 @@ class MetadataTool(SilvaService, Folder):
             try:
                 return getattr(content, aqelname)
             except AttributeError:
-                #print 'attr error on', repr(aqelname)
                 pass
         # if not acquired, fall back on default
         return element.getDefault(content=content)

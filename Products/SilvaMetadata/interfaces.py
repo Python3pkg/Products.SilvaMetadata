@@ -28,6 +28,20 @@ class IMetadataService(ISilvaService):
     """
 
 
+class IMetadataBindingFactory(Interface):
+    """Adapter on a content used to create a metadata binding for it.
+    """
+    read_only = Attribute(u"Boolean indicating the state of the accessor.")
+
+    def get_content():
+        """Return the content that the metadata binding should use.
+        """
+
+    def __call__(service):
+        """Return a metadata binding.
+        """
+
+
 class IMetadataCollection(Interface):
     pass
 
