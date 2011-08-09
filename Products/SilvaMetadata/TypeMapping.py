@@ -18,7 +18,12 @@ DEFAULT_MAPPING_NAME = 'Default'
 
 
 def verifyChain(ctxt, chain):
-    pass
+    for part in filter(None, [c.strip() for c in chain.split(',')]):
+        try:
+            ctxt.getMetadataSet(part)
+        except AttributeError:
+            return False
+    return True
 
 
 class TypeMappingContainer(Folder):

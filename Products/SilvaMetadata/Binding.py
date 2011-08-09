@@ -56,7 +56,6 @@ class DefaultMetadataBindingFactory(grok.Adapter):
 
     def __call__(self, service):
         content = self.get_content()
-        print self.context, content
         if content is None:
             return None
 
