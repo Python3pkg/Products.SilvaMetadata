@@ -27,6 +27,22 @@ class IMetadataService(ISilvaService):
     """Metadata Service.
     """
 
+    def getMetadata(content):
+        """Return a metadata binding adapter for a particular content
+        object. a bind adapter encapsulates both metadata definitions,
+        data, and policy behavior into an api for manipulating and
+        introspecting metadata
+        """
+
+    def getMetadataValue(content, set_id, element_id, acquire=1):
+        """Get a metadata value right away. This can avoid
+        building up the binding over and over while indexing.
+
+        This really goes to the low-level to speed this up to the maximum.
+        Also, optionally turn off acquiring, in case you want to
+        get this objects metadata _only_
+        """
+
 
 class IMetadataBindingFactory(Interface):
     """Adapter on a content used to create a metadata binding for it.
@@ -78,6 +94,24 @@ class IMetadataSet(IOrderedContainer):
 
 class IMetadataElement(Interface):
     pass
+
+
+class ITypeMapping(Interface):
+    """Map content type to a metadata set.
+    """
+
+    def getMetadataChain():
+        """Return the metadata set chain names associated to this content.
+        """
+
+    def setMetadataChain(chain):
+        """Set (and validate) the metadata set chain names associated to
+        this content.
+        """
+
+    def iterChain():
+        """Iter through each metadata set names associated to this content.
+        """
 
 
 # Adapter Provided Functionality

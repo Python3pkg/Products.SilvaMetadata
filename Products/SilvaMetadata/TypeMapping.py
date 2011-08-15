@@ -10,7 +10,10 @@ import operator
 from OFS.Folder import Folder
 from Acquisition import aq_base
 
+from zope.interface import implements
+
 # SilvaMetadata
+from Products.SilvaMetadata.interfaces import ITypeMapping
 from Products.SilvaMetadata.Exceptions import ConfigurationError
 from Products.Silva.ExtensionRegistry import extensionRegistry
 
@@ -26,8 +29,11 @@ def verifyChain(ctxt, chain):
     return True
 
 
-class TypeMappingContainer(Folder):
+def chainIterator(chain):
+    return filter(None, [c.strip() for c in chain.split(',')])
 
+
+class TypeMappingContainer(Folder):
     meta_type = 'Type Mapping Container'
 
     def __init__(self, id):
@@ -56,8 +62,7 @@ class TypeMappingContainer(Folder):
         return ctm.getMetadataChain()
 
     def iterChainFor(self, content_type):
-        chain = self.getChainFor(content_type)
-        return filter(None, [c.strip() for c in chain.split(',')])
+        return chainIterator(self.getChainFor(content_type))
 
     def getTypeMappings(self):
         return self.objectValues(TypeMapping.meta_type)
@@ -99,6 +104,7 @@ class TypeMappingContainer(Folder):
 
 class TypeMapping(Folder):
     meta_type = 'Metadata Type Mapping'
+    implements(ITypeMapping)
 
     def __init__(self, id):
         super(TypeMapping, self).__init__(id)
@@ -111,4 +117,8 @@ class TypeMapping(Folder):
         if not verifyChain(self, chain):
             raise ConfigurationError("invalid metadata set")
         self.chain = chain
+
+    def iterChain(self):
+        return chainIterator(self.chain)
+
 

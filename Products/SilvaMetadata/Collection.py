@@ -17,11 +17,9 @@ from Products.SilvaMetadata.interfaces import IMetadataCollection
 
 
 class MetadataCollection(Folder):
-
     meta_type = 'Metadata Collection'
 
     implements(IMetadataCollection)
-
     security = ClassSecurityInfo()
 
     all_meta_types = (

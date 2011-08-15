@@ -119,22 +119,9 @@ class MetadataTool(SilvaService, Folder):
         return self.getCollection().getSetByNamespace(metadata_namespace)
 
     def getMetadata(self, content):
-        """
-        return a metadata binding adapter for a particular content
-        object. a bind adapter encapsulates both metadata definitions,
-        data, and policy behavior into an api for manipulating and
-        introspecting metadata
-        """
         return IMetadataBindingFactory(content)(self)
 
     def getMetadataValue(self, content, set_id, element_id, acquire=1):
-        """Get a metadata value right away. This can avoid
-        building up the binding over and over while indexing.
-
-        This really goes to the low-level to speed this up to the maximum.
-        Also, optionally turn off acquiring, in case you want to
-        get this objects metadata _only_"""
-
         content = IMetadataBindingFactory(content).get_content()
         if content is None:
             return None
