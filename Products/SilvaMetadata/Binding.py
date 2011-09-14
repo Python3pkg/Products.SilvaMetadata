@@ -167,16 +167,26 @@ class MetadataBindAdapter(Implicit):
                 continue
             try:
                 form = ms.getMetadataForm(context, setname)
-                #validate_all expects an httprequest-list object
-                #we're giving it a dict, so declare that the dict
-                #implements IHTTPRequest. NOTE: this was added
-                #to that the referencelookupwindow field could
-                #be used as a metadata field...this type of
-                #lookupwindow requires an IHTTPRequest in order
-                #to validate using the path adapter
+                #validate_all expects an httprequest-list object,
+                # however our http request does not have the correct form
+                # values (we're validating a single metadata set dict within 
+                # the form).  So clone the request, replace the clones form
+                # with our metadata set dict, and use that instead.
+                # This change was added so that the lookupwindow field could be
+                # used as a metadata field, since it requires IHTTPRequest to
+                # validate using the path adapter
                 reqform = request.form[setname]
-                alsoProvides(reqform,IHTTPRequest)
-                result = form.validate_all(reqform)
+                #need to back up and set request.response to None in order for
+                # clone to work when response is an infrae.wsgi.WSGIResponse
+                resp = self.REQUEST.response
+                self.REQUEST.response = None
+                clone = self.REQUEST.clone()
+                self.REQUEST.response = resp
+                clone.clear()
+
+                clone.form = reqform
+                #alsoProvides(reqform,IHTTPRequest)
+                result = form.validate_all(clone)
 
                 # Remove keys from the result that are supposed to be
                 # read-only only
