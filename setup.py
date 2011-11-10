@@ -6,7 +6,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '2.3.1dev'
+version = '3.0b1'
 
 setup(name='Products.SilvaMetadata',
       version=version,

@@ -1,10 +1,23 @@
 Changes
 =======
 
-2.3.1 (unreleased)
+3.0b1 (2011/11/10)
 ------------------
 
-- ...
+- Update for Zope 2.13 and Python 2.7.
+
+- Declare dependencies correctly.
+
+- Simplify ``getMetadataValue`` when a custom handler is installed.
+
+- Improve ``getMetadataSets`` not to fail with buggy values.
+
+- Add a Zope event when metadata are changed.
+
+- If a metadata is read-only, when you should not be able to edit it.
+
+- Simplify binding creation by using an adapter.
+
 
 2.3 (2010/07/16)
 ----------------
