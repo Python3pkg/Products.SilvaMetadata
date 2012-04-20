@@ -22,7 +22,6 @@ from OFS.interfaces import IZopeObject
 
 from Products.SilvaMetadata.Exceptions import NotFound
 from Products.SilvaMetadata.Export import ObjectMetadataExporter
-from Products.SilvaMetadata.Index import getIndexNamesFor
 from Products.SilvaMetadata import Initialize as BindingInitialize
 from Products.SilvaMetadata.Namespace import BindingRunTime
 from Products.SilvaMetadata.interfaces import MetadataModifiedEvent
@@ -637,10 +636,7 @@ class MetadataBindAdapter(Implicit):
 
         # reindex object
         if reindex:
-            reindex_elements = [
-                e for e in elements
-                if (e.getId() in keys) and e.index_p]
-            ICataloging(ob).reindex(indexes=getIndexNamesFor(reindex_elements))
+            ICataloging(ob).reindex()
         notify(MetadataModifiedEvent(ob, data))
 
     def _getSetByKey(self, namespace_key):
