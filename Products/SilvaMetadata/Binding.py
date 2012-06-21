@@ -635,7 +635,7 @@ class MetadataBindAdapter(Implicit):
         self.content._p_changed = 1
 
         # reindex object
-        if reindex:
+        if reindex and not getattr(ob, '__initialization__', False):
             ICataloging(ob).reindex()
         notify(MetadataModifiedEvent(ob, data))
 
