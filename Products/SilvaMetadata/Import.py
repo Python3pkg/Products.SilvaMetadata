@@ -257,7 +257,7 @@ def make_set(collection, set_node):
 
         set.addMetadataElement(
             e_node.id, e_node.field_type, e_node.index_type, e_node.index_p,
-            e_node.acquire_p, e_node.read_only_p)
+            e_node.acquire_p, e_node.read_only_p, e_node.metadata_in_catalog_p)
 
         element = set.getElement(e_node.id)
 
