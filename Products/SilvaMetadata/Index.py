@@ -17,23 +17,24 @@ class MetadataCatalogingAttributes(grok.Adapter):
 
     def __init__(self, context):
         super(MetadataCatalogingAttributes, self).__init__(context)
-        self.__metadata = component.getUtility(IMetadataService)
+        self._content = context
+        self._metadata = component.getUtility(IMetadataService)
 
     def __getattr__(self, name):
         # We first look in SilvaMetadata if we have a match for this
         # item. This code is not optimal, but we can't do better with
         # SilvaMetadata.
-        for mid, mset in self.__metadata.collection.objectItems():
+        for mid, mset in self._metadata.collection.objectItems():
             if name.startswith(mset.metadata_prefix):
                 for eid in mset.objectIds():
                     if name == ''.join((mset.metadata_prefix, eid,)):
                         # We have a match !
                         try:
-                            return self.__metadata.getMetadataValue(
-                                self.context, mid, eid)
+                            return self._metadata.getMetadataValue(
+                                self._content, mid, eid)
                         except KeyError:
                             pass
-        return getattr(self.context, name)
+        return getattr(self._content, name)
 
 
 def createIndexes(catalog, elements):
