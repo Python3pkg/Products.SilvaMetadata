@@ -7,6 +7,9 @@ from silva.core.interfaces.service import ISilvaService
 from zope.component.interfaces import IObjectEvent, ObjectEvent
 from zope.interface import Interface, implements, Attribute
 
+# Exposed for the API.
+from Products.SilvaMetadata.Exceptions import ReadOnlyError
+
 
 class IMetadataModifiedEvent(IObjectEvent):
     """Event to describe the fact that metadata changed.

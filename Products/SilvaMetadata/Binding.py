@@ -20,7 +20,7 @@ from zExceptions import Unauthorized
 from ZODB.PersistentMapping import PersistentMapping
 from OFS.interfaces import IZopeObject
 
-from Products.SilvaMetadata.Exceptions import NotFound
+from Products.SilvaMetadata.Exceptions import NotFound, ReadOnlyError
 from Products.SilvaMetadata.Export import ObjectMetadataExporter
 from Products.SilvaMetadata import Initialize as BindingInitialize
 from Products.SilvaMetadata.Namespace import BindingRunTime
@@ -174,7 +174,7 @@ class MetadataBindAdapter(Implicit):
         returns a dictionary of errors if any, or none otherwise
         """
         if self.read_only:
-            return None
+            raise ReadOnlyError()
         errors = {}
         data = self.validate(set_id, data, errors)
 
@@ -189,8 +189,7 @@ class MetadataBindAdapter(Implicit):
         """Returns a dictionary of errors if any
         """
         if self.read_only:
-            # We are in read-only, we don't set anything.
-            return {}
+            raise ReadOnlyError()
         all_errors = {}
         ms = self.service_metadata
         context = self._getAnnotatableObject()
@@ -289,7 +288,6 @@ class MetadataBindAdapter(Implicit):
         is the element editable for the content object
         """
         if self.read_only:
-            # If we are in read_only, nothing is editable
             return False
         element = self.collection[set_id].getElement(element_id)
         ob = self._getAnnotatableObject()
@@ -553,7 +551,7 @@ class MetadataBindAdapter(Implicit):
 
     def _setData(self, data, set_id=None, namespace_key=None, reindex=0):
         if self.read_only:
-            return
+            raise ReadOnlyError()
         set = self._getSet(set_id, namespace_key)
         set_id = set.getId()
 
@@ -603,7 +601,7 @@ class MetadataBindAdapter(Implicit):
                 # of the value working again.
                 try:
                     delattr(ob, aqelname)
-                except (KeyError, AttributeError), err:
+                except (KeyError, AttributeError):
                     pass
 
         # save in annotations

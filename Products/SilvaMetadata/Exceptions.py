@@ -2,14 +2,36 @@
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
-class NoContext(Exception): pass
-class NamespaceConflict(Exception): pass
-class ConfigurationError(Exception): pass
-class NotFound(AttributeError): pass
-class ImportError(Exception): pass
-class ValidationError(Exception): pass
-class BindingError(Exception): pass
-class XMLMarshallError(Exception): pass
+class MetadataError(Exception):
+    pass
+
+
+class ReadOnlyError(MetadataError):
+    pass
+
+class NoContext(MetadataError):
+    pass
+
+class NamespaceConflict(MetadataError):
+    pass
+
+class ConfigurationError(MetadataError):
+    pass
+
+class NotFound(MetadataError, AttributeError):
+    pass
+
+class ImportError(MetadataError):
+    pass
+
+class ValidationError(MetadataError):
+    pass
+
+class BindingError(MetadataError):
+    pass
+
+class XMLMarshallError(MetadataError):
+    pass
 
 # For use in python scripts
 from Products.PythonScripts.Utility import allow_class
