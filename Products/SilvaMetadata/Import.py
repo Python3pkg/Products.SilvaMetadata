@@ -2,15 +2,8 @@
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
-from zope.component import getUtility
-
 from xml.sax import make_parser, ContentHandler
-from xml.dom import XMLNS_NAMESPACE
-
 from UserDict import UserDict
-from XMLType import deserialize
-from Exceptions import NotFound, ValidationError
-from interfaces import IMetadataService
 
 _marker = []
 
@@ -115,6 +108,9 @@ class MetadataSetReader(MetaReader):
     def endRead_only_p(self, chars):
         self.getElement().read_only_p = int(chars)
 
+    def endAutomatic_p(self, chars):
+        self.getElement().automatic_p = int(chars)
+
     def endAcquire_p(self, chars):
         self.getElement().acquire_p = int(chars)
 
@@ -216,7 +212,6 @@ def read_set(xml):
 
 
 def make_set(collection, set_node):
-
     from Products.Formulator.TALESField import TALESMethod
 
     # compatiblity.. ick
@@ -242,13 +237,15 @@ def make_set(collection, set_node):
             e_node['acquire_p'] = 0
         if not e_node.has_key('read_only_p'):
             e_node['read_only_p'] = 0
+        if not e_node.has_key('automatic_p'):
+            e_node['automatic_p'] = 0
         if not e_node.has_key('index_p'):
             e_node['index_p'] = 0
         if not e_node.has_key('metadata_in_catalog_p'):
             e_node['metadata_in_catalog_p'] = 0
 
         # type possible is string, convert to 'boolean'
-        for p in ['index_p', 'acquire_p', 'read_only_p',
+        for p in ['index_p', 'acquire_p', 'read_only_p', 'automatic_p',
                   'metadata_in_catalog_p']:
             try:
                 e_node[p] = not not int(e_node[p])
@@ -257,7 +254,8 @@ def make_set(collection, set_node):
 
         set.addMetadataElement(
             e_node.id, e_node.field_type, e_node.index_type, e_node.index_p,
-            e_node.acquire_p, e_node.read_only_p, e_node.metadata_in_catalog_p)
+            e_node.acquire_p, e_node.read_only_p, e_node.metadata_in_catalog_p,
+            e_node.automatic_p)
 
         element = set.getElement(e_node.id)
 
@@ -295,68 +293,6 @@ def make_set(collection, set_node):
         for iav in e_node.index_args:
             constructor_args[iav['key']]=iav['value']
         element.index_constructor_args = constructor_args
-
-
-def import_metadata(content, content_node):
-    """
-
-    minimal import system for object metadata
-
-    """
-
-
-    metadata_node = metadata_node_search(content_node)
-    metadata_tool = getUtility(IMetadataService)
-
-    if not metadata_node:
-        return
-
-    metadata = {}
-    binding = metadata_tool.getMetadata(content)
-
-    for namespace_attr in metadata_node.attributes.values():
-        if not namespace_attr.namespaceURI == XMLNS_NAMESPACE:
-            continue
-        metadata[namespace_attr.value] = {}
-
-    for child in metadata_node.childNodes:
-        if not child.namespaceURI:
-            continue
-        metadata[child.namespaceURI][child.localName] = deserialize(
-            child.firstChild)
-
-    for k, v in metadata.items():
-        # First delete 'read-only' elements from dictionary
-        try:
-            set_name = binding.getSetNameByURI(k)
-        except NotFound:
-            continue
-        element_names = v.keys()
-        for element_name in element_names:
-            if not binding.isEditable(set_name, element_name):
-                del v[element_name]
-
-        # Set data
-        errors = binding._setData(namespace_key=k,
-                                  data=v,
-                                  reindex=1)
-
-        errors = None # discard errors for now
-        if errors:
-            raise ValidationError(
-                "%s %s" % (
-                    str(content.getPhysicalPath()),
-                    str(errors)
-                    )
-                )
-
-def metadata_node_search(content_node):
-
-    for child_node in content_node.childNodes:
-        if child_node.nodeName == 'metadata':
-            return child_node
-
-    return None
 
 
 if __name__ == '__main__':

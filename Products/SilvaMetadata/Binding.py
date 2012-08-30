@@ -5,36 +5,27 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 from UserDict import UserDict
 
 # Zope
-from Acquisition import Implicit, aq_base, aq_parent
+from Acquisition import aq_base
 from AccessControl import ClassSecurityInfo
 from App.class_init import InitializeClass
+
+from ZODB.PersistentMapping import PersistentMapping
+from OFS.interfaces import IZopeObject
 
 from five import grok
 from zope.annotation.interfaces import IAnnotations
 from zope.event import notify
 
 # Formulator
-from Products.Formulator.Errors import FormValidationError
-
-from zExceptions import Unauthorized
-from ZODB.PersistentMapping import PersistentMapping
-from OFS.interfaces import IZopeObject
+from Products.Formulator.Errors import ValidationError
 
 from Products.SilvaMetadata.Exceptions import NotFound, ReadOnlyError
 from Products.SilvaMetadata.Export import ObjectMetadataExporter
-from Products.SilvaMetadata import Initialize as BindingInitialize
-from Products.SilvaMetadata.Namespace import BindingRunTime
 from Products.SilvaMetadata.interfaces import MetadataModifiedEvent
 from Products.SilvaMetadata.interfaces import IMetadataBindingFactory
 
 from silva.core.services.interfaces import ICataloging
 
-
-#################################
-### runtime bind data keys
-AcquireRuntime = 'acquire_runtime'
-ObjectDelegate = 'object_delegate'
-MutationTrigger = 'mutation_trigger'
 
 #################################
 ### Acquired Metadata Prefix Encoding
@@ -58,18 +49,19 @@ class DefaultMetadataBindingFactory(grok.Adapter):
         if content is None:
             return None
 
-        metadata_sets = []
+        sets = []
         mapping = service.getTypeMapping()
         for set_name in mapping.iterChainFor(content.meta_type):
             try:
-                metadata_sets.append(service.getMetadataSet(set_name))
+                sets.append(service.getMetadataSet(set_name))
             except AttributeError:
                 pass
-        if not metadata_sets:
+        if not sets:
             return None
 
-        binding = MetadataBindAdapter(content, metadata_sets, self.read_only)
-        return binding.__of__(content)
+        binding = MetadataBindAdapter(service, content, sets, self.read_only)
+        binding.__parent__ = content
+        return binding
 
 
 class Data(UserDict):
@@ -81,12 +73,12 @@ class Data(UserDict):
     __allow_access_to_unprotected_subobjects__ = 1
 
 
-class MetadataBindAdapter(Implicit):
+class MetadataBindAdapter(object):
     security = ClassSecurityInfo()
     security.declareObjectPublic()
 
-    def __init__(self, content, sets, read_only=False):
-        sets = list(sets)
+    def __init__(self, service, content, sets, read_only=False):
+        self.service = service
         self.content = content
         self.collection = {}
         self.setnames = []
@@ -95,23 +87,23 @@ class MetadataBindAdapter(Implicit):
         self.read_only = read_only
 
         for set in sets:
-            setid = set.getId()
-            self.setnames.append(setid)
-            self.collection[setid] = set
+            set_id = set.getId()
+            self.setnames.append(set_id)
+            self.collection[set_id] = set
             category = set.getCategory()
             setnames = self.category_to_setnames.setdefault(category, [])
-            setnames.append(setid)
+            setnames.append(set_id)
 
     #################################
     ### Views
     security.declarePublic('renderXML')
-    def renderXML(self, set_id=None, namespace_key=None):
+    def renderXML(self, set_id=None):
         """
         return an xml serialization of the object's metadata
         """
 
-        if set_id or namespace_key:
-            sets = [self._getSet(set_id, namespace_key)]
+        if set_id:
+            sets = [self.getSet(set_id)]
         else:
             sets = self.collection.values()
 
@@ -141,48 +133,35 @@ class MetadataBindAdapter(Implicit):
         return element.renderEdit(value)
 
     #################################
-    ### Validation
-
-    security.declarePublic('validate')
-    def validate(self, set_id, data, errors=None):
-        """
-        validate the data. implicit transforms may be preformed.
-        """
-        return validateData(self, self.collection[set_id], data, errors)
-
-    security.declarePublic('validateFromRequest')
-    def validateFromRequest(self, set_id, REQUEST, errors=None):
-        """
-        validate from request
-        """
-        data = REQUEST.form.get(set_id)
-
-        if data is None:
-            raise NotFound("Metadata for %s not found" % (
-                    str(set_id)))
-
-        return self.validate(set_id, data.copy(), errors)
-
-    #################################
     ### Storage (invokes validation)
 
     security.declarePublic('setValues')
     def setValues(self, set_id, data, reindex=0):
-        """
-        data should be a mutable dictionary
+        """Data should be a mutable dictionary.
 
-        returns a dictionary of errors if any, or none otherwise
+        Return True if modifications are made, false otherwise.
         """
         if self.read_only:
             raise ReadOnlyError()
-        errors = {}
-        data = self.validate(set_id, data, errors)
 
+        set = self.getSet(set_id)
+        errors = {}
+        values = []
+        for element in set.getElementsFor(self.content, mode='write'):
+            element_id = element.getId()
+            if element_id not in data:
+                continue
+            try:
+                value = element.validate(data[element_id])
+            except ValidationError as error:
+                errors[element_id] = error.error_text
+            else:
+                values.append((element_id, element, value))
         if errors:
             return errors
 
-        self._setData(data, set_id=set_id, reindex=reindex)
-        return None
+        self._store(values, set, set_id, reindex=reindex)
+        return {}
 
     security.declarePublic('setValuesFromRequest')
     def setValuesFromRequest(self, request, reindex=0):
@@ -190,36 +169,82 @@ class MetadataBindAdapter(Implicit):
         """
         if self.read_only:
             raise ReadOnlyError()
+
         all_errors = {}
-        ms = self.service_metadata
-        context = self._getAnnotatableObject()
-        setnames = self.getSetNames()
-        for setname in setnames:
-            if setname not in request.form:
+        for set_id in self.getSetNames():
+            if set_id not in request.form:
                 continue
-            try:
-                form = ms.getMetadataForm(context, setname)
-                reqform = request.form[setname]
-                result = form.validate_all(reqform)
-
-                # Remove keys from the result that are supposed to be
-                # read-only only
-                set = self.getSet(setname)
-                elements = set.getElements()
-                for element in elements:
-                    if not element.isEditable(context):
-                        try:
-                            del result[element.id]
-                        except KeyError, e:
-                            pass
-
-            except FormValidationError, e:
-                all_errors[setname] = errors = {}
-                for error in e.errors:
-                    errors[error.field_id] = error.error_text
+            data = request.form[set_id]
+            set = self.getSet(set_id)
+            errors = {}
+            values = []
+            for element in set.getElementsFor(self.content, mode='edit'):
+                element_id = element.getId()
+                if element_id not in data:
+                    continue
+                try:
+                    value = element.extract(data)
+                except ValidationError as error:
+                    errors[element_id] = error.error_text
+                else:
+                    values.append((element_id, element, value))
+            if errors:
+                all_errors[set_id] = errors
             else:
-                self._setData(result, setname, reindex=reindex)
+                self._store(values, set, set_id, reindex=reindex)
         return all_errors
+
+    def _store(self, values, set, set_id, reindex=0):
+        if not values:
+            return False
+
+        # Update acquirable values
+        for element_id, element, value in values:
+            if element.isAcquireable():
+                attr_name = encodeElement(set_id, element_id)
+                if not (value == '' or value is None):
+                    setattr(self.content, attr_name, value)
+                else:
+                    # Try and get rid of encoded attribute on the
+                    # annotatable object; this will get acquisition
+                    # of the value working again.
+                    try:
+                        delattr(self.content, attr_name)
+                    except (KeyError, AttributeError):
+                        pass
+
+        # Save values in Annotations
+        annotations = IAnnotations(aq_base(self.content))
+        if set.metadata_uri not in annotations:
+            annotations[set.metadata_uri] = PersistentMapping({})
+        storage = annotations[set.metadata_uri]
+
+        data = {}
+        for element_id, element, value in values:
+            if not (value == '' or value is None):
+                storage[element_id] = value
+            elif element_id in storage:
+                del storage[element_id]
+            # For the event
+            data[element_id] = value
+
+        # invalidate the cache version of the set if any
+        # we do a check for cached acquired/non-acquired
+        if self.cached_values.has_key((0, set_id)):
+            del self.cached_values[(0, set_id)]
+        if self.cached_values.has_key((1, set_id)):
+            del self.cached_values[(1, set_id)]
+
+        # mark both the content and the annotatable object as changed so
+        # on txn commit bindings in other objectspaces get invalidated as well
+        self.content._p_changed = 1
+
+        # reindex object
+        if reindex and not getattr(self.content, '__initialization__', False):
+            ICataloging(self.content).reindex()
+        notify(MetadataModifiedEvent(self.content, data))
+        return True
+
 
     #################################
     ### Discovery Introspection // Definition Accessor Interface
@@ -242,11 +267,7 @@ class MetadataBindAdapter(Implicit):
         """Given a set identifier return the ids of the elements
         within the set.
         """
-        # XXX
-        # if mode is not specified this returns all elements of a set.
-        # not all elements visible will be viewable/editable
-        set = self.collection[set_id]
-
+        set = self.getSet(set_id)
         if mode is not None:
             elements = set.getElementsFor(self.content, mode=mode)
         else:
@@ -267,7 +288,11 @@ class MetadataBindAdapter(Implicit):
         the set not the content, whereas binding methods
         merely require permissions on the content.
         """
-        return self.collection[set_id]
+        try:
+            return self.collection[set_id]
+        except KeyError:
+            raise NotFound("Metadata set not found %s" % set_id)
+
 
     security.declarePublic('getElement')
     def getElement(self, set_id, element_id):
@@ -278,9 +303,8 @@ class MetadataBindAdapter(Implicit):
         """
         is the element viewable for the content object
         """
-        element = self.collection[set_id].getElement(element_id)
-        ob = self._getAnnotatableObject()
-        return element.isViewable(ob)
+        element = self.getSet(set_id).getElement(element_id)
+        return element.isViewable(self.content)
 
     security.declarePublic('isEditable')
     def isEditable(self, set_id, element_id):
@@ -289,10 +313,8 @@ class MetadataBindAdapter(Implicit):
         """
         if self.read_only:
             return False
-        element = self.collection[set_id].getElement(element_id)
-        ob = self._getAnnotatableObject()
-        return element.isEditable(ob)
-
+        element = self.getSet(set_id).getElement(element_id)
+        return element.isEditable(self.content)
 
     security.declarePublic('listAcquired')
     def listAcquired(self):
@@ -302,24 +324,23 @@ class MetadataBindAdapter(Implicit):
         acquires from above in the containment hiearchy.
         """
         res = []
-        ob = self._getAnnotatableObject()
 
-        for s in self.collection.values():
-            sid = s.getId()
-            data = self._getData(set_id = sid, acquire=0)
-            for e in [e for e in s.getElements() if e.isAcquireable()]:
+        for set in self.collection.values():
+            set_id = set.getId()
+            data = self._getData(set_id=set_id, acquire=0)
+            for e in [e for e in set.getElements() if e.isAcquireable()]:
                 eid = e.getId()
                 if data.has_key(eid) and data[eid]:
                     continue
-                name = encodeElement(sid, e.getId())
+                name = encodeElement(set_id, e.getId())
                 try:
-                    value = getattr(ob, name)
+                    getattr(self.content, name)
                 except AttributeError:
                     continue
                 # filter out any empty metadata fields
                 # defined on ourselves to acquire
-                if not hasattr(aq_base(ob), name):
-                    res.append((sid, eid))
+                if not hasattr(aq_base(self.content), name):
+                    res.append((set_id, eid))
 
         return res
 
@@ -359,158 +380,36 @@ class MetadataBindAdapter(Implicit):
         raise KeyError(str(key))
 
     #################################
-    ### RunTime Binding Methods
-
-    security.declarePublic('setObjectDelegator')
-    def setObjectDelegator(self, method_name):
-        """
-        we get and set all metadata on a delegated object,
-        method should be a callable method on the object
-        (acquiring the method is ok) that should take zero
-        args, and return an object. if it doesn't return
-        an object, we return the default metadata values
-        associated (not a good idea).
-        """
-        assert getattr(self.content, method_name), \
-                       "invalid object delegate %s" % method_name
-
-        bind_data = self._getBindData()
-        bind_data[ObjectDelegate]=method_name
-
-    security.declarePrivate('getObjectDelegator')
-    def getObjectDelegator(self):
-        return self._getBindData().get(ObjectDelegate)
-
-    security.declarePublic('clearObjectDelegator')
-    def clearObjectDelegator(self):
-        bind_data = self._getBindData()
-        try:
-            del bind_data[ObjectDelegate]
-        except KeyError:
-            pass
-        # invalidate cache
-        self.cached_values = {}
-
-        return None
-
-    security.declarePublic('setMutationTrigger')
-    def setMutationTrigger(self, set_id, element_id, method_name):
-        """
-        support for simple events, based on acquired method
-        invocation. major use case.. cache invalidation on
-        metadata setting.
-        """
-        assert getattr(self._getAnnotatableObject(), method_name), \
-                       "invalid mutation trigger %s" % method_name
-
-        bind_data = self._getBindData()
-        tr = bind_data.setdefault(MutationTrigger, {}).setdefault(set_id, {})
-        tr[element_id]=method_name
-
-    security.declarePublic('clearMutationTrigger')
-    def clearMutationTrigger(self, set_id, element_id=None):
-        """
-        clear mutation triggers for a particular set or element.
-
-        if element_id is not specified, clear triggers for
-        the entire set.
-        """
-
-        bind_data = self._getBindData()
-        triggers = bind_data[MutationTrigger]
-
-        if element_id is None:
-            try:
-                del triggers[set_id]
-            except KeyError:
-                pass
-        else:
-            try:
-                del triggers[set_id][element_id]
-            except KeyError:
-                pass
-        return None
-
-    #################################
     ### Private
 
-    def _getSet(self, set_id=None, namespace_key=None):
-        if set_id:
-            return self.collection[set_id]
-        elif namespace_key:
-            return self._getSetByKey(namespace_key)
-        else:
-            raise NotFound("metadata set not found %s %s"
-                           % (set_id, namespace_key))
-
-    def _getBindData(self):
-        metadata = IAnnotations(aq_base(self.content))
-        bind_data = metadata.get(BindingRunTime)
-
-        if bind_data is None:
-            init_handler = BindingInitialize.getHandler(self.content)
-            bind_data = metadata.setdefault(BindingRunTime, PersistentMapping())
-            if init_handler is not None:
-                init_handler(self.content, bind_data)
-
-        return bind_data
-
-    def _getMutationTriggers(self, set_id):
-        bind_data = self._getBindData()
-        return bind_data.get(MutationTrigger, {}).get(set_id, [])
-
-    def _getAnnotatableObject(self):
-        # check for object delegation
-        bind_data = self._getBindData()
-        object_delegate = bind_data.get(ObjectDelegate)
-
-        # we want to use the content in its original acquisiton
-        # context, but because we retrieve it as an attribute
-        # it gets wrapped.. content.__of__(binding).__of__(content)
-        # so we remove the outer two wrappers to regain the original
-        # context
-        content = aq_parent(aq_parent(self.content))
-
-        if object_delegate is not None:
-            od = getattr(self.content, object_delegate)
-            ob = od()
-        else:
-            ob = content
-
-        return ob
-
-    def _getData(self, set_id=None, namespace_key=None,
-                 acquire=1, no_defaults=0):
+    def _getData(self, set_id, acquire=1, no_defaults=0):
         """
         find the metadata for the given content object,
         performs runtime binding work as well.
 
         """
-
-        set = self._getSet(set_id, namespace_key)
+        set = self.getSet(set_id)
 
         # cache lookup
-        data = self.cached_values.get((acquire, set.getId()))
+        data = self.cached_values.get((acquire, set_id))
         if data is not None:
             return data
 
         using_defaults = []
-        ob = self._getAnnotatableObject()
 
         # get the annotation data
-        metadata = IAnnotations(aq_base(ob))
+        metadata = IAnnotations(aq_base(self.content))
 
         saved_data = metadata.get(set.metadata_uri)
         data = Data()
 
-        sid = set.getId()
-        element_ids = self.getElementNames(sid)
+        element_ids = self.getElementNames(set_id)
 
         if saved_data is None and no_defaults:
             pass
         elif saved_data is None:
             # use the sets defaults
-            defaultvalues = set.getDefaults(content=ob)
+            defaultvalues = set.getDefaults(content=self.content)
             data.update(defaultvalues)
             # record which elements we used default values for
             using_defaults = element_ids
@@ -521,15 +420,16 @@ class MetadataBindAdapter(Implicit):
             if not no_defaults:
                 # update individual elements with default values
                 # if they don't have a saved value.
-                for eid in element_ids:
-                    if data.has_key(eid):
+                for element_id in element_ids:
+                    if data.has_key(element_id):
                         continue
-                    defaultvalue = set.getElement(eid).getDefault(content=ob)
-                    data[eid] = defaultvalue
-                    using_defaults.append(eid)
+                    defaultvalue = set.getElement(
+                        element_id).getDefault(content=self.content)
+                    data[element_id] = defaultvalue
+                    using_defaults.append(element_id)
 
         # cache metadata
-        self.cached_values[ (acquire, set_id) ]=data
+        self.cached_values[(acquire, set_id)] = data
 
         if not acquire:
             return data
@@ -540,150 +440,18 @@ class MetadataBindAdapter(Implicit):
             eid = e.getId()
             if hk(eid) and data[eid] and not eid in using_defaults:
                 continue
-            aqelname = encodeElement(sid, eid)
+            aqelname = encodeElement(set_id, eid)
             try:
-                val = getattr(ob, aqelname)
+                val = getattr(self.content, aqelname)
             except AttributeError:
                 continue
             data[eid]=val
 
         return data
 
-    def _setData(self, data, set_id=None, namespace_key=None, reindex=0):
-        if self.read_only:
-            raise ReadOnlyError()
-        set = self._getSet(set_id, namespace_key)
-        set_id = set.getId()
-
-        # check for delegates
-        ob = self._getAnnotatableObject()
-
-        # filter based on write guard and whether field is readonly
-        all_elements = set.getElements()
-        all_eids = [e.getId() for e in all_elements]
-        elements = [e for e in set.getElementsFor(ob, mode='edit')]
-        eids = [e.getId() for e in elements]
-
-        keys = data.keys()
-
-        for k in keys:
-            if k in eids:
-                continue
-            elif k in all_eids:
-                raise Unauthorized('Not Allowed to Edit %s in this context' % k)
-            else:
-                del data[k]
-
-        # fire mutation triggers
-        triggers = self._getMutationTriggers(set_id)
-
-        if triggers:
-            for k in keys:
-                if triggers.has_key(k):
-                    try:
-                        getattr(ob, triggers[k])()
-                    except: # gulp
-                        pass
-
-        # update acquireable metadata
-        update_list = [e.getId() for e in set.getElements() \
-                                 if  e.isAcquireable() and e.getId() in keys]
-        sid = set.getId()
-
-        for eid in update_list:
-            aqelname = encodeElement(sid, eid)
-            value = data[eid]
-            if value:
-                setattr(ob, aqelname, value)
-            else:
-                # Try and get rid of encoded attribute on the
-                # annotatable object; this will get acquisition
-                # of the value working again.
-                try:
-                    delattr(ob, aqelname)
-                except (KeyError, AttributeError):
-                    pass
-
-        # save in annotations
-        metadata = IAnnotations(aq_base(ob))
-
-        if metadata.has_key(set.metadata_uri):
-            for key, value in data.items():
-                if not (value == '' or value is None):
-                    metadata[set.metadata_uri][key] = value
-                elif metadata[set.metadata_uri].has_key(key):
-                    del metadata[set.metadata_uri][key]
-        else:
-            metadata[set.metadata_uri] = PersistentMapping({})
-            for key, value in data.items():
-                if not (value == '' or value is None):
-                    metadata[set.metadata_uri][key] = value
-                elif metadata[set.metadata_uri].has_key(key):
-                    del metadata[set.metadata_uri][key]
-        # invalidate the cache version of the set if any
-        # we do a check for cached acquired/non-acquired
-        if self.cached_values.has_key((0, set_id)):
-            del self.cached_values[(0, set_id)]
-        if self.cached_values.has_key((1, set_id)):
-            del self.cached_values[(1, set_id)]
-
-        # mark both the content and the annotatable object as changed so
-        # on txn commit bindings in other objectspaces get invalidated as well
-        ob._p_changed = 1
-        self.content._p_changed = 1
-
-        # reindex object
-        if reindex and not getattr(ob, '__initialization__', False):
-            ICataloging(ob).reindex()
-        notify(MetadataModifiedEvent(ob, data))
-
-    def _getSetByKey(self, namespace_key):
-        for s in self.collection.values():
-            if s.metadata_uri == namespace_key:
-                return s
-        raise NotFound(str(namespace_key))
-
 
 InitializeClass(MetadataBindAdapter)
 
-
-def validateData(binding, set, data, errors_dict=None):
-    # XXX completely formulator specific
-    from Products.Formulator.Errors import ValidationError
-
-    # Filter out elements not in the data dict, provided the element is
-    # not required or the binding already has a value for this element.
-    for e in set.getElements():
-        eid = e.getId()
-        has_a_value = not not binding.get(set.getId(), eid, acquire=0)
-        is_required = e.isRequired()
-
-        if hasattr(aq_base(e.field), 'sub_form'):
-            # XXX this is really a datetime hack..
-            # Fields with subforms will/might have only their marshalled
-            # subform ids stored in the data dict. There really isn't a
-            # good way to discover which fields are sub form providers,
-            # so we just try to introspect.
-            # Get one of the subform field ids, just try one.. unfortunately
-            # the presence of a subform has little todo with the fields
-            # request encoding. sigh.
-            sfid = e.field.sub_form.get_field_ids()[0]
-            sfkey = e.field.generate_subfield_key(sfid, validation=1)
-
-            if not data.has_key(sfkey) and (not is_required or has_a_value):
-                continue
-
-        elif not data.has_key(eid) and (not is_required or has_a_value):
-            continue
-
-        try:
-            data[eid] = e.validate(data)
-        except ValidationError, exception:
-            if errors_dict is not None:
-                errors_dict[eid] = exception.error_text
-            else:
-                raise
-    return data
 
 def encodeElement(set_id, element_id):
     """

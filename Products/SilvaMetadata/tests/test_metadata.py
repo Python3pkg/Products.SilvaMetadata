@@ -133,64 +133,6 @@ class TestAdvancedMetadata(unittest.TestCase):
         acquired = z_binding.listAcquired()
         self.assertEqual(len(acquired), 0)
 
-    def testObjectDelegation(self):
-        from Acquisition import Implicit
-        class Delegator(Implicit):
-            def __init__(self, name):
-                self.name = name
-            def __call__(self):
-                ob = self.aq_inner.aq_parent
-                return getattr(ob, self.name)
-
-        zoo = self.root.zoo
-        delegate = Delegator('reptiles')
-        zoo.delegate = delegate
-        mams = zoo.mammals
-        reps = zoo.reptiles
-        r_binding = getUtility(IMetadataService).getMetadata(reps)
-        m_binding = getUtility(IMetadataService).getMetadata(mams)
-        r_binding.setValues(SET_ID,
-                            {'Title':'snake food',
-                             'Description':'yummy n the tummy'}
-                            )
-        m_binding.setObjectDelegator('delegate')
-        self.assertEqual(
-            m_binding[SET_ID]['Title'],
-            r_binding[SET_ID]['Title']
-            )
-        # test shortcut, too
-        self.assertEqual('snake food',
-                         getUtility(IMetadataService).
-                              getMetadataValue(mams, SET_ID, 'Title'))
-        m_binding.clearObjectDelegator()
-        assert m_binding[SET_ID]['Title'] != r_binding[SET_ID]['Title']
-
-    def testMutationTriggerDelegation(self):
-        class MutationTrigger:
-            def __init__(self):
-                self.called = 0
-            def __call__(self):
-                self.called += 1
-
-        zoo = self.root.zoo
-        mams = zoo.mammals
-        m_binding = getUtility(IMetadataService).getMetadata(mams)
-        trigger = MutationTrigger()
-        zoo.trigger = trigger
-        m_binding.setMutationTrigger(SET_ID, 'Title', 'trigger')
-        m_binding.setValues(SET_ID, {'Title':'surfin betty',
-                                     'Description':'morning pizza'})
-        self.assertEqual(trigger.called, 1)
-        m_binding.setValues(SET_ID, {'Description':'midnight raid'})
-        self.assertEqual(trigger.called, 1)
-        m_binding.clearMutationTrigger(SET_ID)
-        # props to tennyson
-        m_binding.setValues(SET_ID,
-                            {'Title':
-                             'To strive, to seek, to find, and not to yield'}
-                            )
-        self.assertEqual(trigger.called, 1)
-
 
 def test_suite():
     suite = unittest.TestSuite()

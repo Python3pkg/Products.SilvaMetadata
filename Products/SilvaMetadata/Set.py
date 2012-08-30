@@ -25,9 +25,12 @@ from Products.SilvaMetadata.Export import MetadataSetExporter
 from Products.SilvaMetadata.FormulatorField import listFields
 from Products.SilvaMetadata.Index import createIndexes
 from Products.SilvaMetadata.interfaces import IMetadataSet, IOrderedContainer
-from Products.SilvaMetadata.Namespace import DefaultNamespace, DefaultPrefix
 
 from silva.core.services.interfaces import ICatalogService
+
+
+DefaultPrefix = 'example'
+DefaultNamespace = "http://www.example.com/unknown_namespace"
 
 
 class OrderedContainer(Folder):
@@ -190,6 +193,7 @@ class MetadataSet(OrderedContainer):
                            acquire_p=None,
                            read_only_p=None,
                            metadata_in_catalog_p=None,
+                           automatic_p=None,
                            RESPONSE=None):
         """ """
         element = ElementFactory(id)
@@ -201,7 +205,8 @@ class MetadataSet(OrderedContainer):
                                   index_p = index_p,
                                   read_only_p = read_only_p,
                                   metadata_in_catalog_p = metadata_in_catalog_p,
-                                  acquire_p = acquire_p)
+                                  acquire_p = acquire_p,
+                                  automatic_p = automatic_p)
 
         if RESPONSE is not None:
             return RESPONSE.redirect('manage_main')
@@ -282,7 +287,6 @@ class MetadataSet(OrderedContainer):
         return self._getOb(element_id)
 
     def getElementsFor(self, object, mode='view'):
-
         if mode == 'view':
             guard = 'read_guard'
         else:
@@ -290,13 +294,15 @@ class MetadataSet(OrderedContainer):
 
         sm = getSecurityManager()
 
-        res = []
+        elements = []
         for e in self.getElements():
-            if getattr(e, guard).check(sm, e, object):
-                res.append(e)
-            if mode == 'edit' and e.read_only_p:
+            if mode == 'edit' and (e.read_only_p or e.automatic_p):
                 continue
-        return res
+            if mode == 'write' and (e.read_only_p and not e.automatic_p):
+                continue
+            if getattr(e, guard).check(sm, e, object):
+                elements.append(e)
+        return elements
 
     def getMetadataSet(self):
         return self

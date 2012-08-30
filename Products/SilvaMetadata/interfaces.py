@@ -3,12 +3,12 @@ Marker Interfaces
 author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
-from silva.core.interfaces.service import ISilvaService
 from zope.component.interfaces import IObjectEvent, ObjectEvent
 from zope.interface import Interface, implements, Attribute
 
 # Exposed for the API.
 from Products.SilvaMetadata.Exceptions import ReadOnlyError
+from silva.core.services.interfaces import IMetadataService
 
 
 class IMetadataModifiedEvent(IObjectEvent):
@@ -25,26 +25,6 @@ class MetadataModifiedEvent(ObjectEvent):
         self.changes = changes
 
 
-
-class IMetadataService(ISilvaService):
-    """Metadata Service.
-    """
-
-    def getMetadata(content):
-        """Return a metadata binding adapter for a particular content
-        object. a bind adapter encapsulates both metadata definitions,
-        data, and policy behavior into an api for manipulating and
-        introspecting metadata
-        """
-
-    def getMetadataValue(content, set_id, element_id, acquire=1):
-        """Get a metadata value right away. This can avoid
-        building up the binding over and over while indexing.
-
-        This really goes to the low-level to speed this up to the maximum.
-        Also, optionally turn off acquiring, in case you want to
-        get this objects metadata _only_
-        """
 
 
 class IMetadataBindingFactory(Interface):

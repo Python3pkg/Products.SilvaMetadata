@@ -73,6 +73,14 @@ An Element : <dtml-var id>
            </select>
        </td>
        </tr>
+   <tr><td class="form-help">Automatic Field</td>
+       <td>
+           <select name="automatic_p:int">
+           <option value="1" <dtml-if "automatic_p">selected</dtml-if>>Yes</option>
+           <option value="0" <dtml-if "not automatic_p">selected</dtml-if>>No</option>
+           </select>
+       </td>
+       </tr>
 
    <tr><td class="form-help">Index Type</td>
        <td>

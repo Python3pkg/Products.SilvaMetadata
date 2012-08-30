@@ -11,9 +11,6 @@ from zope.annotation.interfaces import IAnnotations
 from zope.component import getUtility
 from five import grok
 
-# Formulator
-from Products.Formulator import Form
-
 # Silva
 from silva.core import conf as silvaconf
 from silva.core.services.base import SilvaService
@@ -21,8 +18,7 @@ from silva.core.services.interfaces import ICatalogService
 from silva.core.views import views as silvaviews
 
 # SilvaMetadata
-from Products.SilvaMetadata.Namespace import BindingRunTime
-from Products.SilvaMetadata.Binding import ObjectDelegate, encodeElement
+from Products.SilvaMetadata.Binding import encodeElement
 from Products.SilvaMetadata.interfaces import IMetadataService
 from Products.SilvaMetadata.interfaces import IMetadataBindingFactory
 
@@ -127,23 +123,14 @@ class MetadataTool(SilvaService, Folder):
             return None
 
         try:
-            set = self.collection.getMetadataSet(set_id)
-            element = set.getElement(element_id)
+            mset = self.collection.getMetadataSet(set_id)
+            element = mset.getElement(element_id)
         except AttributeError:
             return None
         annotations = IAnnotations(aq_base(content))
 
-        bind_data = None
-        if annotations is not None:
-            bind_data = annotations.get(BindingRunTime)
-        if bind_data is not None:
-            delegate = bind_data.get(ObjectDelegate)
-            if delegate is not None:
-                content = getattr(content, delegate)()
-                annotations = IAnnotations(aq_base(content))
-
         try:
-            saved_data = annotations.get(set.metadata_uri)
+            saved_data = annotations.get(mset.metadata_uri)
         except (TypeError, KeyError):
             saved_data = None
 
@@ -162,18 +149,7 @@ class MetadataTool(SilvaService, Folder):
         # if not acquired, fall back on default
         return element.getDefault(content=content)
 
-    def getMetadataForm(self, context, set_id):
-        """Get a complete Formulator form for a metadata set. This helps
-        validating user input.
-        """
-        set = self.collection.getMetadataSet(set_id)
-        fields = [element.field for element in set.getElements()]
-        form = Form.BasicForm().__of__(context)
-        form.add_fields(fields)
-        return form
-
     # Convenience methods
-
     def initializeMetadata(self):
         # initialize the sets if not already initialized
         collection = self.getCollection()

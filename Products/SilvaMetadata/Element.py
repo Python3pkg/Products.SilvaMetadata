@@ -41,6 +41,7 @@ class MetadataElement(SimpleItem):
     index_p = False
     metadata_in_catalog_p = False
     acquire_p = False
+    automatic_p = False
     index_type = None
     field_type = None
     field = None
@@ -91,6 +92,7 @@ class MetadataElement(SimpleItem):
                           read_only_p = None,
                           extra = None,
                           acquire_p = None,
+                          automatic_p = None,
                           RESPONSE = None
                           ):
         """
@@ -143,6 +145,7 @@ class MetadataElement(SimpleItem):
         # need to cascacde this so we can create indexes at the set level
         self.index_p = not not index_p
         self.metadata_in_catalog_p = not not metadata_in_catalog_p
+        self.automatic_p = not not automatic_p
         self.read_only_p = not not read_only_p
         self.acquire_p = not not acquire_p
 
@@ -154,8 +157,11 @@ class MetadataElement(SimpleItem):
         if RESPONSE is not None:
             return RESPONSE.redirect('manage_workspace')
 
+    def extract(self, request):
+        return self.field.validate(request)
+
     def validate(self, data):
-        return self.field.validate(data)
+        return self.field.validator.check(self.field, data)
 
     def Title(self):
         return self.field.get_value('title')
@@ -173,8 +179,9 @@ class MetadataElement(SimpleItem):
         """
         is this element editable for the content object
         """
-        if not self.read_only_p:
+        if not self.read_only_p and not self.automatic_p:
             return self.write_guard.check(getSecurityManager(), self, content)
+        return False
 
     def isAcquireable(self):
         """
