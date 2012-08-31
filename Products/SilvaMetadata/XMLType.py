@@ -8,7 +8,7 @@ import types
 from cgi import escape
 
 from DateTime import DateTime
-from Exceptions import XMLMarshallError
+from Products.SilvaMetadata.Exceptions import XMLMarshallError
 
 def serialize(value):
 

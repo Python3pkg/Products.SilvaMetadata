@@ -22,12 +22,11 @@ Changes to file as per ZPL
 
 from string import split, strip, join
 
-from AccessControl import ClassSecurityInfo
+from AccessControl import ClassSecurityInfo, Permissions
 from Acquisition import Explicit
 from App.class_init import InitializeClass
 from Persistence import Persistent
 
-from Products.Silva import SilvaPermissions
 from Products.SilvaMetadata.Expression import Expression, createExprContext
 
 
@@ -37,7 +36,7 @@ class Guard (Persistent, Explicit):
     expr = None
 
     security = ClassSecurityInfo()
-    security.declareObjectProtected(SilvaPermissions.ViewManagementScreens)
+    security.declareObjectProtected(Permissions.view_management_screens)
 
     def check(self, sm, element, ob):
         '''
@@ -71,6 +70,8 @@ class Guard (Persistent, Explicit):
                 return 0
         return 1
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'changeFromProperties')
     def changeFromProperties(self, props):
         '''
         Returns 1 if changes were specified.
@@ -101,24 +102,25 @@ class Guard (Persistent, Explicit):
         return res
 
     security.declareProtected(
-        SilvaPermissions.ViewManagementScreens, 'getPermissionsText')
+        Permissions.view_management_screens, 'getPermissionsText')
     def getPermissionsText(self):
         if not self.permissions:
             return ''
         return join(self.permissions, '; ')
 
     security.declareProtected(
-        SilvaPermissions.ViewManagementScreens, 'getRolesText')
+        Permissions.view_management_screens, 'getRolesText')
     def getRolesText(self):
         if not self.roles:
             return ''
         return join(self.roles, '; ')
 
     security.declareProtected(
-        SilvaPermissions.ViewManagementScreens, 'getExprText')
+        Permissions.view_management_screens, 'getExprText')
     def getExprText(self):
         if not self.expr:
             return ''
         return str(self.expr.text)
+
 
 InitializeClass(Guard)

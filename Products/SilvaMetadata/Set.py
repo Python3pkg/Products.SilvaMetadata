@@ -17,8 +17,7 @@ from zope.interface import implements
 from zope.component import getUtility
 
 # SilvaMetadata
-from Products.Silva import SilvaPermissions
-from Products.SilvaMetadata.Element import MetadataElement, ElementFactory
+from Products.SilvaMetadata.Element import MetadataElement
 from Products.SilvaMetadata.Exceptions import (
     NamespaceConflict, ConfigurationError, NotFound)
 from Products.SilvaMetadata.Export import MetadataSetExporter
@@ -28,18 +27,16 @@ from Products.SilvaMetadata.interfaces import IMetadataSet, IOrderedContainer
 
 from silva.core.services.interfaces import ICatalogService
 
-
 DefaultPrefix = 'example'
 DefaultNamespace = "http://www.example.com/unknown_namespace"
 
 
 class OrderedContainer(Folder):
-
     implements(IOrderedContainer)
-
     security = ClassSecurityInfo()
 
-    security.declareProtected(Permissions.copy_or_move, 'moveObject')
+    security.declareProtected(
+        Permissions.copy_or_move, 'moveObject')
     def moveObject(self, id, position):
         obj_idx  = self.getObjectPosition(id)
         if obj_idx == position:
@@ -52,7 +49,8 @@ class OrderedContainer(Folder):
         metadata.insert(position, obj_meta)
         self._objects = tuple(metadata)
 
-    security.declareProtected(Permissions.copy_or_move, 'getObjectPosition')
+    security.declareProtected(
+        Permissions.copy_or_move, 'getObjectPosition')
     def getObjectPosition(self, id):
 
         objs = list(self._objects)
@@ -63,7 +61,8 @@ class OrderedContainer(Folder):
 
         raise NotFound('Object %s was not found' % str(id))
 
-    security.declareProtected(Permissions.copy_or_move, 'moveObjectUp')
+    security.declareProtected(
+        Permissions.copy_or_move, 'moveObjectUp')
     def moveObjectUp(self, id, steps=1, RESPONSE=None):
         """ Move an object up """
         self.moveObject(
@@ -73,7 +72,8 @@ class OrderedContainer(Folder):
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
 
-    security.declareProtected(Permissions.copy_or_move, 'moveObjectDown')
+    security.declareProtected(
+        Permissions.copy_or_move, 'moveObjectDown')
     def moveObjectDown(self, id, steps=1, RESPONSE=None):
         """ move an object down """
         self.moveObject(
@@ -83,20 +83,24 @@ class OrderedContainer(Folder):
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
 
-    security.declareProtected(Permissions.copy_or_move, 'moveObjectTop')
+    security.declareProtected(
+        Permissions.copy_or_move, 'moveObjectTop')
     def moveObjectTop(self, id, RESPONSE=None):
         """ move an object to the top """
         self.moveObject(id, 0)
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
 
-    security.declareProtected(Permissions.copy_or_move, 'moveObjectBottom')
+    security.declareProtected(
+        Permissions.copy_or_move, 'moveObjectBottom')
     def moveObjectBottom(self, id, RESPONSE=None):
         """ move an object to the bottom """
         self.moveObject(id, sys.maxint)
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'manage_renameObject')
     def manage_renameObject(self, id, new_id, REQUEST=None):
         " "
         objidx = self.getObjectPosition(id)
@@ -107,6 +111,7 @@ class OrderedContainer(Folder):
         return result
 
 InitializeClass(OrderedContainer)
+
 
 class MetadataSet(OrderedContainer):
     """
@@ -119,7 +124,7 @@ class MetadataSet(OrderedContainer):
     security = ClassSecurityInfo()
 
     all_meta_types = (
-        {'name':MetadataElement.meta_type,
+        {'name': MetadataElement.meta_type,
          'action':'addElementForm'},
         )
 
@@ -131,11 +136,11 @@ class MetadataSet(OrderedContainer):
         )
 
     security.declareProtected(
-        SilvaPermissions.ViewManagementScreens, 'manage_settings')
+        Permissions.view_management_screens, 'manage_settings')
     manage_settings = DTMLFile('ui/SetSettingsForm', globals())
 
     security.declareProtected(
-        SilvaPermissions.ViewManagementScreens, 'addElementForm')
+        Permissions.view_management_screens, 'addElementForm')
     addElementForm  = DTMLFile('ui/ElementAddForm', globals())
 
     manage_main = DTMLFile('ui/SetContainerView', globals())
@@ -176,15 +181,21 @@ class MetadataSet(OrderedContainer):
     def getMinimalRole(self):
         return self._minimal_role
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'setMinimalRole')
     def setMinimalRole(self, role):
         self._minimal_role = role
 
     def getCategory(self):
         return self._category
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'setCategory')
     def setCategory(self, cat):
         self._category = cat
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'addMetadataElement')
     def addMetadataElement(self,
                            id,
                            field_type,
@@ -196,7 +207,7 @@ class MetadataSet(OrderedContainer):
                            automatic_p=None,
                            RESPONSE=None):
         """ """
-        element = ElementFactory(id)
+        element = MetadataElement(id)
         self._setObject(id, element)
         element = self._getOb(id)
 
@@ -211,6 +222,8 @@ class MetadataSet(OrderedContainer):
         if RESPONSE is not None:
             return RESPONSE.redirect('manage_main')
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'editSettings')
     def editSettings(
         self, title, description, i18n_domain, ns_uri, ns_prefix,
         minimal_role='', category=''):
@@ -250,6 +263,8 @@ class MetadataSet(OrderedContainer):
     def isInitialized(self):
         return self.initialized
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'setInitialized')
     def setInitialized(self, initialization_flag, RESPONSE=None):
         """ """
         flag = not not initialization_flag
@@ -261,8 +276,10 @@ class MetadataSet(OrderedContainer):
                 self.initialize()
 
         if RESPONSE:
-            return RESPONSE.redirect('manage_workspace')
+            return RESPONSE.redirect('manage_settings')
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'initialize')
     def initialize(self, RESPONSE=None):
         """ initialize the metadata set """
         if self.isInitialized():
@@ -275,7 +292,8 @@ class MetadataSet(OrderedContainer):
         self.initialized = 1
 
         if RESPONSE is not None:
-            RESPONSE.redirect('manage_workspace')
+            return RESPONSE.redirect('manage_settings')
+
 
     def getNamespace(self):
         return (self.metadata_prefix, self.metadata_uri)
@@ -328,13 +346,14 @@ class MetadataSet(OrderedContainer):
 
 InitializeClass(MetadataSet)
 
+
 def metadataset_added(metadataset, event):
     # verify our namespace
     metadataset.setNamespace(
         metadataset.metadata_uri, metadataset.metadata_prefix)
 
-def verifyNamespace(ctx, uri, prefix):
 
+def verifyNamespace(ctx, uri, prefix):
     sid = ctx.getId()
     container = aq_parent(aq_inner(ctx))
 

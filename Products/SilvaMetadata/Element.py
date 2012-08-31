@@ -3,7 +3,7 @@ Metadata Elements
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
-from AccessControl import ClassSecurityInfo
+from AccessControl import ClassSecurityInfo, Permissions
 from AccessControl import getSecurityManager
 from App.class_init import InitializeClass
 from App.special_dtml import DTMLFile
@@ -11,7 +11,6 @@ from OFS.SimpleItem import SimpleItem
 
 from zope.interface import implements
 
-from Products.Silva import SilvaPermissions
 from Products.SilvaMetadata.Exceptions import ConfigurationError
 from Products.SilvaMetadata.FormulatorField import getFieldFactory
 from Products.SilvaMetadata.Guard import Guard
@@ -60,11 +59,11 @@ class MetadataElement(SimpleItem):
     security = ClassSecurityInfo()
 
     security.declareProtected(
-        SilvaPermissions.ViewManagementScreens, 'manage_settings')
+        Permissions.view_management_screens, 'manage_settings')
     manage_settings = DTMLFile('ui/ElementPolicyForm', globals())
 
     security.declareProtected(
-        SilvaPermissions.ViewManagementScreens, 'manage_guard_form')
+        Permissions.view_management_screens, 'manage_guard_form')
     manage_guard_form = DTMLFile('ui/ElementGuardForm', globals())
 
 
@@ -76,6 +75,8 @@ class MetadataElement(SimpleItem):
 
         self.editElementPolicy(**kw)
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'editElementGuards')
     def editElementGuards(self, read_guard, write_guard, RESPONSE=None):
         """save element guards"""
         self.read_guard.changeFromProperties(read_guard)
@@ -84,6 +85,8 @@ class MetadataElement(SimpleItem):
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'editElementPolicy')
     def editElementPolicy(self,
                           field_type = None,
                           index_type = None,
@@ -237,6 +240,3 @@ class MetadataElement(SimpleItem):
 
 InitializeClass(MetadataElement)
 
-def ElementFactory(id, **kw):
-
-    return MetadataElement(id, **kw)

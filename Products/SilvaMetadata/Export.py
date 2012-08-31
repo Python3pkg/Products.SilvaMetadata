@@ -10,11 +10,11 @@ from types import IntType, FloatType, ListType
 # Zope
 from zope.interface import implements
 
+from Products.SilvaMetadata.interfaces import IMetadataSetExporter
+from Products.SilvaMetadata.Element import MetadataElement
+from Products.SilvaMetadata.XMLType import serialize
+from Products.SilvaMetadata.utils import make_lookup
 
-from interfaces import IMetadataSetExporter
-from Element import MetadataElement
-from XMLType import serialize
-from utils import make_lookup
 
 class MetadataSetExporter(object):
     """
@@ -142,6 +142,7 @@ class MetadataSetExporter(object):
 
         return out.getvalue()
 
+
 class ObjectMetadataExporter(object):
     """
     for exporting the metadata of an object, returns
@@ -156,7 +157,6 @@ class ObjectMetadataExporter(object):
         self.sets = sets
 
     def __call__(self, out=None):
-
         external_out = not not out
 
         if out is None:

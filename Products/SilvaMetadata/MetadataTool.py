@@ -4,17 +4,16 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 
 # Zope
 from Acquisition import aq_base
-from AccessControl import ClassSecurityInfo
+from AccessControl import ClassSecurityInfo, Permissions
+
 from OFS.Folder import Folder
 
 from zope.annotation.interfaces import IAnnotations
-from zope.component import getUtility
 from five import grok
 
 # Silva
 from silva.core import conf as silvaconf
 from silva.core.services.base import SilvaService
-from silva.core.services.interfaces import ICatalogService
 from silva.core.views import views as silvaviews
 
 # SilvaMetadata
@@ -24,8 +23,8 @@ from Products.SilvaMetadata.interfaces import IMetadataBindingFactory
 
 
 def configure_metadata(service):
-    from Collection import MetadataCollection
-    from TypeMapping import TypeMappingContainer
+    from Products.SilvaMetadata.Collection import MetadataCollection
+    from Products.SilvaMetadata.TypeMapping import TypeMappingContainer
 
     collection = MetadataCollection('collection')
     collection.id = 'collection'
@@ -53,49 +52,7 @@ class MetadataTool(SilvaService, Folder):
     security = ClassSecurityInfo()
 
     #################################
-    # Metadata interface
-
-    def listAllowedSubjects(self, content=None):
-        catalog = getUtility(ICatalogService)
-        return catalog.uniqueValuesFor('Subject')
-
-    def listAllowedFormats(self, content=None):
-        catalog = getUtility(ICatalogService)
-        return catalog.uniqueValuesFor('Format')
-
-    def listAllowedLanguages(self, content=None):
-        catalog = getUtility(ICatalogService)
-        return catalog.uniqueValuesFor('Language')
-
-    def listAllowedRights(self, content=None):
-        catalog = getUtility(ICatalogService)
-        return catalog.uniqueValuesFor('Rights')
-
-    #################################
-    ## validation hooks
-    def setInitialMetadata(self, content):
-        binding = self.getMetadata(content)
-        sets = binding.getSetNames()
-        # getting the set metadata will cause its
-        # initialization if nots already initialized
-        for s in sets:
-            binding[s]
-
-    def validateMetadata(self, content):
-        binding = self.getMetadata(content)
-        sets = binding.getSetNames()
-        for s in sets:
-            data = binding[s]
-            binding.validate(data, set_id=s)
-
-    #################################
     ## new interface
-
-    def getCollectionForCategory(self, category=''):
-        """return a container containing all known metadata sets
-        """
-        collections = self._getOb('collection')
-        return [coll for coll in collections if coll.getCategory() == category]
 
     def getCollection(self):
         """return a container containing all known metadata sets
@@ -109,10 +66,6 @@ class MetadataTool(SilvaService, Folder):
     def getMetadataSet(self, set_id):
         """ get a particular metadata set """
         return self.getCollection().getMetadataSet(set_id)
-
-    def getMetadataSetFor(self, metadata_namespace):
-        """ get a particular metadata set by its namespace """
-        return self.getCollection().getSetByNamespace(metadata_namespace)
 
     def getMetadata(self, content):
         return IMetadataBindingFactory(content)(self)
@@ -150,6 +103,8 @@ class MetadataTool(SilvaService, Folder):
         return element.getDefault(content=content)
 
     # Convenience methods
+    security.declareProtected(
+        Permissions.view_management_screens, 'initializeMetadata')
     def initializeMetadata(self):
         # initialize the sets if not already initialized
         collection = self.getCollection()
@@ -157,10 +112,14 @@ class MetadataTool(SilvaService, Folder):
             if not set.isInitialized():
                 set.initialize()
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'addTypesMapping')
     def addTypesMapping(self, types, setids, default=''):
         for type in types:
             self.addTypeMapping(type, setids, default)
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'addTypeMapping')
     def addTypeMapping(self, type, setids, default=''):
         mapping = self.getTypeMapping()
         chain = mapping.getChainFor(type)
@@ -174,10 +133,14 @@ class MetadataTool(SilvaService, Folder):
         tm = {'type': type, 'chain': ','.join(chain)}
         mapping.editMappings(default, (tm, ))
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'removeTypesMapping')
     def removeTypesMapping(self, types, setids):
         for type in types:
             self.removeTypeMapping(type, setids)
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'removeTypeMapping')
     def removeTypeMapping(self, type, setids):
         mapping = self.getTypeMapping()
         chain = mapping.getChainFor(type)
@@ -190,13 +153,6 @@ class MetadataTool(SilvaService, Folder):
         tm = {'type': type, 'chain': ','.join(chain)}
         default = mapping.getDefaultChain()
         mapping.editMappings(default, (tm, ))
-
-    #################################
-    # misc
-
-    def update(self, RESPONSE):
-        """ """
-        RESPONSE.redirect('manage_workspace')
 
 
 class MetadataToolOverview(silvaviews.ZMIView):

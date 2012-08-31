@@ -7,8 +7,12 @@ author: kapil thangavelu <k_vertigo@objectrealms.net>
 import operator
 
 # Zope
-from OFS.Folder import Folder
+from AccessControl import ClassSecurityInfo, Permissions
 from Acquisition import aq_base
+from App.class_init import InitializeClass
+from OFS.Folder import Folder
+from OFS.SimpleItem import SimpleItem
+
 
 from zope.interface import implements
 
@@ -35,11 +39,14 @@ def chainIterator(chain):
 
 class TypeMappingContainer(Folder):
     meta_type = 'Type Mapping Container'
+    security = ClassSecurityInfo()
 
     def __init__(self, id):
         super(TypeMappingContainer, self).__init__(id)
         self.default_chain = ''
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'setDefaultChain')
     def setDefaultChain(self, chain, RESPONSE=None):
         if not verifyChain(self, chain):
             raise ConfigurationError("invalid metadata set")
@@ -74,6 +81,8 @@ class TypeMappingContainer(Folder):
             return None
         return ctm
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'editMappings')
     def editMappings(self, default_chain, type_chains):
         self.setDefaultChain(default_chain)
 
@@ -101,10 +110,13 @@ class TypeMappingContainer(Folder):
                 operator.itemgetter('name'), extensionRegistry.get_contents())
         return self._v_content_types
 
+InitializeClass(TypeMappingContainer)
 
-class TypeMapping(Folder):
-    meta_type = 'Metadata Type Mapping'
+
+class TypeMapping(SimpleItem):
     implements(ITypeMapping)
+    meta_type = 'Metadata Type Mapping'
+    security = ClassSecurityInfo()
 
     def __init__(self, id):
         super(TypeMapping, self).__init__(id)
@@ -113,6 +125,8 @@ class TypeMapping(Folder):
     def getMetadataChain(self):
         return self.chain
 
+    security.declareProtected(
+        Permissions.view_management_screens, 'setMetadataChain')
     def setMetadataChain(self, chain):
         if not verifyChain(self, chain):
             raise ConfigurationError("invalid metadata set")
@@ -120,5 +134,7 @@ class TypeMapping(Folder):
 
     def iterChain(self):
         return chainIterator(self.chain)
+
+InitializeClass(TypeMapping)
 
 

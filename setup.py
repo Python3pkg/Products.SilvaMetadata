@@ -8,6 +8,11 @@ import os
 
 version = '3.0dev'
 
+tests_require = [
+    'Products.Silva [test]',
+    ]
+
+
 setup(name='Products.SilvaMetadata',
       version=version,
       description="Metadata support for Silva",
@@ -33,12 +38,14 @@ setup(name='Products.SilvaMetadata',
         'five.grok',
         'setuptools',
         'silva.core.conf',
-        'silva.core.interfaces',
         'silva.core.services',
         'silva.core.views',
         'zope.interface',
         'zope.annotation',
         'zope.component',
+        'zope.event',
         ],
+      tests_require = tests_require,
+      extras_require = {'test': tests_require},
       )
 

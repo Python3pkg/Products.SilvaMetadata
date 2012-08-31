@@ -466,6 +466,7 @@ def encodeElement(set_id, element_id):
     """
     return MetadataAqPrefix + set_id + MetadataAqVarPrefix + element_id
 
+
 def decodeVariable(name):
     """ decode an encoded variable name... not used """
     assert name.startswith(MetadataAqPrefix)

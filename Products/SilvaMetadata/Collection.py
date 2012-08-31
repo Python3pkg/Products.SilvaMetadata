@@ -2,14 +2,13 @@
 Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
-from AccessControl import ClassSecurityInfo
+from AccessControl import ClassSecurityInfo, Permissions
 from App.class_init import InitializeClass
 from App.special_dtml import DTMLFile
 from OFS.Folder import Folder
 
 from zope.interface import implements
 
-from Products.Silva import SilvaPermissions
 from Products.SilvaMetadata.Exceptions import NotFound
 from Products.SilvaMetadata.Import import read_set, make_set
 from Products.SilvaMetadata.Set import MetadataSet
@@ -24,24 +23,20 @@ class MetadataCollection(Folder):
 
     all_meta_types = (
         {'name':MetadataSet.meta_type,
-         'action':'addMetadataSetForm'},
-        )
+         'action':'addMetadataSetForm'})
 
     manage_options = (
-
         {'label':'Metadata Sets',
          'action':'manage_main'},
-
         {'label':'Metadata Tool',
-         'action':'../manage_workspace'},
-        )
+         'action':'../manage_workspace'})
 
     security.declareProtected(
-        SilvaPermissions.ViewManagementScreens, 'addMetadataSetForm')
+        Permissions.view_management_screens, 'addMetadataSetForm')
     addMetadataSetForm = DTMLFile('ui/MetadataSetAddForm', globals())
 
     security.declareProtected(
-        SilvaPermissions.ViewManagementScreens, 'addMetadataSet')
+        Permissions.view_management_screens, 'addMetadataSet')
     def addMetadataSet(self, id, namespace_prefix, namespace_uri,
                        title='', description='', i18n_domain='', RESPONSE=None):
         " "
@@ -76,7 +71,7 @@ class MetadataCollection(Folder):
         raise NotFound("No Metadata Set Matching %s" % str(metadata_uri))
 
     security.declareProtected(
-        SilvaPermissions.ViewManagementScreens, 'importSet')
+        Permissions.view_management_screens, 'importSet')
     def importSet(self, xml_file, RESPONSE=None):
         """ import an xml definition of a metadata set"""
 
