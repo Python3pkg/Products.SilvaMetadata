@@ -160,12 +160,6 @@ class MetadataElement(SimpleItem):
         if RESPONSE is not None:
             return RESPONSE.redirect('manage_workspace')
 
-    def extract(self, request):
-        return self.field.validate(request)
-
-    def validate(self, data):
-        return self.field.validator.check(self.field, data)
-
     def Title(self):
         return self.field.get_value('title')
 
@@ -192,17 +186,27 @@ class MetadataElement(SimpleItem):
         """
         return self.acquire_p
 
-    def renderView(self, value=None):
+    def extract(self, content, request):
+        field = self.field.__of__(content)
+        return field.validate(request)
+
+    def validate(self, content, data):
+        field = self.field.__of__(content)
+        return field.validator.check(field, data)
+
+    def renderView(self, content, value=None):
         """
         render the element given a particular element value
         """
-        return self.field.render_view(value)
+        field = self.field.__of__(content)
+        return field.render_view(value)
 
-    def renderEdit(self, value=None):
+    def renderEdit(self, content, value=None):
         """
         render the element as a form field given a particular value
         """
-        return self.field.render(value)
+        field = self.field.__of__(content)
+        return field.render(value)
 
     def isRequired(self):
         """

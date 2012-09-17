@@ -115,7 +115,7 @@ class MetadataBindAdapter(object):
         element = self.getElement(set_id, element_id)
         data = self._getData(set_id)
         value = data.get(element_id, None)
-        return element.renderView(value)
+        return element.renderView(self.content, value)
 
     security.declarePublic('renderElementEdit')
     def renderElementEdit(self, set_id, element_id, REQUEST=None):
@@ -130,7 +130,7 @@ class MetadataBindAdapter(object):
             #if request is false, then we want to render the default/saved
             # value
             value = self._getData(set_id, acquire=0).get(element_id,None)
-        return element.renderEdit(value)
+        return element.renderEdit(self.content, value)
 
     #################################
     ### Storage (invokes validation)
@@ -152,7 +152,7 @@ class MetadataBindAdapter(object):
             if element_id not in data:
                 continue
             try:
-                value = element.validate(data[element_id])
+                value = element.validate(self.content, data[element_id])
             except ValidationError as error:
                 errors[element_id] = error.error_text
             else:
@@ -183,7 +183,7 @@ class MetadataBindAdapter(object):
                 if element_id not in data:
                     continue
                 try:
-                    value = element.extract(data)
+                    value = element.extract(self.content, data)
                 except ValidationError as error:
                     errors[element_id] = error.error_text
                 else:
