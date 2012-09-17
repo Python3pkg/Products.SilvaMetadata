@@ -39,9 +39,9 @@ class MetadataTool(SilvaService, Folder):
     meta_type = 'Advanced Metadata Tool'
 
     manage_options = (
-        {'label':'Overview', 'action':'manage_overview'},
-        {'label':'Metadata Sets', 'action':'collection/manage_workspace'},
-        {'label':'Type Mapping', 'action':'manage_mapping'},
+        {'label':'Overview', 'action': 'manage_overview'},
+        {'label':'Metadata Sets', 'action': 'collection/manage_main'},
+        {'label':'Type Mapping', 'action': 'manage_mapping'},
         )
 
     grok.implements(IMetadataService)

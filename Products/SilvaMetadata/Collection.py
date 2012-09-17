@@ -22,14 +22,16 @@ class MetadataCollection(Folder):
     security = ClassSecurityInfo()
 
     all_meta_types = (
-        {'name':MetadataSet.meta_type,
-         'action':'addMetadataSetForm'})
+        {'name': MetadataSet.meta_type,
+         'action': 'addMetadataSetForm'},)
 
     manage_options = (
-        {'label':'Metadata Sets',
-         'action':'manage_main'},
-        {'label':'Metadata Tool',
-         'action':'../manage_workspace'})
+        {'label': 'Overview',
+         'action': '../manage_workspace'},
+        {'label': 'Metadata Sets',
+         'action': 'manage_main'},
+        {'label': 'Type Mapping',
+         'action': '../manage_mapping'},)
 
     security.declareProtected(
         Permissions.view_management_screens, 'addMetadataSetForm')
