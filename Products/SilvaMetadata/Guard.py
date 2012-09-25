@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2001-2012 Zope Corporation and Contributors. All Rights Reserved.
+# See also LICENSE.txt
 ##############################################################################
 #
-# Copyright (c) 2001-2008 Zope Corporation and Contributors. All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
 # Version 2.0 (ZPL).  A copy of the ZPL should accompany this distribution.

@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2012  Infrae. All rights reserved.
+# See also LICENSE.txt
 """
 Marker Interfaces
 author: kapil thangavelu <k_vertigo@objectrealms.net>
