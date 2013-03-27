@@ -18,6 +18,7 @@ from Products.PluginIndexes.interfaces import IPluggableIndex
 
 from zope.interface import implements
 from zope.component import getUtility
+from zope.i18nmessageid import MessageFactory
 
 # SilvaMetadata
 from Products.SilvaMetadata.Element import MetadataElement
@@ -176,9 +177,15 @@ class MetadataSet(OrderedContainer):
 
 
     def getTitle(self):
+        i18n_domain = self.get_i18n_domain()
+        if i18n_domain:
+            return MessageFactory(i18n_domain)(self.title)
         return self.title
 
     def getDescription(self):
+        i18n_domain = self.get_i18n_domain()
+        if i18n_domain:
+            return MessageFactory(i18n_domain)(self.description)
         return self.description
 
     def getMinimalRole(self):
