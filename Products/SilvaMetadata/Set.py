@@ -177,16 +177,20 @@ class MetadataSet(OrderedContainer):
 
 
     def getTitle(self):
-        i18n_domain = self.get_i18n_domain()
-        if i18n_domain:
-            return MessageFactory(i18n_domain)(self.title)
-        return self.title
+        if self.title:
+            i18n_domain = self.get_i18n_domain()
+            if i18n_domain:
+                return MessageFactory(i18n_domain)(self.title)
+            return self.title
+        return u''
 
     def getDescription(self):
-        i18n_domain = self.get_i18n_domain()
-        if i18n_domain:
-            return MessageFactory(i18n_domain)(self.description)
-        return self.description
+        if self.description:
+            i18n_domain = self.get_i18n_domain()
+            if i18n_domain:
+                return MessageFactory(i18n_domain)(self.description)
+            return self.description
+        return u''
 
     def getMinimalRole(self):
         return self._minimal_role
