@@ -1,10 +1,10 @@
 Changes
 =======
 
-3.0 (unreleased)
+3.0 (2013/05/23)
 ----------------
 
-- ...
+- Translate metadata set title and description.
 
 3.0c1 (2012/09/25)
 ------------------

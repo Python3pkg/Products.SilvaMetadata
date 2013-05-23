@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2001-2012 Zope Corporation and Contributors. All Rights Reserved.
+# Copyright (c) 2001-2013 Zope Corporation and Contributors. All Rights Reserved.
 # See also LICENSE.txt
 ##############################################################################
 #
