@@ -74,7 +74,10 @@ class MetadataTool(SilvaService, Folder):
         return IMetadataBindingFactory(content)(self)
 
     def getMetadataValue(self, content, set_id, element_id, acquire=1):
-        content = IMetadataBindingFactory(content).get_content()
+        factory = IMetadataBindingFactory(content, None)
+        if factory is None:
+            return None
+        content = factory.get_content()
         if content is None:
             return None
 

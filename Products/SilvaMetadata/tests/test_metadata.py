@@ -10,6 +10,7 @@ $Id: test_Metadata.py,v 1.22 2005/09/14 23:10:16 clemens Exp $
 import unittest
 
 from zope.component import getUtility
+from zope.interface.verify import verifyObject
 
 from Products.Formulator.TALESField import TALESMethod
 from Products.SilvaMetadata.interfaces import IMetadataService
@@ -24,19 +25,62 @@ class TestMetadataElement(unittest.TestCase):
         self.root = self.layer.get_application()
         setUp(self.root)
 
+    def test_service(self):
+        """Test service API.
+        """
+        pm = getUtility(IMetadataService)
+        self.assertTrue(verifyObject(IMetadataService, pm))
+
+    def test_getMetadataValue_valid(self):
+        """Test valid calls to getMetadataValue.
+        """
+        pm = getUtility(IMetadataService)
+        zoo = self.root.zoo
+        self.assertEqual(
+            pm.getMetadataValue(zoo, SET_ID, 'Description'),
+            '')
+        binding = pm.getMetadata(zoo)
+        binding.setValues(
+            SET_ID,
+            {'Title':'Zoo master', 'Description': u'Éléphant élégant'})
+        self.assertEqual(
+            pm.getMetadataValue(zoo, SET_ID, 'Title'),
+            'Zoo master')
+        self.assertEqual(
+            pm.getMetadataValue(zoo, SET_ID, 'Description'),
+            u'Éléphant élégant')
+
+    def test_getMetadataValue_invalid(self):
+        """Test that invalid calls to getMetadataValue returns None.
+        """
+        pm = getUtility(IMetadataService)
+        zoo = self.root.zoo
+        self.assertEqual(
+            pm.getMetadataValue(None, SET_ID, 'Description'),
+            None)
+        self.assertEqual(
+            pm.getMetadataValue(zoo, SET_ID, 'I don\'t exist'),
+            None)
+        self.assertEqual(
+            pm.getMetadataValue(zoo, "i can't hear you", 'Description'),
+            None)
+
     def testGetDefault(self):
         pm = getUtility(IMetadataService)
         collection = pm.getCollection()
         set = collection.getMetadataSet(SET_ID)
         element = set.getElement('Title')
-        element.field._edit_tales({'default':
-                                   TALESMethod('content/getPhysicalPath')})
+        element.field._edit_tales(
+            {'default': TALESMethod('content/getPhysicalPath')})
         zoo = self.root.zoo
+        defaults = set.getDefaults(content=zoo)
         binding = pm.getMetadata(zoo)
-        defaults = set.getDefaults(content = zoo)
-        self.assertEqual(defaults['Title'],
-                         zoo.getPhysicalPath(),
-                         "Tales Context Passing Failed")
+        self.assertEqual(
+            defaults['Title'],
+            zoo.getPhysicalPath())
+        self.assertEqual(
+            binding.get(SET_ID, 'Title'),
+            zoo.getPhysicalPath())
 
     def testGetDefaultWithTalesDelegate(self):
         mtool = getUtility(IMetadataService)
