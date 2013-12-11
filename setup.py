@@ -14,7 +14,7 @@ tests_require = [
 
 setup(name='Products.SilvaMetadata',
       version=version,
-      description="Metadata support for Silva",
+      description="Metadata engine for Silva CMS",
       long_description=open(os.path.join("Products", "SilvaMetadata", "README.txt")).read() + "\n" +
                        open(os.path.join("Products", "SilvaMetadata", "HISTORY.txt")).read(),
       classifiers=[
@@ -26,7 +26,7 @@ setup(name='Products.SilvaMetadata',
       keywords='silva zope2 metadata',
       author='Infrae',
       author_email='info@infrae.com',
-      url='http://infrae.com/products/silva',
+      url='https://github.com/silvacms/Products.SilvaMetadata',
       license='BSD',
       packages=find_packages(exclude=['ez_setup']),
       namespace_packages=['Products'],

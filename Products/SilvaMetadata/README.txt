@@ -16,8 +16,8 @@ You can find more information on how to use the metadata system in the
 Code repository
 ===============
 
-You can find the code of this extension in Mercurial:
-https://hg.infrae.com/Products.SilvaMetadata.
+You can find the code of this extension in Git:
+https://github.com/silvacms/Products.SilvaMetadata
 
 .. _Silva developer documentation: http://docs.silvacms.org/
 
