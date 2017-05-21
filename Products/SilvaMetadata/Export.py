@@ -6,7 +6,7 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net>
 """
 
 # Python
-from StringIO import StringIO
+from io import StringIO
 from cgi import escape
 from types import IntType, FloatType, ListType
 
@@ -35,12 +35,12 @@ class MetadataSetExporter(object):
             ext_out = 0
             out = StringIO()
 
-        print >> out, '<?xml version="1.0"?>\n\n'
-        print >> out, '<metadata_set id="%s" ns_uri="%s" ns_prefix="%s">' % (
+        print('<?xml version="1.0"?>\n\n', file=out)
+        print('<metadata_set id="%s" ns_uri="%s" ns_prefix="%s">' % (
             self.set.getId(),
             self.set.metadata_uri,
             self.set.metadata_prefix
-            )
+            ), file=out)
 
         title = escape(self.set.getTitle(), 1)
         description = escape(self.set.getDescription(), 1)
@@ -56,37 +56,37 @@ class MetadataSetExporter(object):
 
         for e in self.set.getElements():
 
-            print >> out, '  <metadata_element id="%s">' % e.getId()
-            print >> out, '   <index_type>%s</index_type>' % e.index_type
-            print >> out, '   <index_p>%d</index_p>' % e.index_p
-            print >> out, '   <metadata_in_catalog_p>%d</metadata_in_catalog_p>' % e.metadata_in_catalog_p
-            print >> out, '   <field_type>%s</field_type>' % e.field_type
-            print >> out, '   <acquire_p>%d</acquire_p>' % e.acquire_p
-            print >> out, '   <read_only_p>%d</read_only_p>' % e.read_only_p
-            print >> out, '   <automatic_p>%d</automatic_p>' % e.automatic_p
+            print('  <metadata_element id="%s">' % e.getId(), file=out)
+            print('   <index_type>%s</index_type>' % e.index_type, file=out)
+            print('   <index_p>%d</index_p>' % e.index_p, file=out)
+            print('   <metadata_in_catalog_p>%d</metadata_in_catalog_p>' % e.metadata_in_catalog_p, file=out)
+            print('   <field_type>%s</field_type>' % e.field_type, file=out)
+            print('   <acquire_p>%d</acquire_p>' % e.acquire_p, file=out)
+            print('   <read_only_p>%d</read_only_p>' % e.read_only_p, file=out)
+            print('   <automatic_p>%d</automatic_p>' % e.automatic_p, file=out)
 
             g = e.read_guard
 
-            print >> out, '   <read_guard>'
-            print >> out, '     <roles>%s</roles>' % g.getRolesText()
-            print >> out, '     <permissions>%s</permissions>' \
-                          % g.getPermissionsText()
-            print >> out, '     <expr>%s</expr>' % g.getExprText()
-            print >> out, '   </read_guard>'
+            print('   <read_guard>', file=out)
+            print('     <roles>%s</roles>' % g.getRolesText(), file=out)
+            print('     <permissions>%s</permissions>' \
+                          % g.getPermissionsText(), file=out)
+            print('     <expr>%s</expr>' % g.getExprText(), file=out)
+            print('   </read_guard>', file=out)
 
             g = e.write_guard
-            print >> out, '   <write_guard>'
-            print >> out, '     <roles>%s</roles>' % g.getRolesText()
-            print >> out, '     <permissions>%s</permissions>' \
-                          % g.getPermissionsText()
-            print >> out, '     <expr>%s</expr>' % g.getExprText()
-            print >> out, '   </write_guard>'
+            print('   <write_guard>', file=out)
+            print('     <roles>%s</roles>' % g.getRolesText(), file=out)
+            print('     <permissions>%s</permissions>' \
+                          % g.getPermissionsText(), file=out)
+            print('     <expr>%s</expr>' % g.getExprText(), file=out)
+            print('   </write_guard>', file=out)
 
             f = e.field
 
-            print >> out, '   <field_values>'
+            print('   <field_values>', file=out)
 
-            for k, v in f.values.items():
+            for k, v in list(f.values.items()):
                 if v is None:
                     continue
                 if isinstance(v, IntType):
@@ -106,10 +106,10 @@ class MetadataSetExporter(object):
                               '<value key="%s" type="str" value="%s" />\n'
                               % (k, escape(str(v), 1)))
 
-            print >> out, '   </field_values>'
+            print('   </field_values>', file=out)
 
-            print >> out, '   <field_tales>'
-            for k,v in f.tales.items():
+            print('   <field_tales>', file=out)
+            for k,v in list(f.tales.items()):
                 if v is None:
                     continue
                 # FIXME: we get to the actual "source" for the TALESMethod by
@@ -117,28 +117,28 @@ class MetadataSetExporter(object):
                 # Needs a different way of retrieving this value?
                 out.write('     <value key="%s">%s</value>\n'
                           % (k, escape(getattr(v, '_text', ''), 1)))
-            print >> out, '   </field_tales>'
+            print('   </field_tales>', file=out)
 
-            print >> out, '   <field_messages>'
+            print('   <field_messages>', file=out)
             for message_key in f.get_error_names():
                 message_text = f.get_error_message(
                     message_key, want_message_id=False)
                 out.write('     <message name="%s">%s</message>\n' % (
                     escape(message_key, 1), escape(message_text, 1)))
 
-            print >> out, '   </field_messages>'
+            print('   </field_messages>', file=out)
 
-            print >> out, '   <index_args>'
-            for k,v in e.index_constructor_args.items():
+            print('   <index_args>', file=out)
+            for k,v in list(e.index_constructor_args.items()):
                 out.write('     <value key="%s">%s</value>\n'
                           % (k, escape(str(v), 1)))
-            print >> out, '   </index_args>'
+            print('   </index_args>', file=out)
 
-            print >> out, '  </metadata_element>'
+            print('  </metadata_element>', file=out)
 
 
 
-        print >> out, '</metadata_set>'
+        print('</metadata_set>', file=out)
 
         if ext_out:
             return out
@@ -178,13 +178,13 @@ class ObjectMetadataExporter(object):
             check = make_lookup(set.objectIds(MetadataElement.meta_type))
             data = self.binding._getData(sid)
 
-            for k,v in data.items():
+            for k,v in list(data.items()):
                 # with updates its possible that certain annotation data
                 # is no longer part of the metadata set, so we filter it out.
                 if not check(k):
                     continue
 
-                out.write(u'      <%s:%s>%s</%s:%s>\n'
+                out.write('      <%s:%s>%s</%s:%s>\n'
                           % (prefix, k, serialize(v), prefix, k))
 
         out.write('</metadata>\n')

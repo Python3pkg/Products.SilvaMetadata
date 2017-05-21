@@ -15,27 +15,27 @@ from Products.SilvaMetadata.Exceptions import XMLMarshallError
 
 def serialize(value):
 
-    if isinstance(value, types.IntType):
-        return '<element type="integer">%s</element>' % unicode(str(value))
+    if isinstance(value, int):
+        return '<element type="integer">%s</element>' % str(str(value))
 
-    elif isinstance(value, types.FloatType):
-        return '<element type="float">%s</element>' % unicode(str(value))
+    elif isinstance(value, float):
+        return '<element type="float">%s</element>' % str(str(value))
 
-    elif isinstance(value, types.StringType):
-        return '<element type="string">%s</element>' % unicode(escape(value, 1))
+    elif isinstance(value, bytes):
+        return '<element type="string">%s</element>' % str(escape(value, 1))
 
     elif isinstance(value, DateTime):
-        return '<element type="date">%s</element>' % unicode(str(value))
+        return '<element type="date">%s</element>' % str(str(value))
 
-    elif isinstance(value, types.UnicodeType):
+    elif isinstance(value, str):
         return '<element type="string">%s</element>' % escape(value, 1)
 
-    elif isinstance(value, types.ListType):
+    elif isinstance(value, list):
         return '<element_list type="list">%s</element_list>' \
                % (''.join(map(serialize, value)))
 
-    elif isinstance(value, types.NoneType):
-        return '<element type="none">%s</element>' % unicode(str(value))
+    elif isinstance(value, type(None)):
+        return '<element type="none">%s</element>' % str(str(value))
 
 def deserialize(node):
     if not node.nodeName in ('element', 'element_list'):
@@ -68,7 +68,7 @@ def deserialize(node):
                     )
             return res
 
-    except Exception, e:
+    except Exception as e:
         raise XMLMarshallError(
             "error on marshalling %s %s, childnodes: %s (%s %s)" % (
                 node.nodeName,

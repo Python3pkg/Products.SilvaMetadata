@@ -42,13 +42,13 @@ class TestMetadataElement(unittest.TestCase):
         binding = pm.getMetadata(zoo)
         binding.setValues(
             SET_ID,
-            {'Title':'Zoo master', 'Description': u'Éléphant élégant'})
+            {'Title':'Zoo master', 'Description': 'Éléphant élégant'})
         self.assertEqual(
             pm.getMetadataValue(zoo, SET_ID, 'Title'),
             'Zoo master')
         self.assertEqual(
             pm.getMetadataValue(zoo, SET_ID, 'Description'),
-            u'Éléphant élégant')
+            'Éléphant élégant')
 
     def test_getMetadataValue_invalid(self):
         """Test that invalid calls to getMetadataValue returns None.

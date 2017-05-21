@@ -108,7 +108,7 @@ class MetadataBindAdapter(object):
         if set_id:
             sets = [self.getSet(set_id)]
         else:
-            sets = self.collection.values()
+            sets = list(self.collection.values())
 
         exporter = ObjectMetadataExporter(self, sets)
         return exporter()
@@ -233,9 +233,9 @@ class MetadataBindAdapter(object):
 
         # invalidate the cache version of the set if any
         # we do a check for cached acquired/non-acquired
-        if self.cached_values.has_key((0, set_id)):
+        if (0, set_id) in self.cached_values:
             del self.cached_values[(0, set_id)]
-        if self.cached_values.has_key((1, set_id)):
+        if (1, set_id) in self.cached_values:
             del self.cached_values[(1, set_id)]
 
         # mark both the content and the annotatable object as changed so
@@ -280,7 +280,7 @@ class MetadataBindAdapter(object):
 
     security.declarePublic('getSetNameByURI')
     def getSetNameByURI(self, uri):
-        for set in self.collection.values():
+        for set in list(self.collection.values()):
             if set.metadata_uri == uri:
                 return set.getId()
         raise NotFound(uri)
@@ -328,12 +328,12 @@ class MetadataBindAdapter(object):
         """
         res = []
 
-        for set in self.collection.values():
+        for set in list(self.collection.values()):
             set_id = set.getId()
             data = self._getData(set_id=set_id, acquire=0)
             for e in [e for e in set.getElements() if e.isAcquireable()]:
                 eid = e.getId()
-                if data.has_key(eid) and data[eid]:
+                if eid in data and data[eid]:
                     continue
                 name = encodeElement(set_id, e.getId())
                 try:
@@ -378,7 +378,7 @@ class MetadataBindAdapter(object):
         return data
 
     def __getitem__(self, key):
-        if self.collection.has_key(key):
+        if key in self.collection:
             return self._getData(key)
         raise KeyError(str(key))
 
@@ -424,7 +424,7 @@ class MetadataBindAdapter(object):
                 # update individual elements with default values
                 # if they don't have a saved value.
                 for element_id in element_ids:
-                    if data.has_key(element_id):
+                    if element_id in data:
                         continue
                     defaultvalue = set.getElement(
                         element_id).getDefault(content=self.content)

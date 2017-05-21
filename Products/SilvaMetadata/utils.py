@@ -16,12 +16,12 @@ def make_lookup(seq):
 def normalize_kv_pairs(mapping):
     res = {}
 
-    keys = [k for k in mapping.keys() if k.startswith('key')]
+    keys = [k for k in list(mapping.keys()) if k.startswith('key')]
     keys.sort()
-    vals = [v for v in mapping.keys() if v.startswith('value')]
+    vals = [v for v in list(mapping.keys()) if v.startswith('value')]
     vals.sort()
 
-    pairs = zip(keys, vals)
+    pairs = list(zip(keys, vals))
 
     for k,v in pairs:
         res[mapping[k]]=mapping[v]

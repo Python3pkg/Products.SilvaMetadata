@@ -99,7 +99,7 @@ class OrderedContainer(Folder):
         Permissions.copy_or_move, 'moveObjectBottom')
     def moveObjectBottom(self, id, RESPONSE=None):
         """ move an object to the bottom """
-        self.moveObject(id, sys.maxint)
+        self.moveObject(id, sys.maxsize)
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
 
@@ -182,7 +182,7 @@ class MetadataSet(OrderedContainer):
             if i18n_domain:
                 return MessageFactory(i18n_domain)(self.title)
             return self.title
-        return u''
+        return ''
 
     def getDescription(self):
         if self.description:
@@ -190,7 +190,7 @@ class MetadataSet(OrderedContainer):
             if i18n_domain:
                 return MessageFactory(i18n_domain)(self.description)
             return self.description
-        return u''
+        return ''
 
     def getMinimalRole(self):
         return self._minimal_role

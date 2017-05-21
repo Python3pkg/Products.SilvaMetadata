@@ -84,14 +84,14 @@ class Guard (Persistent, Explicit):
         s = props.get('permissions', None)
         if s:
             res = 1
-            p = map(strip, split(s, ';'))
+            p = list(map(strip, split(s, ';')))
             self.permissions = tuple(p)
         else:
             self.permissions = ()
         s = props.get('roles', None)
         if s:
             res = 1
-            r = map(strip, split(s, ';'))
+            r = list(map(strip, split(s, ';')))
             self.roles = tuple(r)
         else:
             self.roles = ()

@@ -28,7 +28,7 @@ DEFAULT_MAPPING_NAME = 'Default'
 
 
 def verifyChain(ctxt, chain):
-    for part in filter(None, [c.strip() for c in chain.split(',')]):
+    for part in [_f for _f in [c.strip() for c in chain.split(',')] if _f]:
         try:
             ctxt.getMetadataSet(part)
         except AttributeError:
@@ -37,7 +37,7 @@ def verifyChain(ctxt, chain):
 
 
 def chainIterator(chain):
-    return filter(None, [c.strip() for c in chain.split(',')])
+    return [_f for _f in [c.strip() for c in chain.split(',')] if _f]
 
 
 class TypeMappingContainer(Folder):
@@ -109,8 +109,8 @@ class TypeMappingContainer(Folder):
 
     def getContentTypes(self):
         if not hasattr(aq_base(self), '_v_content_types'):
-            self._v_content_types = map(
-                operator.itemgetter('name'), extensionRegistry.get_contents())
+            self._v_content_types = list(map(
+                operator.itemgetter('name'), extensionRegistry.get_contents()))
         return self._v_content_types
 
 InitializeClass(TypeMappingContainer)

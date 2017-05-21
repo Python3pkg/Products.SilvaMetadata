@@ -13,7 +13,7 @@ def getFieldFactory(fieldname):
 
 def listFields():
     mapping = FieldRegistry.get_field_classes()
-    field_types = mapping.keys()
+    field_types = list(mapping.keys())
     field_types.sort()
     return field_types
 

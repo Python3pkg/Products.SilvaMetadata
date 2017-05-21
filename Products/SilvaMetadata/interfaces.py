@@ -17,7 +17,7 @@ from silva.core.services.interfaces import IMetadataService
 class IMetadataModifiedEvent(IObjectEvent):
     """Event to describe the fact that metadata changed.
     """
-    changes = Attribute(u"dict describing the changed metadata")
+    changes = Attribute("dict describing the changed metadata")
 
 
 class MetadataModifiedEvent(ObjectEvent):
@@ -33,7 +33,7 @@ class MetadataModifiedEvent(ObjectEvent):
 class IMetadataBindingFactory(Interface):
     """Adapter on a content used to create a metadata binding for it.
     """
-    read_only = Attribute(u"Boolean indicating the state of the accessor.")
+    read_only = Attribute("Boolean indicating the state of the accessor.")
 
     def get_content():
         """Return the content that the metadata binding should use.

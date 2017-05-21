@@ -45,11 +45,11 @@ class MetaReader(ContentHandler):
         method = getattr(self, 'start%s' % name, None)
         # get rid of unicode...
         d = {}
-        for k, v in attrs.items():
+        for k, v in list(attrs.items()):
             d[str(k)]= str(v)
 
         if method:
-            apply(method, (d,))
+            method(*(d,))
 
     def endElement(self, element_name):
         chars = str(''.join(self.buf)).strip()
@@ -62,7 +62,7 @@ class MetaReader(ContentHandler):
 
         method = getattr(self, 'end%s' % name, None)
         if method:
-            apply(method, (chars,))
+            method(*(chars,))
 
     def characters(self, chars):
         self.buf.append(chars)
@@ -218,11 +218,11 @@ def make_set(collection, set_node):
     from Products.Formulator.TALESField import TALESMethod
 
     # compatiblity.. ick
-    if not set_node.has_key('title'):
+    if 'title' not in set_node:
         set_node['title'] = ''
-    if not set_node.has_key('description'):
+    if 'description' not in set_node:
         set_node['description'] = ''
-    if not set_node.has_key('i18n_domain'):
+    if 'i18n_domain' not in set_node:
         set_node['i18n_domain'] = ''
 
     collection.addMetadataSet(
@@ -236,15 +236,15 @@ def make_set(collection, set_node):
     for e_node in set_node.elements:
 
         # compatiblity.. ick
-        if not e_node.has_key('acquire_p'):
+        if 'acquire_p' not in e_node:
             e_node['acquire_p'] = 0
-        if not e_node.has_key('read_only_p'):
+        if 'read_only_p' not in e_node:
             e_node['read_only_p'] = 0
-        if not e_node.has_key('automatic_p'):
+        if 'automatic_p' not in e_node:
             e_node['automatic_p'] = 0
-        if not e_node.has_key('index_p'):
+        if 'index_p' not in e_node:
             e_node['index_p'] = 0
-        if not e_node.has_key('metadata_in_catalog_p'):
+        if 'metadata_in_catalog_p' not in e_node:
             e_node['metadata_in_catalog_p'] = 0
 
         # type possible is string, convert to 'boolean'
@@ -303,11 +303,11 @@ if __name__ == '__main__':
     import sys
     set_node = read_set(sys.argv[1])
 
-    for k,v in set_node.items():
-        print k
+    for k,v in list(set_node.items()):
+        print(k)
 
         if isinstance(v, DefinitionNode):
-            for k,v in v.items():
-                print "  "*5, k, v
+            for k,v in list(v.items()):
+                print("  "*5, k, v)
         else:
-            print v
+            print(v)
